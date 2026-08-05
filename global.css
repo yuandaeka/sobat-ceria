@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px white;
+}
+
+.floating-element {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Subtle, Clean Card Hover Interactions (Instant render, no scroll lag) */
+.card-hover-effect {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 14px 28px -8px rgba(22, 46, 92, 0.12) !important;
+}
+
+.card-solid-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.card-solid-hover:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.2) !important;
+}
+
+.img-zoom-container {
+  overflow: hidden;
+}
+
+.img-zoom-container img,
+.img-zoom-container Image {
+  transition: transform 0.4s ease-out !important;
+}
+
+.img-zoom-container:hover img,
+.img-zoom-container:hover Image {
+  transform: scale(1.04) !important;
+}

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOBAT CERIA - Platform Tumbuh Kembang & Activity Hub Anak Golden Age</title>
+    <meta name="description" content="Platform terpadu stimulasi tumbuh kembang anak usia 2-7 tahun. Sediakan kelas sensory play, seni, sains, serta laporan evaluasi STPPA untuk orang tua.">
+    <link rel="icon" type="image/png" href="./assets/sobatceria.png">
+    <link rel="shortcut icon" type="image/png" href="./assets/sobatceria.png">
+    <link rel="apple-touch-icon" href="./assets/sobatceria.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Outfit, Plus Jakarta Sans, Anton, & Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Be+Vietnam+Pro:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        display: ['"Outfit"', 'sans-serif'],
+                        anton: ['"Anton"', 'sans-serif'],
+                        vietnam: ['"Be Vietnam Pro"', 'sans-serif'],
+                    },
+                    colors: {
+                        brandBg: '#FAF6F0',
+                        brandPurple: '#8B22C0',
+                        brandPurpleDark: '#701A9C',
+                        brandPurplePastel: '#F4EBF7',
+                        brandNavy: '#1B254B',
+                        brandOrange: '#FF5E3A',
+                        cardBlue: '#E2F1F8',
+                        cardGreen: '#DDF5E6',
+                        cardPeach: '#FCEEE2',
+                        circleTeal: '#05D3A2',
+                        circleLime: '#D6F833',
+                        brand: '#ff79c6',
+                        surface: '#fbf8ff',
+                        'surface-dim': '#d8d9e9',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FAF6F0;
+            color: #1B254B;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Circular Rotating Badge Text Animation */
+        .rotating-badge {
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Slanted Top Edge for Courses Section */
+        .courses-slanted {
+            clip-path: polygon(0 80px, 100% 0, 100% 100%, 0 100%);
+        }
+
+        @media (min-width: 1024px) {
+            .courses-slanted {
+                clip-path: polygon(0 120px, 100% 0, 100% 100%, 0 100%);
+            }
+        }
+
+        /* Custom utilities from new Hero request */
+        .text-outline {
+            color: transparent;
+            -webkit-text-stroke: 2px white;
+        }
+        
+        .hero-bg {
+            background-image: url('https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- HEADER NAVBAR -->
+    <header class="fixed top-4 left-0 right-0 w-full z-50 px-4 sm:px-8">
+        <div id="navbar-card" class="max-w-7xl mx-auto bg-white/10 border border-white/20 shadow-none rounded-full py-3.5 px-6 sm:px-8 flex items-center justify-between transition-all duration-300 backdrop-blur-md">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-2.5">
+                <div id="logo-icon-bg" class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center transition-colors duration-300">
+                    <i id="logo-icon" class="fa-solid fa-face-smile text-amber-300"></i>
+                </div>
+                <span id="logo-text" class="font-display text-xl sm:text-2xl font-extrabold tracking-wider text-white uppercase transition-colors duration-300">
+                    SOBAT CERIA
+                </span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-bold text-slate-700">
+                <a href="#about" class="nav-link text-white/80 hover:text-white transition-colors duration-300">Tentang Kami</a>
+                <a href="#courses" class="nav-link text-white/80 hover:text-white transition-colors duration-300">Program Kelas</a>
+                <a href="#perfect-place" class="nav-link text-white/80 hover:text-white transition-colors duration-300">Keunggulan</a>
+                <a href="#testimonials" class="nav-link text-white/80 hover:text-white transition-colors duration-300">Testimonial Ortu</a>
+            </nav>
+
+            <!-- Header CTA Button -->
+            <div class="hidden sm:flex items-center gap-3">
+                <button onclick="openModal()" class="bg-brandPurple hover:bg-brandPurpleDark text-white font-bold px-6 py-2.5 rounded-full text-sm flex items-center gap-2 transition shadow-md hover:shadow-lg">
+                    Daftar Kelas <i class="fa-solid fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu Toggle -->
+            <button id="menu-btn" class="md:hidden text-white text-2xl focus:outline-none" aria-label="Toggle menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden fixed top-24 left-4 right-4 z-50 bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-2xl px-6 py-6 flex-col gap-4 text-sm font-bold">
+        <a href="#about" class="py-2 text-slate-800 hover:text-brandPurple border-b border-slate-100">Tentang Kami</a>
+        <a href="#courses" class="py-2 text-slate-800 hover:text-brandPurple border-b border-slate-100">Program Kelas</a>
+        <a href="#perfect-place" class="py-2 text-slate-800 hover:text-brandPurple border-b border-slate-100">Keunggulan</a>
+        <a href="#testimonials" class="py-2 text-slate-800 hover:text-brandPurple border-b border-slate-100">Testimonial Ortu</a>
+        <button onclick="openModal()" class="bg-brandPurple text-white py-3 rounded-full font-bold text-center mt-2 shadow-md">
+            Daftar Sesi Si Kecil <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+    </div>
+
+    <!-- HERO SECTION -->
+    <main id="hero" class="relative w-full h-[90vh] md:h-screen hero-bg flex flex-col overflow-hidden z-10">
+        <!-- Dark overlay for better text readability -->
+        <div class="absolute inset-0 bg-black/45 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#FAF6F0] to-transparent pointer-events-none"></div>
+
+        <!-- BEGIN: Main Content -->
+        <div class="relative z-15 flex-1 w-full max-w-7xl mx-auto flex flex-col justify-center items-center px-4 md:px-12 text-center">
+            
+            <!-- Floating Icons in background -->
+            <div class="absolute top-1/4 left-[8%] floating-element hidden lg:block opacity-60 pointer-events-none">
+                <svg class="transform -rotate-12 drop-shadow-md" fill="none" height="48" stroke="#3b82f6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="48" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-0-5H20"></path>
+                </svg>
+            </div>
+            <div class="absolute top-1/3 right-[10%] floating-element hidden lg:block opacity-60 pointer-events-none" style="animation-delay: 1.5s;">
+                <svg class="transform rotate-12 drop-shadow-md" fill="none" height="56" stroke="#ec4899" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="56" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" x2="22" y1="12" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+            </div>
+
+            <!-- Foreground Elements Layer -->
+            <div class="relative z-20 max-w-4xl mx-auto flex flex-col items-center justify-center pb-8 pt-20">
+                
+                <!-- Pill Badge -->
+                <div class="inline-flex items-center gap-2.5 px-4.5 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#ff79c6] text-xs font-black mb-6 tracking-widest uppercase shadow-sm">
+                    <i class="fa-solid fa-sparkles text-amber-300"></i> Platform Tumbuh Kembang Golden Age
+                </div>
+
+                <!-- Giant Title (Anton Font) -->
+                <h1 class="text-[9vw] sm:text-[7vw] md:text-[6vw] lg:text-[4.5vw] leading-tight text-white uppercase drop-shadow-2xl font-anton tracking-tight mb-2">
+                    Learn, Play &amp; Grow
+                </h1>
+                <div class="flex flex-wrap justify-center items-center gap-2 text-[9vw] sm:text-[7vw] md:text-[6vw] lg:text-[4.5vw] leading-tight uppercase font-anton mb-6">
+                    <span class="text-white drop-shadow-2xl">All</span>
+                    <span class="text-outline drop-shadow-2xl">in One Place</span>
+                </div>
+
+                <!-- Subtitle / Description (Vietnam Font) -->
+                <p class="max-w-2xl text-slate-200 text-sm sm:text-base md:text-lg mb-10 leading-relaxed font-sans font-medium px-4 drop-shadow">
+                    Sobat Ceria membantu anak usia 2–7 tahun mengoptimalkan tumbuh kembang lewat kelas stimulasi sensorik, seni, sains, dan pemantauan STPPA klinis terukur bersama tim ahli.
+                </p>
+
+                <!-- CTA Action Buttons -->
+                <div class="flex flex-wrap justify-center gap-4 items-center mb-12">
+                    <a href="#courses" class="bg-brandPurple hover:bg-brandPurpleDark text-white font-bold px-8 py-4 rounded-full text-sm sm:text-base flex items-center gap-3 transition transform hover:scale-105 shadow-lg w-max">
+                        Jelajahi Program <i class="fa-solid fa-arrow-right text-xs text-amber-300"></i>
+                    </a>
+                    <button onclick="openModal()" class="bg-white/15 hover:bg-white/25 text-white backdrop-blur-md border border-white/30 font-bold px-7 py-4 rounded-full text-sm sm:text-base transition w-max">
+                        Daftar Kelas Uji Coba
+                    </button>
+                </div>
+
+                <!-- Floating Badges / Stickers -->
+                <div class="flex flex-row flex-wrap justify-center gap-6 mt-2">
+                    
+                    <!-- Learners Stack Badge -->
+                    <div class="bg-green-100/90 backdrop-blur-sm rounded-full p-1.5 pr-5 flex items-center gap-3 shadow-lg border border-green-300 transform -rotate-1">
+                        <div class="flex -space-x-2">
+                            <img alt="Student" class="w-8 h-8 rounded-full border border-green-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3o-T7kSJjkAGJSPsUq8G2Xw1eDh7bZy-9hsbEnu4VA2bZTOc3BwQ61gx40rCWiDyd6_aGBr9mmJm9f_HziYzkdobXzoJuRiavdNOW5SnFNS4efTI5pDq6NP8Pka5dD-p4b79wcTtDuOIrpOtjlW75Tle_knv7MVwuK-P0-q0CIUwT8C7dBZx7cHzkjyvyC3_phiFSyvotaOfhq19ah4ndZ-qzk1CIHT-eceyoS3U-3HqtjLCas2N67w"/>
+                            <img alt="Student" class="w-8 h-8 rounded-full border border-green-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCECTOj13ZoKJubfeqETnv5tL5ekymFw1qoc2Ed0EX-mvRqpSqp4LcQqJThLxWGrJmRArgkhcCRim9N0QWf4rx3bs-G6OZKMbrRQS3oonuVPgkTFggq_Rf5axmVMbLd0FM_21DUC-KAI3K8ufI2nyW9ziTQdqQrGvEVkLXLz2mhRUInuDeAkU_hxJ--5AfF7_op9izf_UCCphXi77IxLH6Z5xWchSJqdrP2RveS1nmoSqRbUDoDNlY-Dw"/>
+                            <img alt="Student" class="w-8 h-8 rounded-full border border-green-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbe-yPwCPk-fj6IXWBegfbwbYdmimQq8e-cBqeDMdlSt22mG_bOD625ZikD7PwkW4Ejv8KEYa5BwIyQs0Qbh9khBFFvLFruBjVlgTK6i3vdtJyqtT3iOJTeIZWrSehnjae0hXUXS2ZAt_p2eUh6DlIA4sNwYYGlL9pxJRzqXPTywejn10JMKMwGyvfgh7vB4HfAGYPyR0JpP9KVK2gJZOLfYwXtgvpgGACMDe5mS15vdhh4NU36IlH1Q"/>
+                        </div>
+                        <span class="text-green-900 text-xs font-black uppercase tracking-wide leading-tight">2k+ Little Learners</span>
+                    </div>
+
+                    <!-- Stars Rating Badge -->
+                    <div class="bg-blue-500/90 backdrop-blur-sm rounded-full px-5 py-2 flex items-center gap-1.5 shadow-lg border border-blue-400 transform rotate-1">
+                        <div class="flex items-center gap-0.5">
+                            <i class="fa-solid fa-star text-amber-300 text-[10px]"></i>
+                            <i class="fa-solid fa-star text-amber-300 text-[10px]"></i>
+                            <i class="fa-solid fa-star text-amber-300 text-[10px]"></i>
+                            <i class="fa-solid fa-star text-amber-300 text-[10px]"></i>
+                            <i class="fa-solid fa-star text-amber-300 text-[10px]"></i>
+                        </div>
+                        <span class="text-white text-xs font-black uppercase tracking-wider">4.9/5 Rating</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- COURSES SECTION -->
+    <section id="courses" class="w-full bg-[#FAF6F0] py-20 relative z-20 -mt-20 sm:-mt-28 lg:-mt-36 courses-slanted">
+        <!-- Floating Badge Circle (overlays Hero bottom-right) -->
+        <div class="absolute -top-16 right-6 sm:-top-20 sm:right-10 lg:right-16 bg-white p-2.5 rounded-full shadow-2xl hidden sm:flex items-center justify-center w-36 h-36 border border-slate-100 z-30">
+            <div class="relative w-full h-full flex items-center justify-center">
+                <svg class="w-full h-full rotating-badge" viewBox="0 0 100 100">
+                    <path id="circlePathHero" fill="none" stroke="none" d="M 50, 50 m -35, 0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" />
+                    <text class="text-[8.5px] font-black tracking-widest fill-brandPurple uppercase">
+                        <textPath href="#circlePathHero" startOffset="0%">
+                            • SOBAT CERIA • TUMBUH OPTIMAL •
+                        </textPath>
+                    </text>
+                </svg>
+                <div class="absolute inset-0 m-auto w-16 h-16 bg-[#DDF5E6] rounded-full flex flex-col items-center justify-center shadow-inner">
+                    <span class="text-[8px] font-black text-emerald-800 uppercase tracking-widest leading-none">Sensory</span>
+                    <span class="text-xs font-black text-brandPurple uppercase leading-none mt-0.5">& Play</span>
+                    <i class="fa-solid fa-star text-[8px] text-amber-400 mt-1"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 pt-16 sm:pt-24 pb-8">
+            <div class="text-center max-w-3xl mx-auto mb-16" id="about">
+                <span class="text-brandPurple font-bold text-xs uppercase tracking-widest bg-brandPurplePastel px-4 py-1.5 rounded-full">Program Pilihan Ortu</span>
+                <h2 class="font-display text-4xl sm:text-5xl font-black text-brandNavy mt-4 mb-4">
+                    Program Activity & Stimulasi Terfavorit
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base">Dirancang khusus untuk melatih perkembangan motorik, komunikasi, regulasi emosi, dan kecerdasan anak sejak usia dini.</p>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+
+                <!-- Card 1: Sensory & Motoric Play -->
+                <div class="bg-cardBlue rounded-[2.5rem] p-6 flex flex-col justify-between transition transform hover:-translate-y-2 border border-slate-100 shadow-sm">
+                    <div>
+                        <div class="w-full h-52 rounded-[2rem] overflow-hidden mb-5 relative">
+                            <img src="https://images.unsplash.com/photo-1596464716127-f2a82984de30?auto=format&fit=crop&w=600&q=80" alt="Anak bermain permainan motorik dan sensorik" class="w-full h-full object-cover">
+                            <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-brandNavy text-xs font-bold px-3 py-1 rounded-full shadow-sm">Sensory</span>
+                        </div>
+                        <h3 class="font-display text-2xl font-black text-brandNavy mb-3 px-1">Sensory & Motoric Play</h3>
+                        <p class="text-slate-700 text-sm leading-relaxed mb-8 px-1">
+                            Aktivitas permainan taktil & fisik untuk mengasah motorik kasar, saraf sensorik, serta regulasi emosi si kecil dengan cara menyenangkan.
+                        </p>
+                    </div>
+
+                    <!-- Footer Stats & Price Tag -->
+                    <div class="flex items-center justify-between pt-4 border-t border-sky-300/40 text-xs font-bold text-sky-950 px-1">
+                        <div class="flex gap-2">
+                            <span class="bg-[#C8E4F2] px-3.5 py-2 rounded-xl">Usia: 1-3 Thn</span>
+                            <span class="bg-[#C8E4F2] px-3.5 py-2 rounded-xl">Kuota: 10</span>
+                        </div>
+                        <div class="bg-brandNavy text-white px-4 py-2.5 rounded-xl text-sm font-extrabold shadow-sm">
+                            Rp 150rb
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Kelas Seni & Kreativitas -->
+                <div class="bg-cardGreen rounded-[2.5rem] p-6 flex flex-col justify-between transition transform hover:-translate-y-2 border border-slate-100 shadow-sm">
+                    <div>
+                        <div class="w-full h-52 rounded-[2rem] overflow-hidden mb-5 relative">
+                            <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80" alt="Anak melukis dan berkreasi seni" class="w-full h-full object-cover">
+                            <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-emerald-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm">Art & Craft</span>
+                        </div>
+                        <h3 class="font-display text-2xl font-black text-brandNavy mb-3 px-1">Kelas Seni & Kreativitas</h3>
+                        <p class="text-slate-700 text-sm leading-relaxed mb-8 px-1">
+                            Petualangan warna & seni melukis bebas untuk memicu imajinasi, mengekspresikan perasaan, serta membangun rasa percaya diri anak.
+                        </p>
+                    </div>
+
+                    <!-- Footer Stats & Price Tag -->
+                    <div class="flex items-center justify-between pt-4 border-t border-emerald-300/40 text-xs font-bold text-emerald-950 px-1">
+                        <div class="flex gap-2">
+                            <span class="bg-[#C3EDD3] px-3.5 py-2 rounded-xl">Usia: 2-5 Thn</span>
+                            <span class="bg-[#C3EDD3] px-3.5 py-2 rounded-xl">Kuota: 8</span>
+                        </div>
+                        <div class="bg-brandNavy text-white px-4 py-2.5 rounded-xl text-sm font-extrabold shadow-sm">
+                            Rp 175rb
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Sains & Mini Explorer -->
+                <div class="bg-cardPeach rounded-[2.5rem] p-6 flex flex-col justify-between transition transform hover:-translate-y-2 border border-slate-100 shadow-sm">
+                    <div>
+                        <div class="w-full h-52 rounded-[2rem] overflow-hidden mb-5 relative">
+                            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80" alt="Anak eksplorasi sains sederhana" class="w-full h-full object-cover">
+                            <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-amber-900 text-xs font-bold px-3 py-1 rounded-full shadow-sm">STEM</span>
+                        </div>
+                        <h3 class="font-display text-2xl font-black text-brandNavy mb-3 px-1">Sains & Mini Explorer</h3>
+                        <p class="text-slate-700 text-sm leading-relaxed mb-8 px-1">
+                            Eksperimen sains sederhana & ramah anak yang mengenalkan konsep dasar alam, logika angka, serta memupuk rasa ingin tahu yang tinggi.
+                        </p>
+                    </div>
+
+                    <!-- Footer Stats & Price Tag -->
+                    <div class="flex items-center justify-between pt-4 border-t border-orange-300/40 text-xs font-bold text-orange-950 px-1">
+                        <div class="flex gap-2">
+                            <span class="bg-[#F6DECD] px-3.5 py-2 rounded-xl">Usia: 3-6 Thn</span>
+                            <span class="bg-[#F6DECD] px-3.5 py-2 rounded-xl">Kuota: 12</span>
+                        </div>
+                        <div class="bg-brandNavy text-white px-4 py-2.5 rounded-xl text-sm font-extrabold shadow-sm">
+                            Rp 190rb
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS & SOCIAL PROOF -->
+    <section id="testimonials" class="max-w-7xl mx-auto px-4 sm:px-8 py-16 lg:py-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+
+            <!-- Left Column: Layered Stack Testimonial Card -->
+            <div class="lg:col-span-6 relative pr-6">
+                <!-- Layers behind front card to mimic exact mockup tabs shifted right -->
+                <div class="absolute inset-0 bg-white border-[3px] border-brandNavy rounded-[2rem] translate-x-6 z-0"></div>
+                <div class="absolute inset-0 bg-white border-[3px] border-brandNavy rounded-[2rem] translate-x-3 z-10"></div>
+
+                <!-- Frontmost Card -->
+                <div class="relative bg-brandPurplePastel border-[3px] border-brandNavy rounded-[2rem] p-8 sm:p-10 z-20 shadow-sm min-h-[340px] flex flex-col justify-between">
+                    <div>
+                        <div class="text-amber-400 text-sm mb-4 flex gap-1">
+                            <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        </div>
+                        <p id="testimonial-text" class="text-brandNavy text-base sm:text-lg font-bold leading-relaxed mb-8">
+                            "Sobat Ceria benar-benar membantu tumbuh kembang anak saya! Dulu Arka sempat ragu bersosialisasi dan bicaranya terlambat, tapi setelah rutin ikut kelas sensorik & dipantau hasil screening STPPA, perkembangannya pesat sekali. Tempatnya aman & fasilitatornya luar biasa sabar!"
+                        </p>
+                    </div>
+                    <div class="pt-6 border-t-[3px] border-brandNavy/10 flex items-center gap-4">
+                        <img id="testimonial-avatar" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80" alt="Foto Orang Tua Murid" class="w-14 h-14 rounded-full object-cover border-2 border-brandNavy">
+                        <div>
+                            <h4 id="testimonial-name" class="font-extrabold text-brandNavy text-base">Bunda Rina & Arka (4 Thn)</h4>
+                            <p id="testimonial-role" class="text-xs text-brandPurple font-bold">Orang Tua Murid - Kelas Sensory</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Helping Thousands text & slider arrows -->
+            <div class="lg:col-span-6 flex flex-col justify-center">
+                <span class="text-brandOrange font-bold text-xs uppercase tracking-widest mb-3">Cerita Ibu & Ayah</span>
+                <h2 class="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-brandNavy leading-tight mb-8">
+                    Mendampingi Ribuan Orang Tua & Si Kecil Bertumbuh Ceria
+                </h2>
+
+                <!-- Slider Controls & Progress Indicator -->
+                <div class="flex items-center gap-6 mt-4">
+                    <div class="flex-1 bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-[#1B254B] h-full w-1/3 transition-all duration-300"></div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="prevTestimonial()" class="w-12 h-12 rounded-full border-[3px] border-brandNavy bg-white flex items-center justify-center text-brandNavy hover:bg-slate-100 transition shadow-sm" aria-label="Testimonial sebelumnya">
+                            <i class="fa-solid fa-arrow-left text-sm font-black"></i>
+                        </button>
+                        <button onclick="nextTestimonial()" class="w-12 h-12 rounded-full bg-brandOrange flex items-center justify-center text-white hover:bg-opacity-95 transition shadow-sm" aria-label="Testimonial selanjutnya">
+                            <i class="fa-solid fa-arrow-right text-sm font-black"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- PERFECT PLACE FOR GROWING MINDS SECTION -->
+    <section id="perfect-place" class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-brandPurple font-bold text-xs uppercase tracking-widest bg-brandPurplePastel px-4 py-1.5 rounded-full">Keunggulan Sobat Ceria</span>
+            <h2 class="font-display text-4xl sm:text-5xl font-black text-brandNavy mt-4">
+                Wadah Terbaik untuk Masa Depan Si Kecil
+            </h2>
+        </div>
+
+        <!-- 3-Column Asymmetrical Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+
+            <!-- Left Column: Text + Landscape Image -->
+            <div class="lg:col-span-4 flex flex-col justify-between gap-8">
+                <div class="flex flex-col justify-center">
+                    <h3 class="font-display text-2xl sm:text-3xl font-black text-brandNavy mb-3">Lingkungan Safe & Playful</h3>
+                    <p class="text-slate-700 text-sm leading-relaxed">
+                        Fasilitas & ruang aktivitas berstandar keamanan tinggi, didampingi fasilitator sabar & berpengalaman agar si kecil bebas mengeksplorasi potensinya setiap hari.
+                    </p>
+                </div>
+                <div class="rounded-[2.5rem] overflow-hidden h-72 shadow-sm border border-slate-100">
+                    <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=800&q=80" alt="Anak-anak belajar dan membaca bersama di ruangan cerah" class="w-full h-full object-cover">
+                </div>
+            </div>
+
+            <!-- Middle Column: Large Portrait Image -->
+            <div class="lg:col-span-4 rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 h-[380px] lg:h-auto min-h-[420px] relative">
+                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=80" alt="Potret anak tersenyum gembira" class="w-full h-full object-cover">
+                <div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-white/50 text-center shadow-lg">
+                    <p class="text-xs font-black text-brandNavy uppercase tracking-wider">Screening Tumbuh Kembang (STPPA)</p>
+                    <p class="text-[11px] text-slate-600 font-medium">Laporan teratur & rekomendasi stimulasi terpantau di aplikasi</p>
+                </div>
+            </div>
+
+            <!-- Right Column: Square Image + Text + View Schedule Button -->
+            <div class="lg:col-span-4 flex flex-col justify-between gap-8">
+                <div class="rounded-[2.5rem] overflow-hidden h-52 shadow-sm border border-slate-100">
+                    <img src="https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=800&q=80" alt="Anak-anak berinteraksi dan bermain karya seni bersama" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h3 class="font-display text-2xl sm:text-3xl font-black text-brandNavy mb-3">Sosialisasi & Karakter Ceria</h3>
+                    <p class="text-slate-700 text-sm leading-relaxed mb-6">
+                        Menumbuhkan kecerdasan emosional (EQ), empati, serta keberanian berinteraksi sosial dengan teman sebaya melalui sesi aktivitas kolaboratif.
+                    </p>
+                    <button onclick="openModal()" class="bg-brandOrange hover:bg-opacity-95 text-white font-bold px-7 py-3.5 rounded-full text-sm inline-flex items-center gap-2 transition shadow-md">
+                        Lihat Jadwal Kelas <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA BANNER SECTION WITH CIRCULAR CONTACT BADGES -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 py-16">
+        <div class="relative rounded-[3rem] overflow-hidden bg-slate-900 shadow-2xl min-h-[500px] flex flex-col justify-end">
+            <!-- Background Image -->
+            <img src="https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=1600&q=80" alt="Anak-anak bermain ceria di luar ruangan" class="absolute inset-0 w-full h-full object-cover object-center opacity-70">
+
+            <!-- Dark Navy Overlay Curved Block -->
+            <div class="relative z-10 bg-brandNavy text-white p-8 sm:p-12 lg:p-16 rounded-t-[3rem] flex flex-col lg:flex-row items-center justify-between gap-8 border-t border-slate-700/30">
+                <div class="max-w-xl">
+                    <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-black leading-tight text-white">
+                        Siap Memberikan Awal Terbaik untuk Masa Depan Si Kecil?
+                    </h2>
+                    <p class="text-slate-300 text-sm sm:text-base mt-4 font-medium">Konsultasikan kebutuhan stimulasi anak atau daftar kelas uji coba sekarang juga.</p>
+                </div>
+
+                <!-- Overlapping/Touching Action Circles -->
+                <div class="flex items-center gap-4 flex-wrap sm:flex-nowrap relative">
+
+                    <!-- Circle 1: Phone / Teal Green -->
+                    <a href="https://wa.me/6281234567890" target="_blank" class="w-36 h-36 rounded-full bg-circleTeal hover:scale-105 transition flex flex-col items-center justify-center text-brandNavy p-4 text-center shadow-lg group relative">
+                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center mb-2 shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-emerald-600 text-base group-hover:scale-110 transition duration-300"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-800 leading-none">WhatsApp</span>
+                        <span class="text-xs font-black mt-1 text-slate-900 leading-tight">0812-3456-7890</span>
+                    </a>
+
+                    <!-- Circle 2: Email / Lime Yellow -->
+                    <a href="mailto:halo@sobatceria.id" class="w-36 h-36 rounded-full bg-circleLime hover:scale-105 transition flex flex-col items-center justify-center text-brandNavy p-4 text-center shadow-lg group relative -ml-4 sm:-ml-6">
+                        <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center mb-2 shadow-sm">
+                            <i class="fa-solid fa-envelope text-brandNavy text-sm group-hover:scale-110 transition duration-300"></i>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-800 leading-none">Email Kami</span>
+                        <span class="text-xs font-black mt-1 text-slate-900 leading-tight break-all">halo@sobatceria.id</span>
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-brandBg border-t border-slate-200/80 pt-20 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+
+                <!-- Brand Info Column -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-8 h-8 rounded-full bg-brandPurple flex items-center justify-center text-white font-black text-sm">
+                            <i class="fa-solid fa-face-smile text-amber-300"></i>
+                        </div>
+                        <span class="font-display text-2xl sm:text-3xl font-black text-brandPurple uppercase tracking-wider">
+                            SOBAT CERIA
+                        </span>
+                    </div>
+                    <p class="text-slate-600 text-sm mt-3 mb-8 leading-relaxed max-w-sm font-medium">
+                        Platform terpadu untuk stimulasi tumbuh kembang anak usia 2-7 tahun, kelas edukasi interaktif, serta pendampingan orang tua berdaya di Indonesia.
+                    </p>
+                    <!-- Social Media Icons -->
+                    <div class="flex items-center gap-3">
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-200/70 hover:bg-brandPurple hover:text-white transition flex items-center justify-center text-slate-600 text-sm shadow-sm" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-200/70 hover:bg-brandPurple hover:text-white transition flex items-center justify-center text-slate-600 text-sm shadow-sm" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-200/70 hover:bg-brandPurple hover:text-white transition flex items-center justify-center text-slate-600 text-sm shadow-sm" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-slate-200/70 hover:bg-brandPurple hover:text-white transition flex items-center justify-center text-slate-600 text-sm shadow-sm" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    </div>
+                </div>
+
+                <!-- Column 2: Navigasi Utama -->
+                <div>
+                    <h4 class="font-display text-sm font-black text-brandNavy mb-5 uppercase tracking-widest">Navigasi Utama</h4>
+                    <ul class="space-y-3.5 text-sm text-slate-600 font-bold">
+                        <li><a href="#" class="hover:text-brandPurple transition">Beranda</a></li>
+                        <li><a href="#about" class="hover:text-brandPurple transition">Tentang Kami</a></li>
+                        <li><a href="#courses" class="hover:text-brandPurple transition">Program Kelas</a></li>
+                        <li><a href="#perfect-place" class="hover:text-brandPurple transition">Keunggulan</a></li>
+                        <li><a href="#testimonials" class="hover:text-brandPurple transition">Testimonial Ortu</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Layanan & Fitur -->
+                <div>
+                    <h4 class="font-display text-sm font-black text-brandNavy mb-5 uppercase tracking-widest">Fitur & Platform</h4>
+                    <ul class="space-y-3.5 text-sm text-slate-600 font-bold">
+                        <li><a href="#" class="hover:text-brandPurple transition">Screening STPPA</a></li>
+                        <li><a href="#" class="hover:text-brandPurple transition">Lembar Worksheet</a></li>
+                        <li><a href="#" class="hover:text-brandPurple transition">Voucher Repeat Order</a></li>
+                        <li><a href="#" class="hover:text-brandPurple transition">Galeri Event</a></li>
+                        <li><a href="#" class="hover:text-brandPurple transition">Web & Mobile App</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Bantuan & Kontak -->
+                <div>
+                    <h4 class="font-display text-sm font-black text-brandNavy mb-5 uppercase tracking-widest">Bantuan</h4>
+                    <ul class="space-y-3.5 text-sm text-slate-600 font-bold">
+                        <li><a href="#" class="hover:text-brandPurple transition">FAQ Ortu</a></li>
+                        <li><a href="#" class="hover:text-brandPurple transition">Kebijakan Privasi</a></li>
+                        <li><a href="#" class="hover:text-brandPurple transition">Syarat & Ketentuan</a></li>
+                        <li><a href="https://wa.me/6281234567890" target="_blank" class="hover:text-brandPurple transition">Hubungi WhatsApp</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Copyright -->
+            <div class="pt-8 border-t border-slate-200 text-center text-xs text-slate-500 font-bold tracking-wide">
+                © 2026 SOBAT CERIA. Seluruh Hak Cipta Dilindungi. Didesain penuh cinta untuk tumbuh kembang si kecil.
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL REGISTRATION FORM -->
+    <div id="modal-backdrop" class="fixed inset-0 bg-[#1B254B]/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] max-w-lg w-full p-8 relative shadow-2xl">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-700 text-2xl focus:outline-none" aria-label="Tutup modal">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h3 class="font-display text-2xl font-black text-brandNavy mb-2">Formulir Pendaftaran Kelas</h3>
+            <p class="text-xs text-slate-500 mb-6 font-medium">Pilih program aktivitas untuk si kecil. Tim Sobat Ceria akan segera menghubungi Anda melalui WhatsApp.</p>
+
+            <form onsubmit="handleRegistration(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Program Kelas</label>
+                    <select id="event-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brandPurple" required>
+                        <option value="Sensory & Motoric Play">Sensory & Motoric Play (Rp 150.000)</option>
+                        <option value="Kelas Seni & Kreativitas">Kelas Seni & Kreativitas (Rp 175.000)</option>
+                        <option value="Sains & Mini Explorer">Sains & Mini Explorer (Rp 190.000)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Anak</label>
+                        <input type="text" placeholder="misal: Arka" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brandPurple" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Usia Anak (Tahun)</label>
+                        <input type="number" placeholder="misal: 3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brandPurple" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Orang Tua</label>
+                    <input type="text" placeholder="Nama Ibu / Ayah" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brandPurple" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Nomor WhatsApp</label>
+                    <input type="tel" placeholder="misal: 081234567890" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brandPurple" required>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Catatan Khusus (Alergi / Kebutuhan Khusus)</label>
+                    <textarea rows="2" placeholder="Ceritakan singkat tentang si kecil..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brandPurple"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-brandPurple hover:bg-brandPurpleDark text-white font-bold py-3.5 rounded-xl text-sm transition mt-4 shadow-lg">
+                    Kirim Pendaftaran
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Testimonials Slider Data
+        const testimonials = [
+            {
+                text: '"Sobat Ceria benar-benar membantu tumbuh kembang anak saya! Dulu Arka sempat ragu bersosialisasi dan bicaranya terlambat, tapi setelah rutin ikut kelas sensorik & dipantau hasil screening STPPA, perkembangannya pesat sekali. Tempatnya aman & fasilitatornya luar biasa sabar!"',
+                name: 'Bunda Rina & Arka (4 Thn)',
+                role: 'Orang Tua Murid - Kelas Sensory',
+                avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80'
+            },
+            {
+                text: '"Fitur laporan screening perkembangan anak STPPA-nya sangat informatif dan terstruktur. Fasilitator Sobat Ceria selalu memberikan catatan personal setelah kelas, sehingga kami tahu stimulasi apa yang perlu dilanjutkan di rumah."',
+                name: 'Mama Cut & Arkan (3 Thn)',
+                role: 'Orang Tua Murid - Kelas Seni',
+                avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80'
+            },
+            {
+                text: '"Program Sains & Mini Explorer favorit Kirana! Kegiatannya membuat anak jauh dari ketergantungan gadget (screen time) dan melatih rasa ingin tahunya secara aktif. Sangat recommended untuk orang tua modern!"',
+                name: 'Ayah Dimas & Kirana (5 Thn)',
+                role: 'Orang Tua Murid - Kelas Sains',
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80'
+            }
+        ];
+
+        let currentIdx = 0;
+
+        function updateTestimonial() {
+            const item = testimonials[currentIdx];
+            document.getElementById('testimonial-text').innerText = item.text;
+            document.getElementById('testimonial-name').innerText = item.name;
+            document.getElementById('testimonial-role').innerText = item.role;
+            document.getElementById('testimonial-avatar').src = item.avatar;
+
+            const progress = ((currentIdx + 1) / testimonials.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function nextTestimonial() {
+            currentIdx = (currentIdx + 1) % testimonials.length;
+            updateTestimonial();
+        }
+
+        function prevTestimonial() {
+            currentIdx = (currentIdx - 1 + testimonials.length) % testimonials.length;
+            updateTestimonial();
+        }
+
+        // Modal Functions
+        function openModal() {
+            document.getElementById('modal-backdrop').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-backdrop').classList.add('hidden');
+        }
+
+        function handleRegistration(e) {
+            e.preventDefault();
+            alert('Terima kasih! Pendaftaran Anda telah berhasil dikirim. Tim Sobat Ceria akan segera menghubungi via WhatsApp.');
+            closeModal();
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('menu-btn').addEventListener('click', function () {
+            const menu = document.getElementById('mobile-menu');
+            const menuBtn = document.getElementById('menu-btn');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+            
+            // Adjust mobile menu button color if transparent/white header
+            if (menu.classList.contains('flex')) {
+                menuBtn.className = "md:hidden text-slate-800 text-2xl focus:outline-none";
+            } else if (window.scrollY < 50) {
+                menuBtn.className = "md:hidden text-white text-2xl focus:outline-none";
+            } else {
+                menuBtn.className = "md:hidden text-slate-800 text-2xl focus:outline-none";
+            }
+        });
+
+        // Scroll listener for transparent/glassy header transition
+        window.addEventListener('scroll', function() {
+            const navbarCard = document.getElementById('navbar-card');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const logoText = document.getElementById('logo-text');
+            const logoIconBg = document.getElementById('logo-icon-bg');
+            const menuBtn = document.getElementById('menu-btn');
+
+            if (window.scrollY < 50) {
+                // Transparent glass overlaying the dark hero banner
+                navbarCard.className = "max-w-7xl mx-auto bg-white/10 border border-white/20 shadow-none rounded-full py-3.5 px-6 sm:px-8 flex items-center justify-between transition-all duration-300 backdrop-blur-md";
+                logoText.className = "font-display text-xl sm:text-2xl font-extrabold tracking-wider text-white uppercase transition-colors duration-300";
+                logoIconBg.className = "w-9 h-9 rounded-full bg-white/20 flex items-center justify-center transition-colors duration-300";
+                menuBtn.className = "md:hidden text-white text-2xl focus:outline-none";
+                navLinks.forEach(link => {
+                    link.className = "nav-link text-white/80 hover:text-white transition-colors duration-300";
+                });
+            } else {
+                // Frosted white glass overlaying light background content sections
+                navbarCard.className = "max-w-7xl mx-auto bg-white/95 border border-slate-200/80 shadow-lg rounded-full py-3.5 px-6 sm:px-8 flex items-center justify-between transition-all duration-300 backdrop-blur-md";
+                logoText.className = "font-display text-xl sm:text-2xl font-extrabold tracking-wider text-brandPurple uppercase transition-colors duration-300";
+                logoIconBg.className = "w-9 h-9 rounded-full bg-brandPurple flex items-center justify-center text-white font-black text-lg shadow-sm transition-colors duration-300";
+                menuBtn.className = "md:hidden text-slate-800 text-2xl focus:outline-none";
+                navLinks.forEach(link => {
+                    link.className = "nav-link text-slate-700 hover:text-brandPurple transition-colors duration-300";
+                });
+            }
+        });
+
+        // Hero Image Carousel Slide Logic
+        let heroImgIdx = 0;
+        const HERO_IMAGES_COUNT = 3;
+        setInterval(() => {
+            const nextIdx = (heroImgIdx + 1) % HERO_IMAGES_COUNT;
+            const currentImg = document.getElementById('hero-img-' + heroImgIdx);
+            const nextImg = document.getElementById('hero-img-' + nextIdx);
+            if (currentImg && nextImg) {
+                currentImg.classList.remove('opacity-100');
+                currentImg.classList.add('opacity-0');
+                nextImg.classList.remove('opacity-0');
+                nextImg.classList.add('opacity-100');
+            }
+            heroImgIdx = nextIdx;
+        }, 6000);
+
+        // Screen Time Risk Calculator State & Calculations
+        let htmlAge = '3-4';
+        let htmlTime = 'warn';
+
+        function setHtmlAge(val) {
+            htmlAge = val;
+            updateHtmlButtons();
+            calculateHtmlResult();
+        }
+
+        function setHtmlTime(val) {
+            htmlTime = val;
+            updateHtmlButtons();
+            calculateHtmlResult();
+        }
+
+        function updateHtmlButtons() {
+            // Reset age buttons
+            ['0-2', '3-4', '5-6'].forEach(age => {
+                const btn = document.getElementById('age-btn-' + age);
+                if (age === htmlAge) {
+                    btn.className = "flex-1 py-2 rounded-xl text-center border text-[10px] font-black transition bg-brandPurple border-brandPurple text-white";
+                } else {
+                    btn.className = "flex-1 py-2 rounded-xl text-center border text-[10px] font-black transition bg-white/5 border-white/10 text-white/70 hover:bg-white/10";
+                }
+            });
+
+            // Reset time buttons
+            ['safe', 'warn', 'danger'].forEach(time => {
+                const btn = document.getElementById('time-btn-' + time);
+                if (time === htmlTime) {
+                    btn.className = "flex-1 py-2 rounded-xl text-center border text-[10px] font-black transition bg-brandOrange border-brandOrange text-white";
+                } else {
+                    btn.className = "flex-1 py-2 rounded-xl text-center border text-[10px] font-black transition bg-white/5 border-white/10 text-white/70 hover:bg-white/10";
+                }
+            });
+        }
+
+        function calculateHtmlResult() {
+            const box = document.getElementById('calc-result-box');
+            const status = document.getElementById('calc-result-status');
+            const desc = document.getElementById('calc-result-desc');
+            const icon = document.getElementById('calc-result-icon');
+
+            if (htmlAge === '0-2') {
+                if (htmlTime === 'safe') {
+                    box.className = "p-4 rounded-2xl border bg-amber-50 border-amber-200 text-amber-800 mb-4";
+                    status.innerText = "Status: Waspada 🟡";
+                    desc.innerText = "Usia di bawah 2 tahun direkomendasikan 0 screen time. Ganti dengan stimulasi taktil seperti sensory play.";
+                    icon.className = "fa-solid fa-triangle-exclamation text-amber-600 mr-1.5";
+                } else {
+                    box.className = "p-4 rounded-2xl border bg-rose-50 border-rose-250 text-rose-800 mb-4";
+                    status.innerText = "Status: Bahaya 🔴";
+                    desc.innerText = "Sangat Berisiko! Paparan layar di bawah usia 2 tahun berisiko tinggi memicu speech delay dan gangguan fokus.";
+                    icon.className = "fa-solid fa-circle-exclamation text-rose-600 mr-1.5";
+                }
+            } else {
+                if (htmlTime === 'safe') {
+                    box.className = "p-4 rounded-2xl border bg-emerald-50 border-emerald-250 text-emerald-800 mb-4";
+                    status.innerText = "Status: Aman 🟢";
+                    desc.innerText = "Bagus! Durasi di bawah 1 jam aman untuk usia pra-sekolah. Lengkapi dengan kelas bersosialisasi dan kriya.";
+                    icon.className = "fa-solid fa-circle-check text-emerald-600 mr-1.5";
+                } else if (htmlTime === 'warn') {
+                    box.className = "p-4 rounded-2xl border bg-amber-50 border-amber-250 text-amber-800 mb-4";
+                    status.innerText = "Status: Waspada 🟡";
+                    desc.innerText = "Mendekati Batas Maksimal! Durasi 1-2 jam per hari dapat menurunkan konsentrasi anak. Imbangi dengan aktivitas kreatif.";
+                    icon.className = "fa-solid fa-triangle-exclamation text-amber-600 mr-1.5";
+                } else {
+                    box.className = "p-4 rounded-2xl border bg-rose-50 border-rose-250 text-rose-800 mb-4";
+                    status.innerText = "Status: Bahaya 🔴";
+                    desc.innerText = "Waspada Gangguan Tumbuh Kembang! Screen time lebih dari 2 jam per hari memicu kecanduan gadget dan menutup ruang sosialisasi.";
+                    icon.className = "fa-solid fa-circle-exclamation text-rose-600 mr-1.5";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
