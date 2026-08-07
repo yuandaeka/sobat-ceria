@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Course } from '../types';
 import CheckoutModal from '../components/CheckoutModal';
+import { fetchCourses } from '../lib/data';
 
 // Mock Data Courses inside the catalog (8 Official Programs)
 const MOCK_COURSES: Course[] = [
@@ -110,19 +111,38 @@ export default function CatalogScreen({ user }: { user: any }) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [courses, setCourses] = useState<Course[]>(MOCK_COURSES);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await fetchCourses();
+        if (mounted && data.length > 0) setCourses(data);
+      } catch {
+        // fallback ke mock data jika gagal
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Age Filter Options
   const ageFilters = ['All', '2-3 Thn', '3-5 Thn', '5-7 Thn'];
 
   // Filter logic based on age tab and search bar query
   const filteredCourses = useMemo(() => {
-    return MOCK_COURSES.filter(course => {
+    return courses.filter(course => {
       const matchesAge = selectedAge === 'All' || course.ageRange.includes(selectedAge.split(' ')[0]);
       const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             course.category.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesAge && matchesSearch;
     });
-  }, [selectedAge, searchQuery]);
+  }, [selectedAge, searchQuery, courses]);
 
   return (
     <SafeAreaView style={{ flex: 1 }} className="bg-[#FAF6F0]">

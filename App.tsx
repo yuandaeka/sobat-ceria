@@ -5,6 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Dimensions, Image, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
+import { supabase } from './lib/supabase';
+import { fetchUserProfile } from './lib/profile';
 
 const logoImg = require('./assets/sobatceria.png');
 
@@ -131,6 +133,42 @@ export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
+
+  // Load Supabase session on app start & listen to auth changes
+  useEffect(() => {
+    let mounted = true;
+
+    const loadProfileFromSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (mounted && data.session?.user) {
+        try {
+          const { profile } = await fetchUserProfile(data.session.user.id);
+          if (mounted) setUser(profile);
+        } catch {
+          // ignore profile sync errors on startup
+        }
+      }
+    };
+
+    loadProfileFromSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        if (session?.user) {
+          fetchUserProfile(session.user.id)
+            .then(({ profile }) => mounted && setUser(profile))
+            .catch(() => {});
+        } else {
+          setUser(null);
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   // States for Hero Image Carousel & Interactive Calculator
   const [heroImageIdx, setHeroImageIdx] = useState(0);
@@ -459,7 +497,7 @@ export default function App() {
               {/* Left Photo Frame */}
               <View className="w-full md:w-2/5 h-72 md:h-80 rounded-[2rem] overflow-hidden relative shadow-md img-zoom-container">
                 <Image
-                  source={{ uri: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=800' }}
+                  source={require('./assets/dokumentasi sobat/tentang-sobat-ceria.jpeg')}
                   className="w-full h-full object-cover"
                   style={{ width: '100%', height: '100%' }}
                 />
@@ -472,13 +510,16 @@ export default function App() {
               <View className="w-full md:w-3/5">
                 <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Mengenal</Text>
                 <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4">
-                  Tentang Sobat Ceria Fun Learning
+                  Tentang Sobat Ceria
                 </Text>
                 <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-4">
-                  Sobat Ceria Fun Learning adalah program edukatif yang menghadirkan kelas belajar sambil bermain untuk anak usia dini, termasuk anak berkebutuhan khusus. Kami mengusung konsep Mindfulness & Family Co-Creation, di mana orang tua ikut aktif mendampingi anak dalam setiap kegiatan.
+                  Sobat Ceria merupakan layanan stimulasi tumbuh kembang anak usia 2–7 tahun yang menghadirkan pengalaman belajar menyenangkan melalui aktivitas eksploratif, kreatif, dan berbasis bermain.
+                </Text>
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-4">
+                  Program kami dikembangkan berdasarkan Standar Tingkat Pencapaian Perkembangan Anak (STPPA), menggunakan pendekatan Child-Centered Exploration, Mindfulness, serta Family Co-Creation agar setiap anak memperoleh stimulasi yang sesuai dengan kebutuhan dan tahap perkembangannya.
                 </Text>
                 <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-6">
-                  Selain mengadakan kelas di lokasi tempat kami (Laboratorium Tumbuh Kembang FKIP UMS), Sobat Ceria juga menyelenggarakan kelas di luar seperti di TK mitra atau kegiatan belajar lapangan agar anak belajar secara langsung dari lingkungan sekitar dengan cara yang menyenangkan & interaktif.
+                  Tidak hanya berfokus pada kemampuan akademik, Sobat Ceria juga mengembangkan kemampuan sosial emosional, komunikasi, kreativitas, motorik, hingga kemandirian anak melalui pengalaman belajar yang bermakna.
                 </Text>
                 <View className="flex-row items-center gap-4">
                   <TouchableOpacity
@@ -571,13 +612,25 @@ export default function App() {
                 </Text>
 
                 <View className="mb-6">
-                  <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-1">KOMITMEN UTAMA</Text>
+                  <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-1">VISI</Text>
                   <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">
-                    Mewujudkan program edukasi anak usia dini yang inklusif, kreatif, dan menyenangkan, dengan melibatkan keluarga serta menerapkan mindfulness untuk mendukung tumbuh kembang anak secara optimal.
+                    Menjadi pusat layanan stimulasi tumbuh kembang anak yang inovatif, inklusif, dan terpercaya dalam membangun generasi Indonesia yang sehat, percaya diri, kreatif, dan berkarakter.
                   </Text>
                 </View>
 
                 <View>
+                  <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-2">MISI</Text>
+                  <View className="flex-col gap-1.5">
+                    <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">• Memberikan stimulasi perkembangan yang sesuai tahap usia anak.</Text>
+                    <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">• Mengembangkan pembelajaran yang menyenangkan melalui eksplorasi.</Text>
+                    <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">• Mengintegrasikan mindfulness dalam aktivitas belajar.</Text>
+                    <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">• Membangun kolaborasi aktif antara orang tua dan pendidik.</Text>
+                    <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">• Memberikan layanan yang ramah bagi seluruh anak termasuk ABK.</Text>
+                    <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">• Melakukan screening perkembangan secara berkala.</Text>
+                  </View>
+                </View>
+
+                <View className="mt-6">
                   <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-1">LOKASI UTAMA KELAS</Text>
                   <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">
                     Laboratorium Tumbuh Kembang FKIP UMS, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo.
@@ -588,7 +641,7 @@ export default function App() {
               {/* Right Image Frame */}
               <View className="w-full md:w-2/5 h-64 md:h-80 rounded-[2rem] overflow-hidden shadow-lg border-2 border-white/20 img-zoom-container">
                 <Image
-                  source={{ uri: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800' }}
+                  source={require('./assets/dokumentasi sobat/visi-misi.jpeg')}
                   className="w-full h-full object-cover"
                   style={{ width: '100%', height: '100%' }}
                 />
@@ -606,7 +659,7 @@ export default function App() {
             </View>
 
             <View className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Level 1 */}
+              {/* Level 1: Pre-Kinder */}
               <View className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
                 <View className="w-full h-48 rounded-[1.8rem] overflow-hidden mb-6 img-zoom-container">
                   <Image
@@ -615,16 +668,13 @@ export default function App() {
                     style={{ width: '100%', height: '100%' }}
                   />
                 </View>
-                <View className="bg-[#30B864] px-4 py-1 rounded-full mb-3">
-                  <Text className="text-white text-xs font-black">Pre-Kinder & Sensory (2–3 Thn)</Text>
-                </View>
                 <Text className="text-base font-extrabold text-[#162E5C] mb-2">Fokus Sensori & Bicara</Text>
                 <Text className="text-xs text-gray-600 leading-relaxed font-medium">
                   Stimulasi taktil, eksplorasi tekstur, melatih koordinasi fisik dasar, dan menambah kosa kata pertama.
                 </Text>
               </View>
 
-              {/* Level 2 */}
+              {/* Level 2: Kinder A */}
               <View className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
                 <View className="w-full h-48 rounded-[1.8rem] overflow-hidden mb-6 img-zoom-container">
                   <Image
@@ -633,16 +683,13 @@ export default function App() {
                     style={{ width: '100%', height: '100%' }}
                   />
                 </View>
-                <View className="bg-[#2DA9E9] px-4 py-1 rounded-full mb-3">
-                  <Text className="text-white text-xs font-black">Kinder & Craft (3–5 Thn)</Text>
-                </View>
                 <Text className="text-base font-extrabold text-[#162E5C] mb-2">Eksplorasi & Bersosialisasi</Text>
                 <Text className="text-xs text-gray-600 leading-relaxed font-medium">
                   Kriya tangan, motorik halus gunting tempel, permainan kelompok, serta pembentukan kesabaran.
                 </Text>
               </View>
 
-              {/* Level 3 */}
+              {/* Level 3: Kinder B */}
               <View className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
                 <View className="w-full h-48 rounded-[1.8rem] overflow-hidden mb-6 img-zoom-container">
                   <Image
@@ -650,9 +697,6 @@ export default function App() {
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%' }}
                   />
-                </View>
-                <View className="bg-[#D82B5A] px-4 py-1 rounded-full mb-3">
-                  <Text className="text-white text-xs font-black">Senior & Science (5–7 Thn)</Text>
                 </View>
                 <Text className="text-base font-extrabold text-[#162E5C] mb-2">Berpikir Kritis & STEM</Text>
                 <Text className="text-xs text-gray-600 leading-relaxed font-medium">
@@ -678,14 +722,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/ministimulation-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">1. Mini Stimulation</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Mini Stimulation Class</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Stimulasi sensori motorik dasar & pemecahan masalah sederhana si kecil.
+                    Melatih seluruh aspek perkembangan melalui permainan edukatif.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -698,14 +742,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/communication-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">2. Communication</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Communication Class</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Interaksi teman sebaya untuk atasi speech delay & komunikasi aktif.
+                    Mengembangkan kemampuan komunikasi, bahasa, dan public speaking anak.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -718,14 +762,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/seminarparenting-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">3. Seminar Parenting</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Seminar Parenting</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Edukasi interaktif pola asuh positif & stimulasi golden age orang tua.
+                    Edukasi interaktif bersama para ahli untuk membantu orang tua memahami dan mendampingi tumbuh kembang anak secara optimal.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -738,14 +782,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/program-art.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">4. Art & Craft</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Art and Craft Class</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Kriya tangan ramah anak, eksplorasi warna & gunting tempel kreatif.
+                    Mengembangkan kreativitas, motorik halus, dan imajinasi.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -758,14 +802,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1530210124550-912dc1381cb8?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/program-science.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">5. Science Class</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Science Class</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Eksperimen sains sederhana aman memicu rasa tahu & berpikir kritis.
+                    Eksperimen sains sederhana berbasis STEAM.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -778,14 +822,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/poetry-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">6. Pottery Class</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Pottery Class</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Membentuk tanah liat alami melatih kesabaran & motorik halus.
+                    Mengembangkan kreativitas, konsentrasi, koordinasi tangan, dan regulasi emosi.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -798,14 +842,14 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/cooking-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">7. Cooking Class</Text>
                     </View>
                   </View>
                   <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Cooking Class</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Kreasi olahan makanan sehat sederhana melatih kemandirian anak.
+                    Melatih kemandirian, life skill, numerasi, dan sensorik.
                   </Text>
                 </View>
                 <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
@@ -814,16 +858,16 @@ export default function App() {
                 </View>
               </View>
 
-              {/* 8. Sensory & Movement */}
+              {/* 8. Outbond Ceria */}
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={{ uri: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600' }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
+                    <Image source={require('./assets/dokumentasi sobat/outbondceria-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">8. Sensory & Movement</Text>
+                      <Text className="text-[9px] font-black text-white">8. Outbond Ceria</Text>
                     </View>
                   </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Sensory & Movement</Text>
+                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Outbond Ceria</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
                     Permainan fisik aktif & rintangan motorik kasar anak.
                   </Text>
@@ -943,12 +987,12 @@ export default function App() {
               {/* Facility 1 */}
               <View className="bg-white p-7 rounded-[2rem] border border-gray-100 shadow-sm flex-row items-start gap-5 card-hover-effect">
                 <View className="w-12 h-12 rounded-2xl bg-[#5A3B8B]/15 items-center justify-center shrink-0">
-                  <Feather name="message-circle" size={24} color="#5A3B8B" />
+                  <Feather name="users" size={24} color="#5A3B8B" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Aplikasi & Screening STPPA</Text>
+                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Kelas Tatap Muka</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Pemantauan 6 aspek perkembangan anak (Agama/Moral, Motorik, Kognitif, Bahasa, Sosial-Emosional, Seni) oleh fasilitator berpengalaman yang bisa diakses langsung via Web/HP.
+                    Lingkungan belajar nyaman dengan jumlah anak terbatas sehingga setiap anak memperoleh perhatian yang optimal.
                   </Text>
                 </View>
               </View>
@@ -959,9 +1003,9 @@ export default function App() {
                   <Feather name="gift" size={24} color="#D82B5A" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Learning Kit & Worksheet PDF</Text>
+                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Learning Kit</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Setiap pendaftaran kelas disertai paket modul stimulasi dan lembar kerja printable gratis yang siap diunduh untuk pengayaan belajar di rumah.
+                    Setiap peserta memperoleh learning kit sesuai tema pembelajaran yang dapat digunakan selama kegiatan maupun dibawa pulang untuk melanjutkan stimulasi di rumah.
                   </Text>
                 </View>
               </View>
@@ -969,12 +1013,12 @@ export default function App() {
               {/* Facility 3 */}
               <View className="bg-white p-7 rounded-[2rem] border border-gray-100 shadow-sm flex-row items-start gap-5 card-hover-effect">
                 <View className="w-12 h-12 rounded-2xl bg-[#2DA9E9]/15 items-center justify-center shrink-0">
-                  <Feather name="users" size={24} color="#2DA9E9" />
+                  <Feather name="activity" size={24} color="#2DA9E9" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Kelas Tatap Muka & Online</Text>
+                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Screening Tumbuh Kembang</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Metode blended learning memfasilitasi anak untuk belajar tatap muka bersama fasilitator profesional maupun kelas interaktif daring yang fleksibel.
+                    Seluruh peserta mendapatkan screening perkembangan menggunakan instrumen observasi berdasarkan STPPA sehingga orang tua mengetahui capaian perkembangan anak secara objektif.
                   </Text>
                 </View>
               </View>
@@ -982,12 +1026,25 @@ export default function App() {
               {/* Facility 4 */}
               <View className="bg-white p-7 rounded-[2rem] border border-gray-100 shadow-sm flex-row items-start gap-5 card-hover-effect">
                 <View className="w-12 h-12 rounded-2xl bg-[#30B864]/15 items-center justify-center shrink-0">
-                  <Feather name="shield" size={24} color="#30B864" />
+                  <Feather name="message-circle" size={24} color="#30B864" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Prokes & Fasilitator Terlatih</Text>
+                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Konsultasi Psikolog</Text>
                   <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Fasilitas lokasi belajar steril dan aman dengan standar protokol kebersihan ketat, serta pendampingan fasilitator ramah dan berpengalaman.
+                    Orang tua memperoleh kesempatan konsultasi bersama psikolog atau tenaga profesional mengenai hasil perkembangan serta strategi stimulasi lanjutan.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Facility 5 */}
+              <View className="bg-white p-7 rounded-[2rem] border border-gray-100 shadow-sm flex-row items-start gap-5 card-hover-effect">
+                <View className="w-12 h-12 rounded-2xl bg-[#F77712]/15 items-center justify-center shrink-0">
+                  <Feather name="home" size={24} color="#F77712" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-extrabold text-[#162E5C] mb-1">Ruangan Ramah Anak</Text>
+                  <Text className="text-xs text-gray-600 leading-relaxed font-medium">
+                    Area bermain yang aman, bersih, nyaman, dan dirancang sesuai kebutuhan anak usia dini.
                   </Text>
                 </View>
               </View>
@@ -1004,15 +1061,51 @@ export default function App() {
             </View>
 
             <View className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Card 1: Warm Orange */}
-              <View className="bg-[#F77712] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[260px] card-solid-hover">
+              {/* Card 1: Kurikulum Terpersonalisasi */}
+              <View className="bg-[#F77712] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover">
                 <View>
-                  <Text className="text-xl font-black text-white mb-3">Kurikulum & Inklusivitas</Text>
-                  <Text className="text-xs text-white/95 leading-relaxed font-medium mb-2">
-                    • Kurikulum Fun Learning berbasis STPPA
-                  </Text>
+                  <Text className="text-xl font-black text-white mb-3">Kurikulum Terpersonalisasi berbasis STPPA</Text>
                   <Text className="text-xs text-white/95 leading-relaxed font-medium">
-                    • Inklusif untuk anak berkebutuhan khusus
+                    Program disusun sesuai indikator perkembangan nasional sehingga setiap aktivitas memiliki tujuan perkembangan yang jelas.
+                  </Text>
+                </View>
+                <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
+                  <Feather name="book-open" size={20} color="#FFFFFF" />
+                </View>
+              </View>
+
+              {/* Card 2: Free Screening Tumbuh Kembang */}
+              <View className="bg-[#5A3B8B] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover">
+                <View>
+                  <Text className="text-xl font-black text-white mb-3">Free Screening Tumbuh Kembang</Text>
+                  <Text className="text-xs text-white/95 leading-relaxed font-medium">
+                    Monitoring perkembangan anak dilakukan secara berkala agar orang tua mengetahui potensi maupun area yang perlu distimulasi.
+                  </Text>
+                </View>
+                <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
+                  <Feather name="activity" size={20} color="#FFFFFF" />
+                </View>
+              </View>
+
+              {/* Card 3: Konsultasi Psikolog */}
+              <View className="bg-[#D82B5A] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover">
+                <View>
+                  <Text className="text-xl font-black text-white mb-3">Konsultasi Psikolog</Text>
+                  <Text className="text-xs text-white/95 leading-relaxed font-medium">
+                    Voucher konsultasi psikolog diberikan sesuai paket tertentu sebagai follow up bagi orang tua.
+                  </Text>
+                </View>
+                <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
+                  <Feather name="message-circle" size={20} color="#FFFFFF" />
+                </View>
+              </View>
+
+              {/* Card 4: Inklusif */}
+              <View className="bg-[#30B864] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover">
+                <View>
+                  <Text className="text-xl font-black text-white mb-3">Inklusif</Text>
+                  <Text className="text-xs text-white/95 leading-relaxed font-medium">
+                    Seluruh anak mendapatkan kesempatan belajar bersama tanpa diskriminasi.
                   </Text>
                 </View>
                 <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
@@ -1020,36 +1113,67 @@ export default function App() {
                 </View>
               </View>
 
-              {/* Card 2: Deep Purple */}
-              <View className="bg-[#5A3B8B] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[260px] card-solid-hover">
+              {/* Card 5: Mindfulness Activity */}
+              <View className="bg-[#2DA9E9] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover">
                 <View>
-                  <Text className="text-xl font-black text-white mb-3">Pendekatan & Pendampingan</Text>
-                  <Text className="text-xs text-white/95 leading-relaxed font-medium mb-2">
-                    • Pendekatan mindfulness & family co-creation
-                  </Text>
+                  <Text className="text-xl font-black text-white mb-3">Mindfulness Activity</Text>
                   <Text className="text-xs text-white/95 leading-relaxed font-medium">
-                    • Orang tua ikut aktif mendampingi anak
+                    Melatih fokus, regulasi emosi, serta kemampuan mengelola diri sejak dini.
+                  </Text>
+                </View>
+                <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
+                  <Feather name="wind" size={20} color="#FFFFFF" />
+                </View>
+              </View>
+
+              {/* Card 6: Family Co-Creation */}
+              <View className="bg-[#162E5C] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover">
+                <View>
+                  <Text className="text-xl font-black text-white mb-3">Family Co-Creation</Text>
+                  <Text className="text-xs text-white/95 leading-relaxed font-medium">
+                    Orang tua dilibatkan dalam proses pembelajaran agar stimulasi tetap berlanjut di rumah.
                   </Text>
                 </View>
                 <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
                   <Feather name="users" size={20} color="#FFFFFF" />
                 </View>
               </View>
+            </View>
+          </ScrollRevealSection>
 
-              {/* Card 3: SMM Crimson */}
-              <View className="bg-[#D82B5A] rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[260px] card-solid-hover">
-                <View>
-                  <Text className="text-xl font-black text-white mb-3">Tim Ahli & Laporan</Text>
-                  <Text className="text-xs text-white/95 leading-relaxed font-medium mb-2">
-                    • Fasilitator profesional PAUD & psikolog anak
-                  </Text>
-                  <Text className="text-xs text-white/95 leading-relaxed font-medium">
-                    • Laporan perkembangan terstruktur setiap anak
-                  </Text>
-                </View>
-                <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
-                  <Feather name="award" size={20} color="#FFFFFF" />
-                </View>
+          {/* SECTION: PROGRAM KOLABORASI / MITRA SOBAT CERIA */}
+          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
+            <View className="text-center mb-12">
+              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Program Kolaborasi</Text>
+              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C]">
+                Mitra Sobat Ceria
+              </Text>
+              <Text className="text-xs md:text-sm text-gray-500 font-medium mt-3 max-w-2xl mx-auto">
+                Bersama sekolah, komunitas, dan mitra usaha terpercaya dalam mendampingi tumbuh kembang anak Indonesia.
+              </Text>
+            </View>
+
+            {/* Mitra Slider Grid */}
+            <View className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-6 md:p-10">
+              <View className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[
+                  'TK Intan Permata',
+                  'TK Aisyiyah Kampung Sewu',
+                  'TK Alam Surya Mentari',
+                  'Bebimart',
+                  'TK Bintangku',
+                  'TK IT Al Muhsin Klaten',
+                ].map((mitra) => (
+                  <View
+                    key={mitra}
+                    className="bg-[#FAF6F0] border border-gray-100 rounded-2xl px-4 py-5 items-center justify-center min-h-[90px] text-center card-hover-effect"
+                  >
+                    <Feather name="award" size={22} color="#D82B5A" className="mb-2" />
+                    <Text className="text-[11px] font-extrabold text-[#162E5C] text-center leading-snug">
+                      {mitra}
+                    </Text>
+                  </View>
+                ))}
               </View>
             </View>
           </ScrollRevealSection>

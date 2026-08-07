@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { UserProfile } from '../types';
 import LoginScreen from './LoginScreen';
+import { signOut } from '../lib/auth';
 
 interface ProfileScreenProps {
   user: UserProfile | null;
@@ -17,6 +18,11 @@ export default function ProfileScreen({ user, onLogout, onLogin }: ProfileScreen
   }
 
   const child = user?.children?.[0] || { name: 'Arka', age: 4, specialNeeds: '' };
+
+  const handleLogout = async () => {
+    await signOut();
+    onLogout();
+  };
 
   const handleOpenDrive = () => {
     if (Platform.OS === 'web') {
@@ -119,7 +125,7 @@ export default function ProfileScreen({ user, onLogout, onLogin }: ProfileScreen
         {/* Log Out Button */}
         <TouchableOpacity 
           className="bg-rose-50 border border-rose-200 py-3.5 rounded-full items-center flex-row justify-center gap-2 transition-transform active:scale-98"
-          onPress={onLogout}
+          onPress={handleLogout}
         >
           <Feather name="log-out" size={16} color="#D82B5A" />
           <Text className="text-[#D82B5A] text-xs font-extrabold">Keluar dari Akun</Text>

@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TextInput, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ScrollView, TextInput, TouchableOpacity, Platform, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { UserProfile } from '../types';
+import { supabase } from '../lib/supabase';
+import { signInWithGoogle } from '../lib/auth';
+import { fetchUserProfile, upsertProfile, addChild } from '../lib/profile';
 
 interface LoginScreenProps {
   onLogin: (user: UserProfile) => void;
@@ -12,32 +15,96 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const [parentName, setParentName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [childName, setChildName] = useState<string>('');
   const [childAge, setChildAge] = useState<string>('');
   const [specialNeeds, setSpecialNeeds] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [mode, setMode] = useState<'register' | 'login'>('register');
 
-  const handleRegister = () => {
-    if (!parentName.trim() || !email.trim() || !phone.trim()) {
-      alertMessage('Form Belum Lengkap', 'Harap isi Nama, Email, dan No WhatsApp Orang Tua!');
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const session = await signInWithGoogle();
+      if (!session?.user) throw new Error('Session tidak ditemukan.');
+      const { profile } = await fetchUserProfile(session.user.id);
+      onLogin(profile);
+    } catch (error: any) {
+      alertMessage('Login Google Gagal', error?.message || 'Terjadi kesalahan saat login.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (mode === 'login') {
+      return handleLogin();
+    }
+    if (!parentName.trim() || !email.trim() || !phone.trim() || !password.trim()) {
+      alertMessage('Form Belum Lengkap', 'Harap isi Nama, Email, Password, dan No WhatsApp Orang Tua!');
       return;
     }
 
-    const ageNumber = parseInt(childAge.trim()) || 4;
-    
-    const userProfile: UserProfile = {
-      parentName: parentName.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
-      children: [
-        {
-          name: childName.trim() || 'Arka',
-          age: ageNumber,
-          specialNeeds: specialNeeds.trim() ? specialNeeds.trim() : undefined
-        }
-      ]
-    };
+    setLoading(true);
+    try {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: password.trim(),
+        options: {
+          data: { full_name: parentName.trim() },
+        },
+      });
 
-    onLogin(userProfile);
+      if (signUpError) throw signUpError;
+      if (!signUpData.session?.user) {
+        alertMessage('Cek Email Anda', 'Pendaftaran berhasil. Silakan verifikasi email untuk masuk.');
+        setLoading(false);
+        return;
+      }
+
+      const userId = signUpData.session.user.id;
+      await upsertProfile(userId, { parentName: parentName.trim(), email: email.trim(), phone: phone.trim() });
+
+      const ageNumber = parseInt(childAge.trim()) || 4;
+      if (childName.trim()) {
+        await addChild(userId, {
+          name: childName.trim(),
+          age: ageNumber,
+          specialNeeds: specialNeeds.trim() || undefined,
+        });
+      }
+
+      const { profile } = await fetchUserProfile(userId);
+      onLogin(profile);
+    } catch (error: any) {
+      alertMessage('Pendaftaran Gagal', error?.message || 'Terjadi kesalahan. Coba lagi nanti.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      alertMessage('Form Belum Lengkap', 'Harap isi Email dan Password!');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+      if (signInError) throw signInError;
+      if (!signInData.user) throw new Error('User tidak ditemukan.');
+
+      const { profile } = await fetchUserProfile(signInData.user.id);
+      onLogin(profile);
+    } catch (error: any) {
+      alertMessage('Login Gagal', error?.message || 'Email atau password salah.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const alertMessage = (title: string, message: string) => {
@@ -63,6 +130,34 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
         <View className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-gray-100 shadow-md">
           <Text className="text-base font-extrabold text-[#162E5C] mb-4 text-center">Pendaftaran Akun Ceria</Text>
+
+          {/* Google Login Button */}
+          <TouchableOpacity
+            className="bg-white border-2 border-gray-200 rounded-2xl py-3 flex-row items-center justify-center gap-2.5 mb-5 shadow-sm hover:bg-gray-50 transition-transform active:scale-95"
+            onPress={handleGoogleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#D82B5A" />
+            ) : (
+              <>
+                <View className="w-5 h-5 items-center justify-center">
+                  <Image
+                    source={{ uri: 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg' }}
+                    style={{ width: 18, height: 18 }}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text className="text-xs font-extrabold text-[#162E5C]">Lanjutkan dengan Google</Text>
+              </>
+            )}
+          </TouchableOpacity>
+
+          <View className="flex-row items-center gap-3 mb-5">
+            <View className="flex-1 h-px bg-gray-200" />
+            <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">atau daftar manual</Text>
+            <View className="flex-1 h-px bg-gray-200" />
+          </View>
 
           {/* Form input fields */}
           <Text className="text-[10px] font-extrabold text-[#162E5C] mb-1 uppercase tracking-wider">Nama Lengkap Orang Tua</Text>
@@ -95,6 +190,19 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             onChangeText={setPhone}
           />
 
+          <Text className="text-[10px] font-extrabold text-[#162E5C] mb-1 uppercase tracking-wider">Password</Text>
+          <TextInput
+            className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] mb-3.5 font-medium"
+            placeholder={mode === 'register' ? 'Buat password (min. 6 karakter)' : 'Masukkan password'}
+            placeholderTextColor="#9CA3AF"
+            secureTextEntry
+            autoCapitalize="none"
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          {mode === 'register' && (
+            <>
           {/* Child details row */}
           <View className="flex-row gap-3 mb-3.5">
             <View className="flex-[2]">
@@ -130,13 +238,35 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             value={specialNeeds}
             onChangeText={setSpecialNeeds}
           />
+            </>
+          )}
 
           {/* Submit Button */}
-          <TouchableOpacity 
-            className="bg-[#D82B5A] py-3.5 rounded-full items-center shadow-md hover:bg-[#B01E49] transition-transform active:scale-95"
+          <TouchableOpacity
+            className="bg-[#D82B5A] py-3.5 rounded-full items-center shadow-md hover:bg-[#B01E49] transition-transform active:scale-95 flex-row justify-center gap-2"
             onPress={handleRegister}
+            disabled={loading}
           >
-            <Text className="text-white text-xs font-extrabold">Masuk ke Platform Ceria</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text className="text-white text-xs font-extrabold">
+                {mode === 'register' ? 'Masuk ke Platform Ceria' : 'Masuk dengan Email'}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Toggle Login / Register */}
+          <TouchableOpacity
+            className="items-center mt-4"
+            onPress={() => setMode(mode === 'register' ? 'login' : 'register')}
+          >
+            <Text className="text-[11px] font-semibold text-[#162E5C]">
+              {mode === 'register' ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
+              <Text className="text-[#D82B5A] font-extrabold">
+                {mode === 'register' ? 'Masuk di sini' : 'Daftar sekarang'}
+              </Text>
+            </Text>
           </TouchableOpacity>
         </View>
 

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { Course } from '../types';
+import { createOrder, fetchVouchers, VoucherData } from '../lib/data';
 
 interface CheckoutModalProps {
   visible: boolean;
@@ -24,29 +25,35 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
   const [appliedVoucher, setAppliedVoucher] = useState<string>('');
   const [guestChildName, setGuestChildName] = useState<string>('');
   const [guestWhatsApp, setGuestWhatsApp] = useState<string>('');
+  const [vouchers, setVouchers] = useState<VoucherData[]>([]);
 
-  // Voucher validation engine
-  const handleApplyVoucher = () => {
+  React.useEffect(() => {
+    if (visible) {
+      fetchVouchers()
+        .then(setVouchers)
+        .catch(() => setVouchers([]));
+    }
+  }, [visible]);
+
+  // Voucher validation engine (cek ke database)
+  const handleApplyVoucher = async () => {
     const code = voucherCode.trim().toUpperCase();
     if (!code) {
       alertMessage('Pemberitahuan', 'Harap masukkan kode voucher terlebih dahulu.');
       return;
     }
 
-    if (code === 'REPEATORDER10') {
-      setDiscount(10000);
-      setAppliedVoucher('REPEATORDER10');
-      alertMessage('Voucher Berhasil!', 'Kode REPEATORDER10 memberikan diskon Rp 10.000.');
-    } else if (code === 'SOBATCERIA20') {
-      setDiscount(20000);
-      setAppliedVoucher('SOBATCERIA20');
-      alertMessage('Voucher Berhasil!', 'Kode SOBATCERIA20 memberikan diskon Rp 20.000.');
+    const found = vouchers.find((v) => v.code.toUpperCase() === code);
+    if (found) {
+      setDiscount(found.discount_amount);
+      setAppliedVoucher(found.code);
+      alertMessage('Voucher Berhasil!', `Kode ${found.code} memberikan diskon Rp ${found.discount_amount.toLocaleString('id-ID')}.`);
     } else {
       alertMessage('Voucher Tidak Valid', 'Kode voucher yang Anda masukkan tidak terdaftar.');
     }
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!user) {
       if (!guestChildName.trim() || !guestWhatsApp.trim()) {
         alertMessage('Form Belum Lengkap', 'Harap isi Nama Anak dan No. WhatsApp Anda!');
@@ -54,6 +61,20 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
       }
     }
     const totalAmount = Math.max(0, course.price - discount);
+
+    try {
+      await createOrder({
+        courseId: course.id,
+        childName: guestChildName.trim() || user?.children?.[0]?.name || 'Anak Ceria',
+        whatsapp: guestWhatsApp.trim() || user?.phone || '',
+        voucherCode: appliedVoucher || null,
+        discount,
+        totalAmount,
+      });
+    } catch {
+      // jika penyimpanan gagal, checkout tetap dilanjutkan secara lokal
+    }
+
     alertMessage(
       'Pendaftaran Berhasil',
       `Pembayaran sejumlah Rp ${totalAmount.toLocaleString('id-ID')} untuk kelas "${course.title}" telah diterima. Sampai jumpa di kelas!`

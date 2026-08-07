@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
+import { fetchWorksheets, fetchVouchers, WorksheetData, VoucherData } from '../lib/data';
 
 interface Worksheet {
   id: string;
@@ -36,7 +37,39 @@ const MOCK_WORKSHEETS: Worksheet[] = [
 ];
 
 export default function RewardScreen({ navigation, user }: { navigation: any; user: any }) {
-  const voucherCode = 'CERIA10K';
+  const [worksheets, setWorksheets] = useState<Worksheet[]>(MOCK_WORKSHEETS);
+  const [voucherCode, setVoucherCode] = useState<string>('CERIA10K');
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [wsData, voucherData] = await Promise.all([
+          fetchWorksheets(),
+          fetchVouchers(),
+        ]);
+        if (mounted) {
+          if (wsData.length > 0) {
+            setWorksheets(wsData.map((w: WorksheetData) => ({
+              id: w.id,
+              title: w.title,
+              ageGroup: w.age_group,
+              category: w.category,
+              pages: w.pages,
+            })));
+          }
+          if (voucherData.length > 0) {
+            setVoucherCode(voucherData[0].code);
+          }
+        }
+      } catch {
+        // fallback mock
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleDownload = (title: string) => {
     if (Platform.OS === 'web') {

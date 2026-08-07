@@ -3,6 +3,7 @@
     "name": "SOBAT CERIA",
     "slug": "sobat-ceria",
     "version": "1.0.0",
+    "scheme": "sobatceria",
     "orientation": "portrait",
     "icon": "./assets/sobatceria.png",
     "userInterfaceStyle": "light",
@@ -21,6 +22,9 @@
     "web": {
       "favicon": "./assets/sobatceria.png",
       "bundler": "metro"
-    }
+    },
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { ScreeningResult } from '../types';
+import { fetchScreeningResults } from '../lib/data';
 
 const MOCK_RESULTS: ScreeningResult[] = [
   {
@@ -33,6 +34,22 @@ const MOCK_RESULTS: ScreeningResult[] = [
 
 export default function ScreeningScreen({ navigation, user }: { navigation: any; user: any }) {
   const child = user?.children?.[0] || { name: 'Arka', age: 4 };
+  const [results, setResults] = useState<ScreeningResult[]>(MOCK_RESULTS);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await fetchScreeningResults();
+        if (mounted && data.length > 0) setResults(data);
+      } catch {
+        // fallback mock
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -83,7 +100,7 @@ export default function ScreeningScreen({ navigation, user }: { navigation: any;
         {/* Screening Results List */}
         <Text className="text-base font-extrabold text-[#162E5C] mb-3">Laporan Hasil Sesi Terbaru</Text>
         <View className="grid grid-cols-1 gap-4 mb-6">
-          {MOCK_RESULTS.map((result) => {
+          {results.map((result) => {
             const badge = getStatusBadge(result.status);
             return (
               <View key={result.id} className="bg-white rounded-[2.5rem] border border-gray-100 shadow-xs p-6 card-hover-effect">
