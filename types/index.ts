@@ -40,3 +40,28 @@ export interface ScreeningResult {
   scoreDate: string;
   psychologistNotes: string;
 }
+
+export interface BookItem {
+  id: string;
+  title: string;
+  author: string;
+  category: string;
+  ageRange?: string;
+  rating: number;
+  reviewsCount: number;
+  pages: number;
+  coverType: string; // e.g., "Hard Cover", "Soft Cover"
+  language: string;  // e.g., "Indonesia", "English"
+  price: number;
+  image: string;
+  description: string;
+  isBestSeller?: boolean;
+  isTrending?: boolean;
+  ownerInfo?: {
+    name: string;
+    role: string;
+    avatar: string;
+    location?: string;
+  };
+}
+

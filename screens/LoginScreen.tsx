@@ -271,7 +271,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         </View>
 
         <Text className="text-[10px] text-gray-400 mt-5 text-center leading-relaxed font-medium">
-          Laboratorium Tumbuh Kembang FKIP UMS • Pabelan, Sukoharjo
+          Lab Tumbuh Kembang FKIP UMS Lantai 2 • Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo
         </Text>
       </ScrollView>
     </SafeAreaView>

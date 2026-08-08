@@ -36,7 +36,7 @@ function AppCore({ user, setUser }: { user: UserProfile | null; setUser: (u: Use
             let iconName: any = 'home';
             if (route.name === 'Beranda') {
               iconName = 'home';
-            } else if (route.name === 'Katalog') {
+            } else if (route.name === 'Kelas') {
               iconName = 'shopping-bag';
             } else if (route.name === 'Screening') {
               iconName = 'activity';
@@ -82,7 +82,7 @@ function AppCore({ user, setUser }: { user: UserProfile | null; setUser: (u: Use
         <Tab.Screen name="Beranda">
           {(props) => <HomeScreen {...props} user={user} />}
         </Tab.Screen>
-        <Tab.Screen name="Katalog">
+        <Tab.Screen name="Kelas">
           {(props) => <CatalogScreen {...props} user={user} />}
         </Tab.Screen>
         <Tab.Screen name="Screening">
@@ -298,33 +298,6 @@ export default function App() {
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <View className="flex-1 bg-brand-cream relative">
-          {/* Navigation Bar for returning to Landing Page */}
-          <View className="w-full bg-white border-b border-gray-200 py-3 px-4 md:px-8 flex-row justify-between items-center z-50 shadow-sm">
-            <TouchableOpacity
-              className="flex-row items-center gap-2 bg-[#D82B5A]/10 px-4 py-2 rounded-full border border-[#D82B5A]/20 hover:bg-[#D82B5A]/20 transition"
-              onPress={() => setViewMode('landing')}
-            >
-              <Feather name="arrow-left" size={14} color="#D82B5A" />
-              <Text className="text-xs font-black text-[#D82B5A]">Kembali ke Landing Page</Text>
-            </TouchableOpacity>
-
-            <View className="flex-row items-center gap-2">
-              <View className="w-7 h-7 rounded-full overflow-hidden bg-brand-primary/10 items-center justify-center p-0.5 border border-brand-primary/20">
-                <Image
-                  source={logoImg}
-                  style={{ width: '100%', height: '100%', borderRadius: 999 }}
-                  resizeMode="contain"
-                />
-              </View>
-              <Text className="text-sm font-black text-brand-navy tracking-wider">SOBAT CERIA APP</Text>
-            </View>
-
-            <View className="hidden md:flex flex-row items-center gap-2">
-              <View className="w-2 h-2 rounded-full bg-emerald-500" />
-              <Text className="text-xs font-bold text-gray-600">Web App Active</Text>
-            </View>
-          </View>
-
           {/* Main App Workspace (Clean Layout without Phone Frame) */}
           <View className="flex-1 w-full bg-brand-cream justify-center items-center">
             <View className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
@@ -533,75 +506,6 @@ export default function App() {
             </View>
           </ScrollRevealSection>
 
-          {/* SECTION 2: MILESTONE PERJALANAN SOBAT CERIA (Interactive Staggered Cards) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Milestone</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C]">
-                Perjalanan Sobat Ceria
-              </Text>
-            </View>
-
-            {/* Timeline Steps Grid */}
-            <View className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-              {/* Milestone 1 */}
-              <View className="bg-white p-6 rounded-[2rem] border-2 border-[#F77712]/30 shadow-sm flex-col justify-between relative card-hover-effect">
-                <View className="w-12 h-12 rounded-full bg-[#F77712]/15 border-2 border-[#F77712] items-center justify-center mb-4">
-                  <Feather name="flag" size={20} color="#F77712" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-[#F77712] mb-1">2019</Text>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-2">Berdirinya Sobat Ceria</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Tahun ini, Sobat Ceria memulai perjalanan kelas stimulasi tatap muka anak pra-sekolah di Solo Raya.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Milestone 2 */}
-              <View className="bg-white p-6 rounded-[2rem] border-2 border-[#5A3B8B]/30 shadow-sm flex-col justify-between relative card-hover-effect">
-                <View className="w-12 h-12 rounded-full bg-[#5A3B8B]/15 border-2 border-[#5A3B8B] items-center justify-center mb-4">
-                  <Feather name="heart" size={20} color="#5A3B8B" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-[#5A3B8B] mb-1">2021</Text>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-2">Modul Sensorik & Speech</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Merilis kelas stimulasi terstruktur untuk atasi speech delay dan mengasah komunikasi teman sebaya.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Milestone 3 */}
-              <View className="bg-white p-6 rounded-[2rem] border-2 border-[#D82B5A]/30 shadow-sm flex-col justify-between relative card-hover-effect">
-                <View className="w-12 h-12 rounded-full bg-[#D82B5A]/15 border-2 border-[#D82B5A] items-center justify-center mb-4">
-                  <Feather name="bar-chart-2" size={20} color="#D82B5A" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-[#D82B5A] mb-1">2023</Text>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-2">Screening STPPA Digital</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Peluncuran modul evaluasi 6 aspek perkembangan anak (STPPA) secara digital untuk laporan terukur.
-                  </Text>
-                </View>
-              </View>
-
-              {/* Milestone 4 */}
-              <View className="bg-white p-6 rounded-[2rem] border-2 border-[#30B864]/30 shadow-sm flex-col justify-between relative card-hover-effect">
-                <View className="w-12 h-12 rounded-full bg-[#30B864]/15 border-2 border-[#30B864] items-center justify-center mb-4">
-                  <Feather name="check-circle" size={20} color="#30B864" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-[#30B864] mb-1">2026</Text>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-2">Ekosistem 8 Kelas Terpadu</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed font-medium">
-                    Platform lengkap dengan 8 program kelas resmi, worksheet gratis printable, dan voucher promo hemat.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </ScrollRevealSection>
-
           {/* SECTION 3: VISI & MISI (Interactive Card Reveal) */}
           <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
             <View className="bg-[#162E5C] rounded-[2.5rem] p-8 md:p-14 text-white shadow-xl flex-col md:flex-row items-center gap-10 card-solid-hover">
@@ -633,7 +537,7 @@ export default function App() {
                 <View className="mt-6">
                   <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-1">LOKASI UTAMA KELAS</Text>
                   <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">
-                    Laboratorium Tumbuh Kembang FKIP UMS, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo.
+                    Lab Tumbuh Kembang FKIP UMS Lantai 2, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo.
                   </Text>
                 </View>
               </View>
@@ -1319,7 +1223,7 @@ export default function App() {
                 <View>
                   <Text className="text-xs font-black text-white uppercase tracking-widest mb-3">Lokasi & Kontak</Text>
                   <Text className="text-xs text-gray-300 mb-2 font-medium max-w-[220px]">
-                    Lab Tumbuh Kembang FKIP UMS, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo
+                    Lab Tumbuh Kembang FKIP UMS Lantai 2, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo
                   </Text>
                   <Text className="text-xs text-gray-300 mb-2">WhatsApp: +62 858-7633-2598</Text>
                   <Text className="text-xs text-gray-300 mb-3">Email: sobatceria25@gmail.com</Text>

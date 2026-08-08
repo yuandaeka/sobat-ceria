@@ -1,21 +1,12 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TextInput, 
-  TouchableOpacity, 
-  Image, 
-  Platform 
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Course } from '../types';
 import CheckoutModal from '../components/CheckoutModal';
-import { fetchCourses } from '../lib/data';
 
-// Mock Data Courses inside the catalog (8 Official Programs)
-const MOCK_COURSES: Course[] = [
+// 8 Program Kelas Resmi dengan gambar aset
+const PROGRAM_COURSES: Course[] = [
   {
     id: '1',
     title: 'Mini Stimulation Class',
@@ -23,9 +14,9 @@ const MOCK_COURSES: Course[] = [
     ageRange: '2-3 Thn',
     price: 59000,
     seats: 12,
-    image: 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600',
-    description: 'Sensory motor stimulation, melatih fokus & pemecahan masalah sederhana berbasis latihan fisik.',
-    facilitator: 'Bunda Sarah, M.Psi'
+    image: 'minstim',
+    description: 'Melatih seluruh aspek perkembangan melalui permainan edukatif.',
+    facilitator: 'Bunda Sarah, M.Psi',
   },
   {
     id: '2',
@@ -34,9 +25,9 @@ const MOCK_COURSES: Course[] = [
     ageRange: '2-4 Thn',
     price: 65000,
     seats: 4,
-    image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600',
-    description: 'Interaksi teman sebaya untuk mengatasi speech delay dan melatih kepercayaan diri anak dalam berkomunikasi.',
-    facilitator: 'Bunda Sarah, M.Psi'
+    image: 'communication',
+    description: 'Mengembangkan kemampuan komunikasi, bahasa, dan public speaking anak.',
+    facilitator: 'Bunda Sarah, M.Psi',
   },
   {
     id: '3',
@@ -45,9 +36,9 @@ const MOCK_COURSES: Course[] = [
     ageRange: 'Ortu',
     price: 49000,
     seats: 25,
-    image: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600',
-    description: 'Wadah edukasi interaktif untuk orang tua mengenai stimulasi golden age, emosi anak, & pencegahan kecanduan gadget.',
-    facilitator: 'Dr. Anita, Sp.A & Tim Psikolog'
+    image: 'seminarparenting',
+    description: 'Edukasi interaktif bersama para ahli untuk membantu orang tua memahami dan mendampingi tumbuh kembang anak secara optimal.',
+    facilitator: 'Dr. Anita, Sp.A & Tim Psikolog',
   },
   {
     id: '4',
@@ -56,9 +47,9 @@ const MOCK_COURSES: Course[] = [
     ageRange: '2-5 Thn',
     price: 79000,
     seats: 8,
-    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600',
-    description: 'Kriya tangan ramah anak, eksplorasi media warna, & gunting tempel untuk mengasah kreativitas dan motorik halus.',
-    facilitator: 'Kak Rian, S.Sn'
+    image: 'art',
+    description: 'Mengembangkan kreativitas, motorik halus, dan imajinasi.',
+    facilitator: 'Kak Rian, S.Sn',
   },
   {
     id: '5',
@@ -67,9 +58,9 @@ const MOCK_COURSES: Course[] = [
     ageRange: '3-7 Thn',
     price: 69000,
     seats: 15,
-    image: 'https://images.unsplash.com/photo-1530210124550-912dc1381cb8?w=600',
-    description: 'Eksperimen sains aman dan menyenangkan untuk memicu rasa ingin tahu alami serta berpikir kritis si kecil.',
-    facilitator: 'Kak Rian, S.Sn'
+    image: 'science',
+    description: 'Eksperimen sains sederhana berbasis STEAM.',
+    facilitator: 'Kak Rian, S.Sn',
   },
   {
     id: '6',
@@ -78,9 +69,9 @@ const MOCK_COURSES: Course[] = [
     ageRange: '3-7 Thn',
     price: 75000,
     seats: 6,
-    image: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=600',
-    description: 'Pembentukan media tanah liat alami untuk melatih kesabaran, koordinasi jemari tangan, serta imajinasi spasial.',
-    facilitator: 'Kak Rian, S.Sn'
+    image: 'pottery',
+    description: 'Mengembangkan kreativitas, konsentrasi, koordinasi tangan, dan regulasi emosi.',
+    facilitator: 'Kak Rian, S.Sn',
   },
   {
     id: '7',
@@ -89,120 +80,71 @@ const MOCK_COURSES: Course[] = [
     ageRange: '3-7 Thn',
     price: 85000,
     seats: 10,
-    image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600',
-    description: 'Kreasi makanan sehat sederhana untuk melatih kemandirian, pengenalan tekstur bahan, & kebersihan anak.',
-    facilitator: 'Bunda Sarah, M.Psi'
+    image: 'cooking',
+    description: 'Melatih kemandirian, life skill, numerasi, dan sensorik.',
+    facilitator: 'Bunda Sarah, M.Psi',
   },
   {
     id: '8',
-    title: 'Sensory & Movement Class',
-    category: 'Sensory Play',
-    ageRange: '2-6 Thn',
+    title: 'Outbond Ceria',
+    category: 'Outbond',
+    ageRange: '2-7 Thn',
     price: 69000,
     seats: 12,
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600',
-    description: 'Permainan fisik aktif, rintangan motorik kasar, serta stimulasi taktil untuk perkembangan olah tubuh anak.',
-    facilitator: 'Tim Fasilitator Sobat Ceria'
-  }
+    image: 'outbond',
+    description: 'Permainan fisik aktif & rintangan motorik kasar anak.',
+    facilitator: 'Tim Fasilitator Sobat Ceria',
+  },
 ];
 
-export default function CatalogScreen({ user }: { user: any }) {
-  const [selectedAge, setSelectedAge] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+const getProgramImage = (key: string) => {
+  const images: Record<string, any> = {
+    minstim: require('../assets/dokumentasi sobat/ministimulation-program.jpeg'),
+    communication: require('../assets/dokumentasi sobat/communication-program.jpeg'),
+    seminarparenting: require('../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
+    art: require('../assets/dokumentasi sobat/program-art.jpeg'),
+    science: require('../assets/dokumentasi sobat/program-science.jpeg'),
+    pottery: require('../assets/dokumentasi sobat/poetry-program.jpeg'),
+    cooking: require('../assets/dokumentasi sobat/cooking-program.jpeg'),
+    outbond: require('../assets/dokumentasi sobat/outbondceria-program.jpeg'),
+  };
+  return images[key];
+};
+
+export default function CatalogScreen({ navigation, user }: { navigation: any; user: any }) {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [courses, setCourses] = useState<Course[]>(MOCK_COURSES);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const data = await fetchCourses();
-        if (mounted && data.length > 0) setCourses(data);
-      } catch {
-        // fallback ke mock data jika gagal
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // Age Filter Options
-  const ageFilters = ['All', '2-3 Thn', '3-5 Thn', '5-7 Thn'];
-
-  // Filter logic based on age tab and search bar query
-  const filteredCourses = useMemo(() => {
-    return courses.filter(course => {
-      const matchesAge = selectedAge === 'All' || course.ageRange.includes(selectedAge.split(' ')[0]);
-      const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            course.category.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesAge && matchesSearch;
-    });
-  }, [selectedAge, searchQuery, courses]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }} className="bg-[#FAF6F0]">
-      {/* Search Header Wrapper */}
-      <View className="px-5 pt-4 pb-4 bg-white border-b border-gray-100 shadow-xs">
-        <View className="flex-row items-center gap-2 mb-1">
-          <View className="w-2.5 h-2.5 rounded-full bg-[#D82B5A]" />
-          <Text className="text-lg md:text-xl font-extrabold text-[#162E5C]">Katalog 8 Program Kelas</Text>
+    <SafeAreaView style={{ flex: 1 }} className="bg-[#FAFDFB]">
+      <ScrollView contentContainerStyle={{ paddingBottom: 110 }} className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="px-5 pt-4 pb-4 bg-white border-b border-rose-50">
+          <View className="flex-row items-center gap-2 mb-1">
+            <View className="w-2.5 h-2.5 rounded-full bg-[#D82B5A]" />
+            <Text className="text-lg md:text-xl font-extrabold text-[#1F2937]">Katalog 8 Program Kelas</Text>
+          </View>
+          <Text className="text-xs text-gray-500 font-medium">
+            Pilih kelas stimulasi terpadu untuk buah hati Anda (Laboratorium FKIP UMS Lantai 2).
+          </Text>
         </View>
-        <Text className="text-xs text-gray-500 font-medium mb-3">
-          Pilih kelas stimulasi terpadu untuk buah hati Anda (Laboratorium FKIP UMS).
-        </Text>
-        
-        {/* Search Bar */}
-        <View className="bg-gray-50 rounded-2xl px-4 border border-gray-200 flex-row items-center">
-          <Feather name="search" size={16} color="#9CA3AF" className="mr-2" />
-          <TextInput
-            className="flex-1 h-11 text-xs text-[#162E5C] font-medium"
-            placeholder="Cari kelas berdasarkan nama atau kategori..."
-            placeholderTextColor="#888"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-      </View>
 
-      {/* Age Filters Navigation Row */}
-      <View className="py-3 bg-white/50 border-b border-gray-100">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16 }}>
-          {ageFilters.map((age) => (
-            <TouchableOpacity
-              key={age}
-              className={`rounded-full px-5 py-2 mr-2 border shadow-xs transition-transform active:scale-95 ${
-                selectedAge === age 
-                  ? 'bg-[#D82B5A] border-[#D82B5A]' 
-                  : 'bg-white border-gray-200'
-              }`}
-              onPress={() => setSelectedAge(age)}
-            >
-              <Text className={`text-xs font-extrabold ${selectedAge === age ? 'text-white' : 'text-[#162E5C]'}`}>
-                {age === 'All' ? 'Semua Jenjang Usia' : age}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Catalog Listing Grid */}
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 110 }} showsVerticalScrollIndicator={false} className="max-w-5xl mx-auto w-full">
-        {filteredCourses.length > 0 ? (
+        {/* Catalog Grid */}
+        <View className="p-5 max-w-5xl mx-auto w-full">
           <View className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {filteredCourses.map((course) => (
-              <View 
-                key={course.id} 
-                className="bg-white rounded-[2.5rem] overflow-hidden border border-gray-100 shadow-xs flex-col justify-between card-hover-effect"
+            {PROGRAM_COURSES.map((course) => (
+              <View
+                key={course.id}
+                className="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-xs flex-col justify-between"
               >
                 <View>
-                  <View className="w-full h-44 overflow-hidden relative img-zoom-container">
-                    <Image source={{ uri: course.image }} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-3 left-3 bg-[#162E5C] px-3 py-1 rounded-full shadow-xs">
+                  <View className="w-full h-44 overflow-hidden relative">
+                    <Image
+                      source={getProgramImage(course.image)}
+                      className="w-full h-full object-cover"
+                      style={{ width: '100%', height: '100%' }}
+                    />
+                    <View className="absolute top-3 left-3 bg-[#1F2937] px-3 py-1 rounded-full shadow-xs">
                       <Text className="text-[10px] font-black text-white">{course.category}</Text>
                     </View>
                     <View className="absolute top-3 right-3 bg-[#D82B5A] px-3 py-1 rounded-full shadow-xs">
@@ -211,20 +153,18 @@ export default function CatalogScreen({ user }: { user: any }) {
                   </View>
 
                   <View className="p-5">
-                    <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">{course.title}</Text>
+                    <Text className="text-base font-extrabold text-[#1F2937] mb-1.5">{course.title}</Text>
                     <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-3">{course.description}</Text>
 
-                    {/* Facilitator info */}
                     {course.facilitator && (
                       <View className="flex-row items-center gap-1.5 mb-3 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
                         <Feather name="user" size={13} color="#D82B5A" />
                         <Text className="text-xs text-gray-600 font-medium">
-                          Fasilitator: <Text className="font-extrabold text-[#162E5C]">{course.facilitator}</Text>
+                          Fasilitator: <Text className="font-extrabold text-[#1F2937]">{course.facilitator}</Text>
                         </Text>
                       </View>
                     )}
 
-                    {/* Kuota Indicator */}
                     <View className="mb-1">
                       {course.seats <= 4 ? (
                         <View className="bg-amber-50 border border-amber-200 px-3 py-1 rounded-full flex-row items-center gap-1.5 self-start">
@@ -234,9 +174,9 @@ export default function CatalogScreen({ user }: { user: any }) {
                           </Text>
                         </View>
                       ) : (
-                        <View className="bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex-row items-center gap-1.5 self-start">
+                        <View className="bg-rose-50 border border-rose-200 px-3 py-1 rounded-full flex-row items-center gap-1.5 self-start">
                           <Feather name="check-circle" size={12} color="#059669" />
-                          <Text className="text-[10px] font-black text-emerald-700">
+                          <Text className="text-[10px] font-black text-rose-700">
                             Tersedia: {course.seats} kursi
                           </Text>
                         </View>
@@ -245,7 +185,6 @@ export default function CatalogScreen({ user }: { user: any }) {
                   </View>
                 </View>
 
-                {/* Price & Action Button */}
                 <View className="flex-row justify-between items-center px-5 py-4 bg-gray-50 border-t border-gray-100">
                   <View>
                     <Text className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Harga per Sesi</Text>
@@ -253,9 +192,9 @@ export default function CatalogScreen({ user }: { user: any }) {
                       Rp {course.price.toLocaleString('id-ID')}
                     </Text>
                   </View>
-                  
-                  <TouchableOpacity 
-                    className="bg-[#D82B5A] py-2.5 px-5 rounded-full shadow-md hover:bg-[#B01E49] transition-transform active:scale-95 flex-row items-center gap-1.5"
+
+                  <TouchableOpacity
+                    className="bg-[#D82B5A] py-2.5 px-5 rounded-full shadow-md active:scale-95 transition-transform flex-row items-center gap-1.5"
                     onPress={() => {
                       setSelectedCourse(course);
                       setModalVisible(true);
@@ -268,16 +207,10 @@ export default function CatalogScreen({ user }: { user: any }) {
               </View>
             ))}
           </View>
-        ) : (
-          <View className="items-center pt-16">
-            <Feather name="search" size={32} color="#9CA3AF" />
-            <Text className="text-base font-extrabold text-[#162E5C] mt-2">Kelas tidak ditemukan</Text>
-            <Text className="text-xs text-gray-500 mt-1">Coba gunakan filter usia atau kata kunci lain!</Text>
-          </View>
-        )}
+        </View>
       </ScrollView>
 
-      {/* Interactive Checkout Modal */}
+      {/* Checkout Modal */}
       {selectedCourse && (
         <CheckoutModal
           visible={modalVisible}
