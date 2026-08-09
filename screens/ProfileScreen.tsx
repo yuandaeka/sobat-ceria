@@ -132,68 +132,114 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
     }
   };
 
-  const inputCls = "bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] font-medium mb-3.5";
-  const labelCls = "text-[10px] font-extrabold text-[#162E5C] mb-1 uppercase tracking-wider";
+  const inputCls = "bg-white border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] font-medium mb-3.5 focus:border-[#D82B5A]";
+  const labelCls = "text-[10px] font-extrabold text-[#162E5C] mb-1.5 uppercase tracking-wider";
+
+  // Inisial untuk avatar
+  const initials = (user?.parentName || 'S')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase() || 'S';
+
+  const infoCard = (icon: any, color: string, bg: string, label: string, value: string, valueCls = 'text-xs font-bold text-[#162E5C]') => (
+    <View className="bg-[#FAF7F3] rounded-2xl px-4 py-3.5 flex-row items-center gap-3">
+      <View className={`w-10 h-10 rounded-xl ${bg} items-center justify-center shrink-0`}>
+        <Feather name={icon} size={17} color={color} />
+      </View>
+      <View className="flex-1">
+        <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">{label}</Text>
+        <Text className={`${valueCls} mt-0.5 leading-snug`} numberOfLines={2}>{value}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }} className="bg-[#FAF6F0]">
       <ScrollView contentContainerStyle={{ paddingBottom: 110 }} className="p-4 md:p-8 max-w-5xl mx-auto w-full" showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xs mb-6">
-          <View className="flex-row items-center gap-2 mb-1">
+        {/* Header Row */}
+        <View className="flex-row items-center justify-between mb-5">
+          <View className="flex-row items-center gap-2">
             <View className="w-2.5 h-2.5 rounded-full bg-[#D82B5A]" />
-            <Text className="text-lg md:text-xl font-extrabold text-[#162E5C]">Profil Pengguna & Pendampingan</Text>
+            <Text className="text-lg md:text-xl font-extrabold text-[#162E5C]">Profil Saya</Text>
           </View>
-          <Text className="text-xs text-gray-500 font-medium">
-            Kelola data orang tua, informasi anak, dan dokumentasi aktivitas Sobat Ceria.
-          </Text>
-        </View>
-
-        {/* Edit / Save Action Bar */}
-        {!editing ? (
-          <View className="flex-row justify-end mb-4">
+          {!editing ? (
             <TouchableOpacity
-              className="bg-[#162E5C] px-5 py-2.5 rounded-full flex-row items-center gap-2 shadow-sm active:scale-95 transition-transform"
+              className="bg-[#162E5C] px-4 py-2 rounded-full flex-row items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
               onPress={startEdit}
             >
-              <Feather name="edit-3" size={14} color="#FFFFFF" />
-              <Text className="text-white font-extrabold text-xs">Edit Profil</Text>
+              <Feather name="edit-3" size={13} color="#FFFFFF" />
+              <Text className="text-white font-extrabold text-[11px]">Edit Profil</Text>
             </TouchableOpacity>
-          </View>
-        ) : (
-          <View className="flex-row justify-end gap-2 mb-4">
-            <TouchableOpacity
-              className="bg-gray-100 px-5 py-2.5 rounded-full items-center active:scale-95 transition-transform"
-              onPress={() => setEditing(false)}
-            >
-              <Text className="text-gray-600 font-extrabold text-xs">Batal</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#D82B5A] px-5 py-2.5 rounded-full flex-row items-center gap-2 shadow-sm active:scale-95 transition-transform"
-              onPress={handleSave}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Feather name="check" size={14} color="#FFFFFF" />
-              )}
-              <Text className="text-white font-extrabold text-xs">Simpan</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Parent Details Card */}
-        <View className="bg-white border border-gray-100 shadow-xs rounded-[2.5rem] p-6 mb-5 card-hover-effect">
-          <View className="flex-row items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-            <View className="w-10 h-10 rounded-2xl bg-[#D82B5A]/10 items-center justify-center border border-[#D82B5A]/20">
-              <Feather name="user" size={18} color="#D82B5A" />
+          ) : (
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="bg-gray-200 px-4 py-2 rounded-full items-center active:scale-95 transition-transform"
+                onPress={() => setEditing(false)}
+              >
+                <Text className="text-gray-600 font-extrabold text-[11px]">Batal</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="bg-[#D82B5A] px-4 py-2 rounded-full flex-row items-center gap-1.5 shadow-sm active:scale-95 transition-transform"
+                onPress={handleSave}
+                disabled={saving}
+              >
+                {saving ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Feather name="check" size={13} color="#FFFFFF" />
+                )}
+                <Text className="text-white font-extrabold text-[11px]">Simpan</Text>
+              </TouchableOpacity>
             </View>
+          )}
+        </View>
+
+        {/* Profile Hero Card */}
+        <View className="rounded-[2rem] overflow-hidden mb-6 relative">
+          {/* Background Gradient */}
+          <View
+            className="absolute inset-0"
+            style={{ backgroundImage: 'linear-gradient(135deg, #D82B5A 0%, #8B22C0 60%, #162E5C 100%)' } as any}
+          />
+          {/* Decorative Circles */}
+          <View className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
+          <View className="absolute bottom-4 -left-6 w-24 h-24 rounded-full bg-white/10" />
+
+          <View className="p-6 md:p-7 relative z-10">
+            <View className="flex-row items-center gap-4">
+              {/* Avatar */}
+              <View className="w-16 h-16 rounded-2xl bg-white/95 items-center justify-center shadow-lg">
+                <Text className="text-xl font-black text-[#D82B5A]">{initials}</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-white/70 text-[10px] font-black uppercase tracking-widest">Selamat Datang</Text>
+                <Text className="text-lg md:text-xl font-extrabold text-white leading-tight mt-0.5">
+                  {user?.parentName || 'Bunda Dinda'}
+                </Text>
+                <Text className="text-white/80 text-[11px] font-medium mt-0.5">{user?.email}</Text>
+              </View>
+            </View>
+
+            {/* Badge Member */}
+            <View className="mt-5 bg-white/15 border border-white/25 rounded-full px-3.5 py-1.5 self-start flex-row items-center gap-1.5">
+              <Feather name="star" size={12} color="#FFD100" />
+              <Text className="text-white text-[10px] font-black uppercase tracking-wide">🌟 Member Sobat Ceria</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Informasi Orang Tua */}
+        <View className="mb-6">
+          <View className="flex-row items-center gap-2 mb-3">
             <Text className="text-sm font-extrabold text-[#162E5C]">Informasi Orang Tua</Text>
+            <View className="flex-1 h-px bg-gray-200/80" />
           </View>
 
           {editing ? (
-            <View>
+            <View className="bg-white rounded-[1.75rem] p-5 shadow-sm border border-gray-100">
               <Text className={labelCls}>Nama Lengkap</Text>
               <TextInput
                 className={inputCls}
@@ -220,41 +266,28 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
               />
             </View>
           ) : (
-            <View className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <View>
-                <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Nama Lengkap</Text>
-                <Text className="text-xs font-black text-[#162E5C] mt-0.5">{user?.parentName || 'Bunda Dinda'}</Text>
-              </View>
-
-              <View>
-                <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Email Terdaftar</Text>
-                <Text className="text-xs font-bold text-[#162E5C] mt-0.5">{user?.email || 'dinda@sobatceria.id'}</Text>
-              </View>
-
-              <View>
-                <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">No. WhatsApp</Text>
-                <Text className="text-xs font-bold text-[#162E5C] mt-0.5">{user?.phone || '- belum diisi -'}</Text>
-              </View>
+            <View className="flex-col gap-3">
+              {infoCard('user', '#D82B5A', 'bg-[#D82B5A]/10', 'Nama Lengkap', user?.parentName || 'Bunda Dinda', 'text-xs font-black text-[#162E5C]')}
+              {infoCard('mail', '#8B22C0', 'bg-[#8B22C0]/10', 'Email Terdaftar', user?.email || 'dinda@sobatceria.id')}
+              {infoCard('message-circle', '#2DA9E9', 'bg-[#2DA9E9]/10', 'No. WhatsApp', user?.phone || '- belum diisi -')}
             </View>
           )}
         </View>
 
-        {/* Child Details Card */}
-        <View className="bg-white border border-gray-100 shadow-xs rounded-[2.5rem] p-6 mb-5 card-hover-effect">
-          <View className="flex-row items-center gap-3 mb-4 border-b border-gray-100 pb-3">
-            <View className="w-10 h-10 rounded-2xl bg-[#2DA9E9]/10 items-center justify-center border border-[#2DA9E9]/20">
-              <Feather name="smile" size={18} color="#2DA9E9" />
-            </View>
+        {/* Data Pendampingan Anak */}
+        <View className="mb-6">
+          <View className="flex-row items-center gap-2 mb-3">
             <Text className="text-sm font-extrabold text-[#162E5C]">Data Pendampingan Anak</Text>
+            <View className="flex-1 h-px bg-gray-200/80" />
           </View>
 
           {editing ? (
-            <View>
+            <View className="bg-white rounded-[1.75rem] p-5 shadow-sm border border-gray-100">
               <View className="flex-row gap-3 mb-3.5">
                 <View className="flex-[2]">
                   <Text className={labelCls}>Nama Anak</Text>
                   <TextInput
-                    className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] font-medium"
+                    className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] font-medium"
                     placeholder="Nama anak"
                     placeholderTextColor="#9CA3AF"
                     value={childName}
@@ -264,7 +297,7 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
                 <View className="flex-1">
                   <Text className={`${labelCls} text-center`}>Usia (Thn)</Text>
                   <TextInput
-                    className="bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] text-center font-medium"
+                    className="bg-white border border-gray-200 rounded-2xl px-4 py-3 text-xs text-[#162E5C] text-center font-medium"
                     placeholder="4"
                     placeholderTextColor="#9CA3AF"
                     keyboardType="numeric"
@@ -284,106 +317,89 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
               />
             </View>
           ) : (
-            <View className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <View>
-                <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Nama Anak</Text>
-                <Text className="text-xs font-black text-[#162E5C] mt-0.5">{child.name}</Text>
-              </View>
-
-              <View>
-                <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Usia Anak</Text>
-                <Text className="text-xs font-bold text-[#162E5C] mt-0.5">{child.age} Tahun (Jenjang Usia 2–7 Thn)</Text>
-              </View>
-
-              <View>
-                <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Kebutuhan Khusus / ABK</Text>
-                <Text className={`text-xs font-extrabold mt-0.5 ${child.specialNeeds ? 'text-[#F77712]' : 'text-[#30B864]'}`}>
-                  {child.specialNeeds || 'Anak Tipikal (Inklusif Welcome)'}
-                </Text>
+            <View className="flex-col gap-3">
+              {infoCard('smile', '#30B864', 'bg-[#30B864]/10', 'Nama Anak', child.name, 'text-xs font-black text-[#162E5C]')}
+              {infoCard('calendar', '#F77712', 'bg-[#F77712]/10', 'Usia Anak', `${child.age} Tahun (Jenjang Usia 2–7 Thn)`)}
+              <View className="bg-[#FAF7F3] rounded-2xl px-4 py-3.5 flex-row items-center gap-3">
+                <View className="w-10 h-10 rounded-xl bg-[#5A3B8B]/10 items-center justify-center shrink-0">
+                  <Feather name="heart" size={17} color="#5A3B8B" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">Kebutuhan Khusus / ABK</Text>
+                  <Text className={`text-xs font-extrabold mt-0.5 ${child.specialNeeds ? 'text-[#F77712]' : 'text-[#30B864]'}`}>
+                    {child.specialNeeds || 'Anak Tipikal (Inklusif Welcome)'}
+                  </Text>
+                </View>
               </View>
             </View>
           )}
         </View>
 
-        {/* Documentation Media Vault Card */}
-        <View className="bg-[#162E5C] border border-[#162E5C] shadow-md rounded-[2.5rem] p-6 md:p-8 mb-6 text-white card-solid-hover">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-base font-extrabold text-white">Vault Dokumentasi Activity</Text>
-            <View className="w-10 h-10 bg-white/10 rounded-2xl items-center justify-center border border-white/20">
-              <Feather name="image" size={18} color="#FFFFFF" />
-            </View>
-          </View>
-          <Text className="text-xs text-gray-300 leading-relaxed font-medium mb-4">
-            Lihat rekaman momen belajar sambil bermain si kecil selama mengikuti kelas stimulasi Sobat Ceria di Instagram & Drive official kami.
-          </Text>
-          <TouchableOpacity 
-            className="bg-[#D82B5A] py-3 rounded-full items-center shadow-md hover:bg-[#B01E49] transition-transform active:scale-95 flex-row justify-center gap-2"
-            onPress={handleOpenDrive}
-          >
-            <Feather name="instagram" size={16} color="#FFFFFF" />
-            <Text className="text-white text-xs font-extrabold">Buka Dokumentasi Official</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Riwayat Order / Receipt */}
-        <View className="bg-white border border-gray-100 shadow-xs rounded-[2.5rem] p-6 mb-6 card-hover-effect">
-          <View className="flex-row items-center justify-between mb-4 border-b border-gray-100 pb-3">
-            <View className="flex-row items-center gap-3">
-              <View className="w-10 h-10 rounded-2xl bg-[#30B864]/10 items-center justify-center border border-[#30B864]/20">
-                <Feather name="file-text" size={18} color="#30B864" />
+        <View className="mb-6">
+          <View className="flex-row items-center gap-2 mb-3">
+            <Text className="text-sm font-extrabold text-[#162E5C]">Riwayat Order</Text>
+            <View className="flex-1 h-px bg-gray-200/80" />
+            {orders.length > 0 && (
+              <View className="bg-[#30B864]/15 px-2.5 py-1 rounded-full">
+                <Text className="text-[9px] font-black text-[#30B864]">{orders.length} Order</Text>
               </View>
-              <View>
-                <Text className="text-sm font-extrabold text-[#162E5C]">Riwayat Order</Text>
-                <Text className="text-[10px] text-gray-400 font-medium">Daftar pendaftaran kelas & receipt</Text>
-              </View>
-            </View>
+            )}
           </View>
 
           {ordersLoading ? (
-            <View className="items-center py-6">
+            <View className="items-center py-10 bg-white rounded-[1.75rem] shadow-sm border border-gray-100">
               <ActivityIndicator size="small" color="#D82B5A" />
             </View>
           ) : orders.length === 0 ? (
-            <View className="items-center py-6 bg-[#FAF6F0] rounded-2xl border border-dashed border-gray-200">
-              <Feather name="inbox" size={26} color="#C4C4C4" />
-              <Text className="text-xs font-bold text-gray-400 mt-2">Belum ada order</Text>
-              <Text className="text-[10px] text-gray-400 mt-0.5 text-center">
+            <View className="items-center py-10 bg-white rounded-[1.75rem] shadow-sm border border-gray-100">
+              <View className="w-14 h-14 rounded-2xl bg-[#FAF6F0] items-center justify-center mb-3">
+                <Feather name="inbox" size={24} color="#C4C4C4" />
+              </View>
+              <Text className="text-xs font-bold text-gray-400">Belum ada order</Text>
+              <Text className="text-[10px] text-gray-400 mt-1 text-center px-8 leading-relaxed">
                 Order kelas akan muncul di sini setelah Anda daftar.
               </Text>
             </View>
           ) : (
             orders.map((order) => (
-              <View key={order.id} className="bg-[#FAF6F0] rounded-2xl p-4 mb-3 border border-gray-100">
-                <View className="flex-row justify-between items-start mb-2">
-                  <View className="flex-1 mr-2">
-                    <Text className="text-xs font-black text-[#162E5C]">
-                      {order.courses?.title || 'Kelas Sobat Ceria'}
-                    </Text>
-                    <Text className="text-[10px] text-gray-500 font-medium mt-0.5">
-                      {order.courses?.category || ''} • Anak: {order.child_name || '-'}
-                    </Text>
-                  </View>
-                  <View className="bg-[#30B864]/15 px-2.5 py-1 rounded-full">
-                    <Text className="text-[9px] font-black text-[#30B864] uppercase">{order.status}</Text>
-                  </View>
+              <View key={order.id} className="bg-white rounded-[1.75rem] p-4 mb-3 shadow-sm border border-gray-100 flex-row items-center gap-3.5">
+                {/* Course Thumb */}
+                <View className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#D82B5A] to-[#8B22C0] items-center justify-center shrink-0">
+                  <Feather name="book-open" size={20} color="#FFFFFF" />
                 </View>
 
-                <View className="flex-row justify-between items-center border-t border-gray-200/70 pt-2">
-                  <View className="flex-row items-center gap-1.5">
-                    <Feather name="calendar" size={11} color="#9CA3AF" />
-                    <Text className="text-[10px] text-gray-500 font-medium">
-                      {new Date(order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                <View className="flex-1">
+                  <View className="flex-row items-center justify-between mb-0.5">
+                    <Text className="text-xs font-black text-[#162E5C] flex-1 mr-2" numberOfLines={1}>
+                      {order.courses?.title || 'Kelas Sobat Ceria'}
                     </Text>
+                    <View className="bg-[#30B864]/15 px-2 py-0.5 rounded-full ml-1">
+                      <Text className="text-[8px] font-black text-[#30B864] uppercase">{order.status}</Text>
+                    </View>
                   </View>
-                  <View className="flex-row items-center gap-2">
-                    {order.voucher_code ? (
-                      <Text className="text-[9px] text-emerald-600 font-bold">
-                        {order.voucher_code} (-Rp {order.discount.toLocaleString('id-ID')})
+
+                  <Text className="text-[10px] text-gray-500 font-medium">
+                    {order.courses?.category || ''} • Anak: {order.child_name || '-'}
+                  </Text>
+
+                  <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                    <View className="flex-row items-center gap-1.5">
+                      <Feather name="calendar" size={10} color="#9CA3AF" />
+                      <Text className="text-[9px] text-gray-500 font-medium">
+                        {new Date(order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </Text>
-                    ) : null}
-                    <Text className="text-xs font-black text-[#D82B5A]">
-                      Rp {order.total_amount.toLocaleString('id-ID')}
-                    </Text>
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      {order.voucher_code ? (
+                        <View className="bg-[#F77712]/10 px-1.5 py-0.5 rounded-md">
+                          <Text className="text-[8px] font-bold text-[#F77712]">{order.voucher_code}</Text>
+                        </View>
+                      ) : null}
+                      <Text className="text-xs font-black text-[#D82B5A]">
+                        Rp {order.total_amount.toLocaleString('id-ID')}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -391,12 +407,41 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
           )}
         </View>
 
+        {/* Vault Dokumentasi */}
+        <View className="rounded-[1.75rem] overflow-hidden mb-6 relative">
+          <View
+            className="absolute inset-0"
+            style={{ backgroundImage: 'linear-gradient(135deg, #162E5C 0%, #1B254B 100%)' } as any}
+          />
+          <View className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/10" />
+          <View className="p-6 relative z-10 flex-row items-center gap-4">
+            <View className="w-12 h-12 rounded-2xl bg-white/15 items-center justify-center border border-white/20 shrink-0">
+              <Feather name="image" size={20} color="#FFFFFF" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-sm font-extrabold text-white">Vault Dokumentasi Activity</Text>
+              <Text className="text-[10px] text-gray-300 font-medium mt-0.5 leading-relaxed">
+                Lihat rekaman momen belajar sambil bermain si kecil selama mengikuti kelas stimulasi Sobat Ceria di Instagram & Drive official kami.
+              </Text>
+            </View>
+          </View>
+          <View className="px-6 pb-6 relative z-10">
+            <TouchableOpacity
+              className="bg-[#D82B5A] py-3 rounded-full items-center shadow-md hover:bg-[#B01E49] transition-transform active:scale-95 flex-row justify-center gap-2"
+              onPress={handleOpenDrive}
+            >
+              <Feather name="instagram" size={16} color="#FFFFFF" />
+              <Text className="text-white text-xs font-extrabold">Buka Dokumentasi Official</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Log Out Button */}
-        <TouchableOpacity 
-          className="bg-rose-50 border border-rose-200 py-3.5 rounded-full items-center flex-row justify-center gap-2 transition-transform active:scale-98"
+        <TouchableOpacity
+          className="bg-white border border-rose-200 py-3.5 rounded-[1.75rem] items-center flex-row justify-center gap-2 shadow-sm transition-transform active:scale-98"
           onPress={handleLogout}
         >
-          <Feather name="log-out" size={16} color="#D82B5A" />
+          <Feather name="log-out" size={15} color="#D82B5A" />
           <Text className="text-[#D82B5A] text-xs font-extrabold">Keluar dari Akun</Text>
         </TouchableOpacity>
       </ScrollView>
