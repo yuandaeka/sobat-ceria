@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Course } from '../types';
 import CheckoutModal from '../components/CheckoutModal';
+import { fetchCourses } from '../lib/data';
 
-// 8 Program Kelas Resmi dengan gambar aset
-const PROGRAM_COURSES: Course[] = [
+// Fallback jika data dari Supabase belum terisi
+const FALLBACK_COURSES: Course[] = [
   {
     id: '1',
     title: 'Mini Stimulation Class',
@@ -97,23 +98,45 @@ const PROGRAM_COURSES: Course[] = [
   },
 ];
 
-const getProgramImage = (key: string) => {
+// Peta nama program -> gambar lokal aset
+const getProgramImage = (course: Course) => {
+  const key = (course.title || '').toLowerCase();
   const images: Record<string, any> = {
-    minstim: require('../assets/dokumentasi sobat/ministimulation-program.jpeg'),
+    'mini stimulation': require('../assets/dokumentasi sobat/ministimulation-program.jpeg'),
     communication: require('../assets/dokumentasi sobat/communication-program.jpeg'),
-    seminarparenting: require('../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
-    art: require('../assets/dokumentasi sobat/program-art.jpeg'),
+    'seminar parenting': require('../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
+    'art and craft': require('../assets/dokumentasi sobat/program-art.jpeg'),
     science: require('../assets/dokumentasi sobat/program-science.jpeg'),
     pottery: require('../assets/dokumentasi sobat/poetry-program.jpeg'),
     cooking: require('../assets/dokumentasi sobat/cooking-program.jpeg'),
     outbond: require('../assets/dokumentasi sobat/outbondceria-program.jpeg'),
   };
-  return images[key];
+  const matched = Object.keys(images).find((k) => key.includes(k));
+  return matched ? images[matched] : images['mini stimulation'];
 };
 
 export default function CatalogScreen({ navigation, user }: { navigation: any; user: any }) {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [courses, setCourses] = useState<Course[]>(FALLBACK_COURSES);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await fetchCourses();
+        if (mounted && data.length > 0) setCourses(data);
+      } catch {
+        // fallback ke mock jika fetch gagal
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }} className="bg-[#FAFDFB]">
@@ -131,8 +154,13 @@ export default function CatalogScreen({ navigation, user }: { navigation: any; u
 
         {/* Catalog Grid */}
         <View className="p-5 max-w-5xl mx-auto w-full">
+          {loading ? (
+            <View className="items-center py-16">
+              <ActivityIndicator size="small" color="#D82B5A" />
+            </View>
+          ) : (
           <View className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {PROGRAM_COURSES.map((course) => (
+            {courses.map((course) => (
               <View
                 key={course.id}
                 className="bg-white rounded-[2rem] overflow-hidden border border-gray-100 shadow-xs flex-col justify-between"
@@ -140,7 +168,7 @@ export default function CatalogScreen({ navigation, user }: { navigation: any; u
                 <View>
                   <View className="w-full h-44 overflow-hidden relative">
                     <Image
-                      source={getProgramImage(course.image)}
+                      source={getProgramImage(course)}
                       className="w-full h-full object-cover"
                       style={{ width: '100%', height: '100%' }}
                     />
@@ -207,6 +235,7 @@ export default function CatalogScreen({ navigation, user }: { navigation: any; u
               </View>
             ))}
           </View>
+          )}
         </View>
       </ScrollView>
 
