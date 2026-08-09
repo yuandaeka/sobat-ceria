@@ -26,6 +26,13 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     setLoading(true);
     try {
       const session = await signInWithGoogle();
+
+      // Web: redirect penuh ke Google terjadi — session akan ditangani oleh App.tsx
+      // setelah kembali (detectSessionInUrl + onAuthStateChange). Tidak perlu lanjut di sini.
+      if (Platform.OS === 'web') {
+        return;
+      }
+
       if (!session?.user) throw new Error('Session tidak ditemukan.');
       const { profile } = await fetchUserProfile(session.user.id);
       onLogin(profile);

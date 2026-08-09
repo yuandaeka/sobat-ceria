@@ -6,12 +6,14 @@ import { Session } from '@supabase/supabase-js';
 
 WebBrowser.maybeCompleteAuthSession();
 
+// Web: gunakan env EXPO_PUBLIC_SITE_URL (opsional) atau origin halaman aktif.
+// Native: pakai scheme sobatceria:// untuk callback.
 const redirectTo =
   Platform.OS === 'web'
-    ? window.location.origin
+    ? (process.env.EXPO_PUBLIC_SITE_URL as string) || window.location.origin
     : AuthSession.makeRedirectUri();
 
-export async function signInWithGoogle(): Promise<Session> {
+export async function signInWithGoogle(): Promise<Session | null> {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -23,10 +25,11 @@ export async function signInWithGoogle(): Promise<Session> {
   if (error) throw error;
   if (!data?.url) throw new Error('Terjadi kesalahan saat menyiapkan login Google.');
 
-  // Web: buka halaman OAuth di tab browser yang sama
+  // Web: supabase-js melakukan redirect penuh browser ke Google (skipBrowserRedirect false).
+  // Jangan tunggu session di sini — setelah kembali, detectSessionInUrl + onAuthStateChange
+  // di App.tsx yang akan memuat profil & masuk otomatis.
   if (Platform.OS === 'web') {
-    const session = await supabase.auth.getSession();
-    return session.data.session as Session;
+    return null;
   }
 
   // Native: buka browser OAuth dan tangkap callback session
