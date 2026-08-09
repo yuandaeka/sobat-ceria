@@ -2,6 +2,7 @@
 // Custom TypeScript interfaces for SOBAT CERIA project
 
 export interface Child {
+  id?: string;           // id dari tabel children (untuk update/edit)
   name: string;
   age: number;
   specialNeeds?: string; // e.g., "Speech Delay", "ADHD", or leave empty/undefined for typical children

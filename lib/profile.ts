@@ -55,6 +55,7 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
       email: profile?.email || '',
       phone: profile?.phone || '',
       children: (children || []).map((c) => ({
+        id: c.id,
         name: c.name,
         age: c.age,
         specialNeeds: c.special_needs || undefined,
@@ -67,12 +68,15 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
 export async function upsertProfile(userId: string, data: Partial<{ parentName: string; email: string; phone: string }>) {
   const { error } = await supabase
     .from('profiles')
-    .update({
-      parent_name: data.parentName ?? undefined,
-      email: data.email ?? undefined,
-      phone: data.phone ?? undefined,
-    })
-    .eq('id', userId);
+    .upsert(
+      {
+        id: userId,
+        parent_name: data.parentName ?? '',
+        email: data.email ?? null,
+        phone: data.phone ?? null,
+      },
+      { onConflict: 'id' }
+    );
   if (error) throw error;
 }
 
@@ -85,5 +89,20 @@ export async function addChild(userId: string, child: { name: string; age: numbe
       age: child.age,
       special_needs: child.specialNeeds || null,
     });
+  if (error) throw error;
+}
+
+export async function updateChild(
+  childId: string,
+  child: { name: string; age: number; specialNeeds?: string }
+) {
+  const { error } = await supabase
+    .from('children')
+    .update({
+      name: child.name,
+      age: child.age,
+      special_needs: child.specialNeeds || null,
+    })
+    .eq('id', childId);
   if (error) throw error;
 }
