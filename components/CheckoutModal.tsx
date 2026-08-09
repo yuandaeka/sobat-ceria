@@ -11,6 +11,7 @@ import {
 import { Feather } from '@expo/vector-icons';
 import { Course } from '../types';
 import { createOrder, fetchVouchers, VoucherData } from '../lib/data';
+import { syncOrderToSheet } from '../lib/sheets';
 
 interface CheckoutModalProps {
   visible: boolean;
@@ -70,6 +71,18 @@ export default function CheckoutModal({ visible, course, user, onClose }: Checko
         voucherCode: appliedVoucher || null,
         discount,
         totalAmount,
+      });
+
+      // Kirim data order + pembayaran ke Google Sheet
+      await syncOrderToSheet({
+        courseTitle: course.title,
+        courseCategory: course.category,
+        childName: guestChildName.trim() || user?.children?.[0]?.name || 'Anak Ceria',
+        whatsapp: guestWhatsApp.trim() || user?.phone || '',
+        voucherCode: appliedVoucher || null,
+        discount,
+        totalAmount,
+        status: 'paid',
       });
     } catch {
       // jika penyimpanan gagal, checkout tetap dilanjutkan secara lokal

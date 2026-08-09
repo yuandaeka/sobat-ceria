@@ -8,6 +8,7 @@ import { signOut } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { upsertProfile, updateChild, addChild, fetchUserProfile } from '../lib/profile';
 import { fetchOrders, OrderData } from '../lib/data';
+import { syncProfileToSheet } from '../lib/sheets';
 
 interface ProfileScreenProps {
   user: UserProfile | null;
@@ -109,6 +110,9 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
 
       const { profile } = await fetchUserProfile(userId);
       onLogin(profile);
+
+      // Sinkronkan data profil ke Google Sheet
+      await syncProfileToSheet(profile);
 
       setEditing(false);
       alertMessage('Profil Tersimpan', 'Data profil Anda berhasil diperbarui.');

@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from './lib/supabase';
 import { fetchUserProfile } from './lib/profile';
+import { syncProfileToSheet } from './lib/sheets';
 
 const logoImg = require('./assets/sobatceria.png');
 
@@ -168,6 +169,7 @@ export default function App() {
           if (mounted) {
             setUser(profile);
             setViewMode('app');
+            syncProfileToSheet(profile);
           }
         } catch {
           // ignore profile sync errors on startup
@@ -185,6 +187,7 @@ export default function App() {
               if (!mounted) return;
               setUser(profile);
               setViewMode('app');
+              syncProfileToSheet(profile);
             })
             .catch(() => {});
         } else {

@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "deploy": "supabase functions deploy sync-to-sheets --no-verify-jwt"
+  },
+  "imports": {}
+}
