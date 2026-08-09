@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform, Linking, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import LoginScreen from './LoginScreen';
 import { signOut } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { upsertProfile, updateChild, addChild, fetchUserProfile } from '../lib/profile';
+import { fetchOrders, OrderData } from '../lib/data';
 
 interface ProfileScreenProps {
   user: UserProfile | null;
@@ -33,6 +34,27 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
   const [childName, setChildName] = useState<string>(child.name || '');
   const [childAge, setChildAge] = useState<string>(String(child.age || 4));
   const [specialNeeds, setSpecialNeeds] = useState<string>(child.specialNeeds || '');
+
+  // Order history state
+  const [orders, setOrders] = useState<OrderData[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await fetchOrders();
+        if (mounted) setOrders(data);
+      } catch {
+        // fallback: biarkan kosong
+      } finally {
+        if (mounted) setOrdersLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const alertMessage = (title: string, message: string) => {
     if (Platform.OS === 'web') {
@@ -301,6 +323,72 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
             <Feather name="instagram" size={16} color="#FFFFFF" />
             <Text className="text-white text-xs font-extrabold">Buka Dokumentasi Official</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Riwayat Order / Receipt */}
+        <View className="bg-white border border-gray-100 shadow-xs rounded-[2.5rem] p-6 mb-6 card-hover-effect">
+          <View className="flex-row items-center justify-between mb-4 border-b border-gray-100 pb-3">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-2xl bg-[#30B864]/10 items-center justify-center border border-[#30B864]/20">
+                <Feather name="file-text" size={18} color="#30B864" />
+              </View>
+              <View>
+                <Text className="text-sm font-extrabold text-[#162E5C]">Riwayat Order</Text>
+                <Text className="text-[10px] text-gray-400 font-medium">Daftar pendaftaran kelas & receipt</Text>
+              </View>
+            </View>
+          </View>
+
+          {ordersLoading ? (
+            <View className="items-center py-6">
+              <ActivityIndicator size="small" color="#D82B5A" />
+            </View>
+          ) : orders.length === 0 ? (
+            <View className="items-center py-6 bg-[#FAF6F0] rounded-2xl border border-dashed border-gray-200">
+              <Feather name="inbox" size={26} color="#C4C4C4" />
+              <Text className="text-xs font-bold text-gray-400 mt-2">Belum ada order</Text>
+              <Text className="text-[10px] text-gray-400 mt-0.5 text-center">
+                Order kelas akan muncul di sini setelah Anda daftar.
+              </Text>
+            </View>
+          ) : (
+            orders.map((order) => (
+              <View key={order.id} className="bg-[#FAF6F0] rounded-2xl p-4 mb-3 border border-gray-100">
+                <View className="flex-row justify-between items-start mb-2">
+                  <View className="flex-1 mr-2">
+                    <Text className="text-xs font-black text-[#162E5C]">
+                      {order.courses?.title || 'Kelas Sobat Ceria'}
+                    </Text>
+                    <Text className="text-[10px] text-gray-500 font-medium mt-0.5">
+                      {order.courses?.category || ''} • Anak: {order.child_name || '-'}
+                    </Text>
+                  </View>
+                  <View className="bg-[#30B864]/15 px-2.5 py-1 rounded-full">
+                    <Text className="text-[9px] font-black text-[#30B864] uppercase">{order.status}</Text>
+                  </View>
+                </View>
+
+                <View className="flex-row justify-between items-center border-t border-gray-200/70 pt-2">
+                  <View className="flex-row items-center gap-1.5">
+                    <Feather name="calendar" size={11} color="#9CA3AF" />
+                    <Text className="text-[10px] text-gray-500 font-medium">
+                      {new Date(order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-2">
+                    {order.voucher_code ? (
+                      <Text className="text-[9px] text-emerald-600 font-bold">
+                        {order.voucher_code} (-Rp {order.discount.toLocaleString('id-ID')})
+                      </Text>
+                    ) : null}
+                    <Text className="text-xs font-black text-[#D82B5A]">
+                      Rp {order.total_amount.toLocaleString('id-ID')}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
         </View>
 
         {/* Log Out Button */}

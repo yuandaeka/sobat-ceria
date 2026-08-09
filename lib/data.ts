@@ -91,6 +91,33 @@ export async function fetchVouchers(): Promise<VoucherData[]> {
 
 // ============ ORDERS ============
 
+export interface OrderData {
+  id: string;
+  course_id: string | null;
+  child_name: string | null;
+  whatsapp: string | null;
+  voucher_code: string | null;
+  discount: number;
+  total_amount: number;
+  status: string;
+  created_at: string;
+  courses?: { title: string | null; category: string | null; image: string | null } | null;
+}
+
+export async function fetchOrders(): Promise<OrderData[]> {
+  const { data: authData } = await supabase.auth.getUser();
+  if (!authData.user) return [];
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, courses(title, category, image)')
+    .eq('profile_id', authData.user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data || []) as OrderData[];
+}
+
 export async function createOrder(input: {
   courseId: string;
   childName: string;
