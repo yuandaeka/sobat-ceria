@@ -138,7 +138,29 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
 
+    // Web: proses token OAuth yang kembali di URL hash secara eksplisit
+    // (lebih andal daripada detectSessionInUrl saja, yang bisa gagal karena race condition)
+    const processOAuthCallback = async () => {
+      if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+      const hash = window.location.hash;
+      if (!hash || !hash.includes('access_token')) return;
+
+      const params = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      const refreshToken = params.get('refresh_token');
+
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        // Bersihkan hash agar token tidak menempel di URL
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      }
+    };
+
     const loadProfileFromSession = async () => {
+      await processOAuthCallback();
       const { data } = await supabase.auth.getSession();
       if (mounted && data.session?.user) {
         try {

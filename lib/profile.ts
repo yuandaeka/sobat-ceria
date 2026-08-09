@@ -33,10 +33,13 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
     profile = inserted;
   } else if (profileError) {
     throw profileError;
-  } else if (profile && !profile.parent_name && metaName) {
-    // Profil sudah ada tapi nama kosong (mis. user lama) → isi dari metadata Google
-    await supabase.from('profiles').update({ parent_name: metaName }).eq('id', userId);
-    profile = { ...profile, parent_name: metaName };
+  } else if (profile && (!profile.parent_name || !profile.email) && (metaName || authData.user?.email)) {
+    // Profil sudah ada tapi kosong (mis. user lama) → isi dari metadata Google
+    const patch: { parent_name?: string; email?: string } = {};
+    if (!profile.parent_name && metaName) patch.parent_name = metaName;
+    if (!profile.email && authData.user?.email) patch.email = authData.user.email;
+    await supabase.from('profiles').update(patch).eq('id', userId);
+    profile = { ...profile, ...patch };
   }
 
   const { data: children, error: childrenError } = await supabase
