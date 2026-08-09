@@ -214,7 +214,6 @@ export default function App() {
   const [heroImageIdx, setHeroImageIdx] = useState(0);
   const [calcAge, setCalcAge] = useState<'0-2' | '3-4' | '5-6'>('3-4');
   const [calcTime, setCalcTime] = useState<'safe' | 'warn' | 'danger'>('warn');
-  const [scrollY, setScrollY] = useState(0);
 
   const HERO_IMAGES = [
     require('./assets/dokumentasi sobat/1.jpeg'),
@@ -411,10 +410,6 @@ export default function App() {
         <ScrollView
           className="flex-1 bg-[#FAF6F0]"
           showsVerticalScrollIndicator={false}
-          onScroll={(event) => {
-            setScrollY(event.nativeEvent.contentOffset.y);
-          }}
-          scrollEventThrottle={16}
         >
 
           {/* HERO SECTION (SMM Format with 100% Full Background Photo + Left Pink Right-Fading Opacity Gradient + Rounded-BL & Rounded-BR Corners) */}

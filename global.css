@@ -21,23 +21,28 @@ html {
   100% { transform: translateY(0px); }
 }
 
-/* Subtle, Clean Card Hover Interactions (Instant render, no scroll lag) */
+/* Subtle, Clean Card Hover Interactions — hanya untuk perangkat dengan hover (desktop).
+   Di perangkat touch/mobile, hover nonaktif agar tidak "kedut" saat scroll. */
 .card-hover-effect {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.card-hover-effect:hover {
-  transform: translateY(-5px) !important;
-  box-shadow: 0 14px 28px -8px rgba(22, 46, 92, 0.12) !important;
+@media (hover: hover) {
+  .card-hover-effect:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 14px 28px -8px rgba(22, 46, 92, 0.12) !important;
+  }
 }
 
 .card-solid-hover {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.card-solid-hover:hover {
-  transform: translateY(-5px) !important;
-  box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.2) !important;
+@media (hover: hover) {
+  .card-solid-hover:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.2) !important;
+  }
 }
 
 .img-zoom-container {
@@ -49,7 +54,9 @@ html {
   transition: transform 0.4s ease-out !important;
 }
 
-.img-zoom-container:hover img,
-.img-zoom-container:hover Image {
-  transform: scale(1.04) !important;
+@media (hover: hover) {
+  .img-zoom-container:hover img,
+  .img-zoom-container:hover Image {
+    transform: scale(1.04) !important;
+  }
 }
