@@ -341,7 +341,12 @@ export default function App() {
           {/* Main App Workspace (Clean Layout without Phone Frame) */}
           <View className="flex-1 w-full bg-brand-cream justify-center items-center">
             <View className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
-              <AppCore user={user} setUser={setUser} />
+              {/* Wajib login dulu sebelum masuk aplikasi */}
+              {!user ? (
+                <LoginScreen onLogin={(profile) => setUser(profile)} />
+              ) : (
+                <AppCore user={user} setUser={setUser} />
+              )}
             </View>
           </View>
         </View>
