@@ -126,8 +126,12 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
     <SafeAreaView style={{ flex: 1 }} className="bg-[#FAF6F0] justify-center">
       <ScrollView contentContainerStyle={{ paddingVertical: 30 }} className="p-4 md:p-8 max-w-md mx-auto w-full" showsVerticalScrollIndicator={false}>
         <View className="items-center mb-6">
-          <View className="w-14 h-14 bg-[#D82B5A]/10 border border-[#D82B5A]/20 rounded-2xl items-center justify-center mb-3 shadow-xs">
-            <Feather name="smile" size={28} color="#D82B5A" />
+          <View className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-[#D82B5A]/20 shadow-md items-center justify-center p-1 mb-3">
+            <Image
+              source={require('../assets/sobatceria.png')}
+              style={{ width: '100%', height: '100%', borderRadius: 999 }}
+              resizeMode="contain"
+            />
           </View>
           <Text className="text-2xl font-black text-[#162E5C] tracking-widest text-center">SOBAT CERIA</Text>
           <Text className="text-xs font-semibold text-gray-500 text-center mt-1">
