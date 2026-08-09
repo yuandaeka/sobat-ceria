@@ -433,7 +433,7 @@ export default function App() {
                     style={{
                       width: '100%',
                       height: '100%',
-                      objectPosition: idx === 4 ? 'center 95%' : 'center center',
+                      objectPosition: idx === 4 ? 'center 100%' : 'center center',
                     } as any}
                     resizeMode="cover"
                   />
@@ -710,7 +710,7 @@ export default function App() {
               <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/seminarparenting-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%', objectPosition: 'center 92%' } as any} />
+                    <Image source={require('./assets/dokumentasi sobat/seminarparenting-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%', objectPosition: 'center 100%' } as any} />
                     <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
                       <Text className="text-[9px] font-black text-white">3. Seminar Parenting</Text>
                     </View>
