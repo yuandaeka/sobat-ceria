@@ -143,7 +143,10 @@ export default function App() {
       if (mounted && data.session?.user) {
         try {
           const { profile } = await fetchUserProfile(data.session.user.id);
-          if (mounted) setUser(profile);
+          if (mounted) {
+            setUser(profile);
+            setViewMode('app');
+          }
         } catch {
           // ignore profile sync errors on startup
         }
@@ -156,7 +159,11 @@ export default function App() {
       if (mounted) {
         if (session?.user) {
           fetchUserProfile(session.user.id)
-            .then(({ profile }) => mounted && setUser(profile))
+            .then(({ profile }) => {
+              if (!mounted) return;
+              setUser(profile);
+              setViewMode('app');
+            })
             .catch(() => {});
         } else {
           setUser(null);

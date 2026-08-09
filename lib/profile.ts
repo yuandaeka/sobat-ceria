@@ -8,6 +8,10 @@ export interface ProfileWithChildren {
 
 // Ambil profil + anak dari Supabase, buat default jika belum ada
 export async function fetchUserProfile(userId: string): Promise<ProfileWithChildren> {
+  // Ambil metadata user (nama dari Google/email) untuk isi parent_name jika kosong
+  const { data: authData } = await supabase.auth.getUser();
+  const metaName = authData.user?.user_metadata?.full_name || authData.user?.user_metadata?.name || '';
+
   let { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('*')
@@ -19,8 +23,8 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
       .from('profiles')
       .insert({
         id: userId,
-        parent_name: '',
-        email: null,
+        parent_name: metaName,
+        email: authData.user?.email || null,
         phone: null,
       })
       .select()
@@ -29,6 +33,10 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
     profile = inserted;
   } else if (profileError) {
     throw profileError;
+  } else if (profile && !profile.parent_name && metaName) {
+    // Profil sudah ada tapi nama kosong (mis. user lama) → isi dari metadata Google
+    await supabase.from('profiles').update({ parent_name: metaName }).eq('id', userId);
+    profile = { ...profile, parent_name: metaName };
   }
 
   const { data: children, error: childrenError } = await supabase
@@ -40,7 +48,7 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
 
   return {
     profile: {
-      parentName: profile?.parent_name || '',
+      parentName: profile?.parent_name || metaName,
       email: profile?.email || '',
       phone: profile?.phone || '',
       children: (children || []).map((c) => ({
