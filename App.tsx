@@ -141,10 +141,11 @@ export default function App() {
 
     // Web: proses token OAuth yang kembali di URL hash secara eksplisit
     // (lebih andal daripada detectSessionInUrl saja, yang bisa gagal karena race condition)
-    const processOAuthCallback = async () => {
-      if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    // Return true jika ada token OAuth yang diproses (berarti baru selesai login Google).
+    const processOAuthCallback = async (): Promise<boolean> => {
+      if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
       const hash = window.location.hash;
-      if (!hash || !hash.includes('access_token')) return;
+      if (!hash || !hash.includes('access_token')) return false;
 
       const params = new URLSearchParams(hash.substring(1));
       const accessToken = params.get('access_token');
@@ -157,18 +158,23 @@ export default function App() {
         });
         // Bersihkan hash agar token tidak menempel di URL
         window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+        return true;
       }
+      return false;
     };
 
     const loadProfileFromSession = async () => {
-      await processOAuthCallback();
+      // true = baru selesai login via OAuth (dari hash URL) → boleh langsung ke app
+      const isFreshOAuth = await processOAuthCallback();
       const { data } = await supabase.auth.getSession();
       if (mounted && data.session?.user) {
         try {
           const { profile } = await fetchUserProfile(data.session.user.id);
           if (mounted) {
             setUser(profile);
-            setViewMode('app');
+            // Hanya pindah ke aplikasi jika benar-benar baru login via OAuth.
+            // Jika hanya session tersimpan (buka link biasa), tetap di landing page.
+            if (isFreshOAuth) setViewMode('app');
             syncProfileToSheet(profile);
           }
         } catch {
@@ -179,14 +185,16 @@ export default function App() {
 
     loadProfileFromSession();
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (mounted) {
         if (session?.user) {
           fetchUserProfile(session.user.id)
             .then(({ profile }) => {
               if (!mounted) return;
               setUser(profile);
-              setViewMode('app');
+              // Hanya pindah ke aplikasi saat event SIGNED_IN (user baru login),
+              // bukan saat INITIAL_SESSION / TOKEN_REFRESHED (buka link biasa).
+              if (event === 'SIGNED_IN') setViewMode('app');
               syncProfileToSheet(profile);
             })
             .catch(() => {});
