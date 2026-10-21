@@ -134,6 +134,7 @@ export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Load Supabase session on app start & listen to auth changes
   useEffect(() => {
@@ -380,32 +381,230 @@ export default function App() {
             </Text>
           </TouchableOpacity>
 
-          {/* Nav Menu Desktop */}
+          {/* Nav Menu Desktop (Utama: Tentang Kami, Aplikasi Screening, Class Toolkit, Join Us) */}
           {isDesktop && (
             <View className="flex-row items-center gap-8">
               <TouchableOpacity onPress={() => scrollToSection('tentang-kami')}>
-                <Text className="text-sm font-bold text-[#D82B5A] hover:text-[#B01E49] transition">Tentang Kami</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => scrollToSection('katalog-kelas')}>
-                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Katalog Kelas</Text>
+                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Tentang Kami</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollToSection('screening-stppa')}>
-                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Screening STPPA</Text>
+                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Aplikasi Screening</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => scrollToSection('worksheet-gratis')}>
-                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Worksheet Gratis</Text>
+              <TouchableOpacity onPress={() => scrollToSection('class-toolkit')}>
+                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Class Toolkit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => scrollToSection('join-us')}>
+                <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">Join Us</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* Header CTA Button (SMM Crimson Pill) */}
+          {/* Header CTA Button: Menu Toggle */}
           <TouchableOpacity
-            className="bg-[#D82B5A] px-6 py-2.5 rounded-full shadow-md items-center justify-center hover:bg-[#B01E49] transition shrink-0"
-            onPress={() => setViewMode('app')}
+            className="bg-[#D82B5A] px-5 py-2.5 rounded-full shadow-md items-center justify-center hover:bg-[#B01E49] transition shrink-0 flex-row items-center gap-2"
+            onPress={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <Text className="text-white font-extrabold text-xs md:text-sm tracking-wide">Buka Aplikasi</Text>
+            <Feather name={isMenuOpen ? "x" : "menu"} size={16} color="#FFFFFF" />
+            <Text className="text-white font-extrabold text-xs md:text-sm tracking-wide">Menu</Text>
           </TouchableOpacity>
         </View>
+
+        {/* DROPDOWN / FULL NAV OPTIONS MENU */}
+        {isMenuOpen && (
+          <>
+            {/* Backdrop overlay for closing on click outside */}
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setIsMenuOpen(false)}
+              style={{
+                position: 'fixed' as any,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(15, 23, 42, 0.35)',
+                zIndex: 60,
+              }}
+            />
+
+            {/* Menu Popover Container */}
+            <View
+              style={{
+                position: 'fixed' as any,
+                top: 68,
+                right: isDesktop ? 64 : 16,
+                zIndex: 70,
+                maxWidth: 360,
+                width: '90%',
+              }}
+              className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-5 overflow-hidden"
+            >
+              {/* Header inside Menu */}
+              <View className="flex-row items-center justify-between pb-3 border-b border-gray-100 mb-2">
+                <View className="flex-row items-center gap-2">
+                  <View className="w-7 h-7 rounded-full bg-[#D82B5A]/10 items-center justify-center">
+                    <Feather name="grid" size={14} color="#D82B5A" />
+                  </View>
+                  <Text className="text-xs font-black text-[#162E5C] tracking-wide uppercase">Menu Lengkap</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setIsMenuOpen(false)}
+                  className="w-7 h-7 rounded-full bg-gray-100 items-center justify-center hover:bg-gray-200"
+                >
+                  <Feather name="x" size={14} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Menu Options: Katalog Kelas, Screening STPPA, Worksheet Gratis, Testimoni, Why Us */}
+              <View className="flex-col gap-1">
+                <TouchableOpacity
+                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-rose-50 transition"
+                  onPress={() => {
+                    scrollToSection('katalog-kelas');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-9 h-9 rounded-xl bg-[#D82B5A]/10 items-center justify-center">
+                      <Feather name="book-open" size={16} color="#D82B5A" />
+                    </View>
+                    <View>
+                      <Text className="text-xs font-extrabold text-[#162E5C]">Katalog Kelas</Text>
+                      <Text className="text-[10px] text-gray-500 font-medium">8 program stimulasi usia dini</Text>
+                    </View>
+                  </View>
+                  <Feather name="chevron-right" size={14} color="#D82B5A" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-sky-50 transition"
+                  onPress={() => {
+                    scrollToSection('screening-stppa');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-9 h-9 rounded-xl bg-[#2DA9E9]/15 items-center justify-center">
+                      <Feather name="activity" size={16} color="#2DA9E9" />
+                    </View>
+                    <View>
+                      <Text className="text-xs font-extrabold text-[#162E5C]">Screening STPPA</Text>
+                      <Text className="text-[10px] text-gray-500 font-medium">Deteksi tumbuh kembang 6 aspek</Text>
+                    </View>
+                  </View>
+                  <Feather name="chevron-right" size={14} color="#2DA9E9" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-purple-50 transition"
+                  onPress={() => {
+                    scrollToSection('worksheet-gratis');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-9 h-9 rounded-xl bg-[#5A3B8B]/15 items-center justify-center">
+                      <Feather name="gift" size={16} color="#5A3B8B" />
+                    </View>
+                    <View>
+                      <Text className="text-xs font-extrabold text-[#162E5C]">Worksheet Gratis</Text>
+                      <Text className="text-[10px] text-gray-500 font-medium">Download printable lembar kerja</Text>
+                    </View>
+                  </View>
+                  <Feather name="chevron-right" size={14} color="#5A3B8B" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-amber-50 transition"
+                  onPress={() => {
+                    scrollToSection('testimoni');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-9 h-9 rounded-xl bg-[#F59E0B]/15 items-center justify-center">
+                      <Feather name="star" size={16} color="#D97706" />
+                    </View>
+                    <View>
+                      <Text className="text-xs font-extrabold text-[#162E5C]">Testimoni</Text>
+                      <Text className="text-[10px] text-gray-500 font-medium">Pengalaman orang tua murid</Text>
+                    </View>
+                  </View>
+                  <Feather name="chevron-right" size={14} color="#D97706" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-emerald-50 transition"
+                  onPress={() => {
+                    scrollToSection('why-us');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-9 h-9 rounded-xl bg-[#30B864]/15 items-center justify-center">
+                      <Feather name="award" size={16} color="#30B864" />
+                    </View>
+                    <View>
+                      <Text className="text-xs font-extrabold text-[#162E5C]">Why Us</Text>
+                      <Text className="text-[10px] text-gray-500 font-medium">Keunggulan & pendekatan kami</Text>
+                    </View>
+                  </View>
+                  <Feather name="chevron-right" size={14} color="#30B864" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Mobile Extended Nav (Tentang Kami, Class Toolkit, Join Us) */}
+              {!isDesktop && (
+                <View className="mt-2 pt-2 border-t border-gray-100 flex-col gap-1">
+                  <TouchableOpacity
+                    className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                    onPress={() => {
+                      scrollToSection('tentang-kami');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <Text className="text-xs font-bold text-gray-700">Tentang Kami</Text>
+                    <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                    onPress={() => {
+                      scrollToSection('class-toolkit');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <Text className="text-xs font-bold text-gray-700">Class Toolkit (Franchise)</Text>
+                    <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                    onPress={() => {
+                      scrollToSection('join-us');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <Text className="text-xs font-bold text-gray-700">Join Us (Kemitraan)</Text>
+                    <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Direct App Launch Button */}
+              <View className="mt-3 pt-3 border-t border-gray-100">
+                <TouchableOpacity
+                  className="w-full bg-[#D82B5A] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#B01E49] transition flex-row items-center gap-2"
+                  onPress={() => {
+                    setViewMode('app');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <Feather name="smartphone" size={14} color="#FFFFFF" />
+                  <Text className="text-white font-extrabold text-xs">Buka Aplikasi Penuh</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </>
+        )}
 
         <ScrollView
           className="flex-1 bg-[#FAF6F0]"
@@ -472,15 +671,16 @@ export default function App() {
 
                   <View className="flex-row flex-wrap items-center gap-4">
                     <TouchableOpacity
-                      className="bg-white px-7 py-3 rounded-full shadow-lg hover:bg-gray-100 transition"
+                      className="bg-white px-7 py-3 rounded-full shadow-lg hover:bg-gray-100 transition flex-row items-center gap-2"
                       onPress={() => setViewMode('app')}
                     >
-                      <Text className="text-[#D82B5A] font-extrabold text-xs md:text-sm">Daftar Sekarang</Text>
+                      <Feather name="activity" size={16} color="#D82B5A" />
+                      <Text className="text-[#D82B5A] font-extrabold text-xs md:text-sm">Buka Aplikasi Screening</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                       className="border-2 border-white px-7 py-2.5 rounded-full hover:bg-white/10 transition"
-                      onPress={() => setViewMode('app')}
+                      onPress={() => scrollToSection('pendaftaran')}
                     >
                       <Text className="text-white font-extrabold text-xs md:text-sm">Daftar Kelas Trial</Text>
                     </TouchableOpacity>
@@ -922,6 +1122,297 @@ export default function App() {
             </View>
           </ScrollRevealSection>
 
+          {/* SECTION: CLASS TOOLKIT FRANCHISE (PILAR 3) - TEPAT DI BAWAH WORKSHEET */}
+          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
+            <View id="class-toolkit" nativeID="class-toolkit" className="bg-white rounded-[2.5rem] p-8 md:p-14 border border-gray-100 shadow-sm card-hover-effect">
+              {/* Header Penjelasan Class Toolkit Franchise */}
+              <View className="text-center max-w-3xl mx-auto mb-12">
+                <View className="bg-[#D82B5A]/10 self-center px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
+                  <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider">Pilar 3 Inovasi: Program Franchise Edukasi</Text>
+                </View>
+                <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4">
+                  Ready-to-Deploy Class Toolkits
+                </Text>
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium">
+                  Class Toolkit Franchise adalah paket kemitraan usaha stimulasi tumbuh kembang anak usia dini (0–6 tahun) siap pakai berkonsep turn-key. Dirancang khusus untuk mempermudah sekolah, daycare, komunitas, maupun wirausaha pemula mereplikasi kelas belajar berkualitas tanpa harus meriset kurikulum dari awal. Setiap mitra dibekali modul tematik STEAM & Mindfulness, perlengkapan sensory kit terstandar, SOP manajemen kelas, serta akses aplikasi screening tumbuh kembang berbantuan AI.
+                </Text>
+              </View>
+
+              {/* 3 Paket Franchise Grid */}
+              <View className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Paket 1: Starter Toolkit */}
+                <View className="bg-[#FAF6F0] rounded-[2rem] p-7 border border-gray-200/80 flex-col justify-between hover:shadow-md transition">
+                  <View>
+                    <View className="w-12 h-12 rounded-2xl bg-[#5A3B8B]/15 items-center justify-center mb-4">
+                      <Feather name="box" size={24} color="#5A3B8B" />
+                    </View>
+                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#5A3B8B] mb-1">Paket Komunitas / Pop-Up</Text>
+                    <Text className="text-xl font-extrabold text-[#162E5C] mb-2">Starter Toolkit</Text>
+                    <Text className="text-xs text-gray-600 font-medium leading-relaxed mb-5">
+                      Cocok untuk guru privat, komunitas orang tua, atau kelas stimulasi berkala berskala kecil.
+                    </Text>
+
+                    <View className="border-t border-gray-200/70 pt-4 mb-6 flex-col gap-2.5">
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">2 Modul Tematik Pilihan</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Sensory Starter Kit (10 Anak)</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Buku Panduan Ajar & SOP Dasar</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Screening Perkembangan STPPA Dasar</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    className="w-full bg-[#162E5C] py-3 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-2"
+                    onPress={() => {}}
+                  >
+                    <Text className="text-white font-extrabold text-xs">Lihat Lebih Lanjut</Text>
+                    <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Paket 2: Pro Growth Hub (Featured) */}
+                <View className="bg-[#162E5C] rounded-[2rem] p-7 text-white shadow-xl relative overflow-hidden flex-col justify-between border-2 border-[#D82B5A]">
+                  <View className="absolute top-4 right-4 bg-[#D82B5A] px-3 py-1 rounded-full">
+                    <Text className="text-[10px] font-black text-white uppercase tracking-wider">Paling Populer</Text>
+                  </View>
+
+                  <View>
+                    <View className="w-12 h-12 rounded-2xl bg-[#D82B5A]/30 items-center justify-center mb-4">
+                      <Feather name="zap" size={24} color="#FF7B9E" />
+                    </View>
+                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#FFD100] mb-1">Paket Playgroup / Daycare</Text>
+                    <Text className="text-xl font-extrabold text-white mb-2">Pro Growth Hub</Text>
+                    <Text className="text-xs text-gray-200 font-medium leading-relaxed mb-5">
+                      Pilihan terlengkap untuk bimbingan belajar, daycare, atau sentra stimulasi tumbuh kembang mandiri.
+                    </Text>
+
+                    <View className="border-t border-white/15 pt-4 mb-6 flex-col gap-2.5">
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#FFD100" />
+                        <Text className="text-xs font-semibold text-white">Lengkap 8 Modul Kelas Resmi</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#FFD100" />
+                        <Text className="text-xs font-semibold text-white">Full Sensory & STEAM Kits (30 Anak)</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#FFD100" />
+                        <Text className="text-xs font-semibold text-white">Akses Aplikasi Screening AI & Dashboard</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#FFD100" />
+                        <Text className="text-xs font-semibold text-white">Pelatihan & Sertifikasi 2 Fasilitator</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#FFD100" />
+                        <Text className="text-xs font-semibold text-white">Starter Brand Kit & Brosur Promosi</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    className="w-full bg-[#D82B5A] py-3 rounded-full items-center justify-center shadow-md hover:bg-[#B01E49] transition active:scale-95 flex-row items-center gap-2"
+                    onPress={() => {}}
+                  >
+                    <Text className="text-white font-extrabold text-xs">Lihat Lebih Lanjut</Text>
+                    <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Paket 3: Enterprise Center */}
+                <View className="bg-[#FAF6F0] rounded-[2rem] p-7 border border-gray-200/80 flex-col justify-between hover:shadow-md transition">
+                  <View>
+                    <View className="w-12 h-12 rounded-2xl bg-[#30B864]/15 items-center justify-center mb-4">
+                      <Feather name="award" size={24} color="#30B864" />
+                    </View>
+                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#30B864] mb-1">Paket Sekolah / Center Mitra</Text>
+                    <Text className="text-xl font-extrabold text-[#162E5C] mb-2">Enterprise Partner</Text>
+                    <Text className="text-xs text-gray-600 font-medium leading-relaxed mb-5">
+                      Kemitraan strategis institusional untuk sekolah TK/PAUD, klinik tumbuh kembang, dan pusat edukasi anak.
+                    </Text>
+
+                    <View className="border-t border-gray-200/70 pt-4 mb-6 flex-col gap-2.5">
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Lisensi Area / Wilayah Eksklusif</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Inventaris Kit Lengkap (50+ Anak)</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Supervisi Psikolog & Dokter Anak</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Pelatihan & Monitoring Terpadu</Text>
+                      </View>
+                      <View className="flex-row items-center gap-2">
+                        <Feather name="check" size={14} color="#30B864" />
+                        <Text className="text-xs font-semibold text-gray-700">Pembaruan Modul Berkala Otomatis</Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    className="w-full bg-[#162E5C] py-3 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-2"
+                    onPress={() => {}}
+                  >
+                    <Text className="text-white font-extrabold text-xs">Lihat Lebih Lanjut</Text>
+                    <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </ScrollRevealSection>
+
+          {/* SECTION: JOIN US (PILAR 4) - TEPAT DI BAWAH CLASS TOOLKIT */}
+          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
+            <View id="join-us" nativeID="join-us" className="text-center mb-12">
+              <View className="bg-[#D82B5A]/10 self-center px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
+                <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider">Pilar 4 Inovasi: Partner Collaboration Hub</Text>
+              </View>
+              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3">
+                Join Us & Tumbuh Bersama Sobat Ceria
+              </Text>
+              <Text className="text-xs md:text-sm text-gray-600 font-medium max-w-2xl mx-auto leading-relaxed">
+                Bergabunglah ke dalam ekosistem tumbuh kembang anak usia dini yang inklusif dan bebas stigma. Kami membuka 4 pintu peluang bagi relawan, tenaga pengajar, institusi, maupun mitra profesional untuk memperluas jangkauan layanan edukasi ramah anak.
+              </Text>
+            </View>
+
+            {/* 4 Pilihan Pendaftaran Grid (Volunteer, Tutor/Guru, Collaboration, Mitra) */}
+            <View className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* 1. Volunteer */}
+              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+                <View>
+                  <View className="w-12 h-12 rounded-2xl bg-[#FFD100]/25 items-center justify-center mb-4">
+                    <Feather name="heart" size={24} color="#B45309" />
+                  </View>
+                  <View className="bg-[#FFD100]/20 self-start px-2.5 py-0.5 rounded-full mb-2">
+                    <Text className="text-[#B45309] text-[9px] font-black uppercase tracking-wider">Relawan Anak</Text>
+                  </View>
+                  <Text className="text-lg font-extrabold text-[#162E5C] mb-2">Daftar Volunteer</Text>
+                  <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-6">
+                    Bagi mahasiswa, pemerhati anak, atau siapa saja yang berjiwa sosial untuk mendampingi kegiatan bermain edukatif, outbond ceria, dan event ramah anak.
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  className="w-full bg-[#162E5C] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-1.5"
+                  onPress={() => {}}
+                >
+                  <Text className="text-white font-extrabold text-xs">Daftar</Text>
+                  <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 2. Tutor / Guru */}
+              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+                <View>
+                  <View className="w-12 h-12 rounded-2xl bg-[#5A3B8B]/15 items-center justify-center mb-4">
+                    <Feather name="users" size={24} color="#5A3B8B" />
+                  </View>
+                  <View className="bg-[#5A3B8B]/10 self-start px-2.5 py-0.5 rounded-full mb-2">
+                    <Text className="text-[#5A3B8B] text-[9px] font-black uppercase tracking-wider">Tenaga Pendidik</Text>
+                  </View>
+                  <Text className="text-lg font-extrabold text-[#162E5C] mb-2">Daftar Menjadi Tutor / Guru</Text>
+                  <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-6">
+                    Bagi sarjana/praktisi PAUD, Psikologi, dan Pendidikan Khusus. Dapatkan modul stimulasi siap ajar, sertifikasi fasilitator, serta jadwal mengajar fleksibel.
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  className="w-full bg-[#5A3B8B] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#472c72] transition active:scale-95 flex-row items-center gap-1.5"
+                  onPress={() => {}}
+                >
+                  <Text className="text-white font-extrabold text-xs">Daftar</Text>
+                  <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 3. Collaboration */}
+              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+                <View>
+                  <View className="w-12 h-12 rounded-2xl bg-[#2DA9E9]/15 items-center justify-center mb-4">
+                    <Feather name="share-2" size={24} color="#2DA9E9" />
+                  </View>
+                  <View className="bg-[#2DA9E9]/10 self-start px-2.5 py-0.5 rounded-full mb-2">
+                    <Text className="text-[#2DA9E9] text-[9px] font-black uppercase tracking-wider">Project & Media</Text>
+                  </View>
+                  <Text className="text-lg font-extrabold text-[#162E5C] mb-2">Daftar Collaboration</Text>
+                  <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-6">
+                    Terbuka untuk brand edukasi anak, komunitas parenting, penyelenggara event, seminar parenting, sponsorship, maupun program CSR berdampak nyata.
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  className="w-full bg-[#2DA9E9] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#1E8EC7] transition active:scale-95 flex-row items-center gap-1.5"
+                  onPress={() => {}}
+                >
+                  <Text className="text-white font-extrabold text-xs">Daftar</Text>
+                  <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+
+              {/* 4. Mitra */}
+              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+                <View>
+                  <View className="w-12 h-12 rounded-2xl bg-[#30B864]/15 items-center justify-center mb-4">
+                    <Feather name="shield" size={24} color="#30B864" />
+                  </View>
+                  <View className="bg-[#30B864]/10 self-start px-2.5 py-0.5 rounded-full mb-2">
+                    <Text className="text-[#30B864] text-[9px] font-black uppercase tracking-wider">Klinis & Sekolah</Text>
+                  </View>
+                  <Text className="text-lg font-extrabold text-[#162E5C] mb-2">Daftar Mitra</Text>
+                  <Text className="text-xs text-gray-600 leading-relaxed font-medium mb-6">
+                    Sinergi rujukan bersama psikolog anak, dokter spesialis anak, terapis wicara & sensori, serta kolaborasi kelas stimulasi terpadu di sekolah TK/PAUD.
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  className="w-full bg-[#30B864] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#25944f] transition active:scale-95 flex-row items-center gap-1.5"
+                  onPress={() => {}}
+                >
+                  <Text className="text-white font-extrabold text-xs">Daftar</Text>
+                  <Feather name="arrow-right" size={14} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Mitra Logo Badges Grid */}
+            <View className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-6 md:p-10 mt-10">
+              <Text className="text-xs font-black uppercase tracking-wider text-gray-400 text-center mb-6">Jejaring Mitra & Sekolah yang Telah Berkolaborasi</Text>
+              <View className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[
+                  'TK Intan Permata',
+                  'TK Aisyiyah Kampung Sewu',
+                  'TK Alam Surya Mentari',
+                  'Bebimart',
+                  'TK Bintangku',
+                  'TK IT Al Muhsin Klaten',
+                ].map((mitra) => (
+                  <View
+                    key={mitra}
+                    className="bg-[#FAF6F0] border border-gray-100 rounded-2xl px-4 py-5 items-center justify-center min-h-[90px] text-center card-hover-effect"
+                  >
+                    <Feather name="award" size={22} color="#D82B5A" className="mb-2" />
+                    <Text className="text-[11px] font-extrabold text-[#162E5C] text-center leading-snug">
+                      {mitra}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </ScrollRevealSection>
+
           {/* SECTION 6: FASILITAS & FITUR EKOSISTEM (Interactive Hover Cards) */}
           <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
             <View className="text-center mb-12">
@@ -1001,7 +1492,7 @@ export default function App() {
 
           {/* SECTION 7: KEUNGGULAN KAMI (Interactive Solid Lift Cards) */}
           <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="text-center mb-12">
+            <View id="why-us" nativeID="why-us" className="text-center mb-12">
               <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Keunggulan Kami</Text>
               <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C]">
                 Mengapa Memilih Sobat Ceria Fun Learning
@@ -1085,43 +1576,6 @@ export default function App() {
                 <View className="w-10 h-10 rounded-full bg-white/20 items-center justify-center self-end mt-4">
                   <Feather name="users" size={20} color="#FFFFFF" />
                 </View>
-              </View>
-            </View>
-          </ScrollRevealSection>
-
-          {/* SECTION: PROGRAM KOLABORASI / MITRA SOBAT CERIA */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Program Kolaborasi</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C]">
-                Mitra Sobat Ceria
-              </Text>
-              <Text className="text-xs md:text-sm text-gray-500 font-medium mt-3 max-w-2xl mx-auto">
-                Bersama sekolah, komunitas, dan mitra usaha terpercaya dalam mendampingi tumbuh kembang anak Indonesia.
-              </Text>
-            </View>
-
-            {/* Mitra Slider Grid */}
-            <View className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-6 md:p-10">
-              <View className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {[
-                  'TK Intan Permata',
-                  'TK Aisyiyah Kampung Sewu',
-                  'TK Alam Surya Mentari',
-                  'Bebimart',
-                  'TK Bintangku',
-                  'TK IT Al Muhsin Klaten',
-                ].map((mitra) => (
-                  <View
-                    key={mitra}
-                    className="bg-[#FAF6F0] border border-gray-100 rounded-2xl px-4 py-5 items-center justify-center min-h-[90px] text-center card-hover-effect"
-                  >
-                    <Feather name="award" size={22} color="#D82B5A" className="mb-2" />
-                    <Text className="text-[11px] font-extrabold text-[#162E5C] text-center leading-snug">
-                      {mitra}
-                    </Text>
-                  </View>
-                ))}
               </View>
             </View>
           </ScrollRevealSection>
