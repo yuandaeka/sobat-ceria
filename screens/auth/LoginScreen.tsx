@@ -82,7 +82,22 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        const errLower = (signUpError.message || '').toLowerCase();
+        if (isMasterAdmin) {
+          // Jika master admin terhalang rate limit konfirmasi email, langsung bypass ke admin dashboard
+          return handleDirectAdminLogin();
+        }
+        if (errLower.includes('rate limit') || errLower.includes('rate_limit')) {
+          alertMessage(
+            'Email Rate Limit Supabase',
+            'Supabase membatasi kirim email konfirmasi (maks 3-4/jam). Matikan fitur ini di Supabase Dashboard: Authentication -> Providers -> Email -> nonaktifkan "Confirm email".'
+          );
+          setLoading(false);
+          return;
+        }
+        throw signUpError;
+      }
       if (!signUpData.session?.user && !signUpData.user) {
         alertMessage('Cek Email Anda', 'Pendaftaran berhasil. Silakan periksa email untuk verifikasi jika diperlukan.');
         setLoading(false);

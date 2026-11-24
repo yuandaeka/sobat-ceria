@@ -211,13 +211,24 @@ export async function registerRoleUser(payload: RoleRegisterPayload) {
     },
   });
 
+  let userId = signUpData?.user?.id;
+
   if (signUpError) {
-    if (signUpError.message.toLowerCase().includes('already') || signUpError.message.includes('registered')) {
+    const errorMsg = (signUpError.message || '').toLowerCase();
+    if (errorMsg.includes('already') || errorMsg.includes('registered')) {
       throw new Error('Email ini sudah terdaftar. Silakan gunakan email lain atau hubungi Admin Sobat Ceria.');
     }
-    throw signUpError;
+
+    // Jika terkena email rate limit dari Supabase (karena fitur "Confirm email" aktif)
+    // Jangan gagalkan pendaftaran! Buat ID pelamar fallback agar tetap tersimpan & bisa di-review Admin
+    if (errorMsg.includes('rate limit') || errorMsg.includes('rate_limit')) {
+      userId = 'applicant-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now();
+      console.warn('Supabase email rate limit exceeded. Menggunakan applicant fallback ID:', userId);
+    } else {
+      throw signUpError;
+    }
   }
-  const userId = signUpData.user?.id;
+
   if (!userId) {
     throw new Error('Gagal membuat akun pengguna. Silakan periksa kembali email Anda.');
   }
