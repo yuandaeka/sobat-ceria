@@ -637,7 +637,14 @@ export default function App() {
                   <View className="flex-row flex-wrap items-center gap-4">
                     <TouchableOpacity
                       className="bg-white px-7 py-3 rounded-full shadow-lg hover:bg-gray-100 transition flex-row items-center gap-2"
-                      onPress={() => setViewMode('app')}
+                      onPress={() => {
+                        const url = 'https://sccreening-sobatceria.vercel.app/';
+                        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                          window.open(url, '_blank', 'noopener,noreferrer');
+                        } else {
+                          Linking.openURL(url).catch(() => {});
+                        }
+                      }}
                     >
                       <Feather name="activity" size={16} color="#D82B5A" />
                       <Text className="text-[#D82B5A] font-extrabold text-xs md:text-sm">Buka Aplikasi Screening</Text>
