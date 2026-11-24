@@ -1245,14 +1245,14 @@ export default function App() {
 
           {/* SECTION: JOIN US (PILAR 4) - TEPAT DI BAWAH CLASS TOOLKIT */}
           <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="join-us" nativeID="join-us" className="text-center mb-12">
+            <View id="join-us" nativeID="join-us" className="items-center text-center mb-12">
               <View className="bg-[#D82B5A]/10 self-center px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
-                <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider">Pilar 4 Inovasi: Partner Collaboration Hub</Text>
+                <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider text-center">Pilar 4 Inovasi: Partner Collaboration Hub</Text>
               </View>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3">
+              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3 text-center">
                 Join Us & Tumbuh Bersama Sobat Ceria
               </Text>
-              <Text className="text-xs md:text-sm text-gray-600 font-medium max-w-2xl mx-auto leading-relaxed">
+              <Text className="text-xs md:text-sm text-gray-600 font-medium max-w-2xl mx-auto leading-relaxed text-center">
                 Bergabunglah ke dalam ekosistem tumbuh kembang anak usia dini yang inklusif dan bebas stigma. Kami membuka 4 pintu peluang bagi relawan, tenaga pengajar, institusi, maupun mitra profesional untuk memperluas jangkauan layanan edukasi ramah anak.
               </Text>
             </View>
