@@ -347,12 +347,19 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
       return localApplicants;
     }
 
-    // Ambil data pendukung teacher_profiles untuk memperkaya detail pelamar
+    // Ambil data pendukung teacher_profiles & volunteer_profiles untuk memperkaya detail pelamar
     let teacherMap = new Map<string, any>();
+    let volunteerMap = new Map<string, any>();
     try {
-      const { data: teachers } = await supabase.from('teacher_profiles').select('*');
+      const [{ data: teachers }, { data: volunteers }] = await Promise.all([
+        supabase.from('teacher_profiles').select('*'),
+        supabase.from('volunteer_profiles').select('*'),
+      ]);
       if (teachers) {
         teachers.forEach((t) => teacherMap.set(t.profile_id, t));
+      }
+      if (volunteers) {
+        volunteers.forEach((v) => volunteerMap.set(v.profile_id, v));
       }
     } catch {
       // ignore
@@ -367,6 +374,14 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
           education: t.education || '-',
           experienceYears: t.experience_years || 0,
           notes: t.notes || '-',
+        };
+      } else if (p.role === 'volunteer' && volunteerMap.has(p.id)) {
+        const v = volunteerMap.get(p.id);
+        details = {
+          city: v.city || '-',
+          occupation: v.occupation || '-',
+          availability: v.availability || '-',
+          motivation: v.motivation || '-',
         };
       }
 
@@ -470,7 +485,28 @@ export async function updateUserAccountStatus(
         });
       }
     } else if (role === 'volunteer') {
-      await supabase.from('volunteer_profiles').update({ status_approval: status }).eq('profile_id', userId);
+      const details = fullData?.details || {};
+      const { data: existingVol } = await supabase
+        .from('volunteer_profiles')
+        .select('profile_id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+
+      if (existingVol) {
+        await supabase
+          .from('volunteer_profiles')
+          .update({ status_approval: status })
+          .eq('profile_id', userId);
+      } else {
+        await supabase.from('volunteer_profiles').upsert({
+          profile_id: userId,
+          city: details.city || '-',
+          occupation: details.occupation || '-',
+          availability: details.availability || '-',
+          motivation: details.motivation || '',
+          status_approval: status,
+        });
+      }
     } else if (role === 'partner') {
       await supabase.from('partner_profiles').update({ status_approval: status }).eq('profile_id', userId);
     } else if (role === 'collaboration') {

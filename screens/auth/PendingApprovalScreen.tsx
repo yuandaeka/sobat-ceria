@@ -100,7 +100,10 @@ export default function PendingApprovalScreen({
             <Text className="text-xs text-gray-600 font-medium text-center leading-relaxed mb-6">
               Halo <Text className="font-bold text-[#162E5C]">{approvedUser.parentName}</Text>! Aplikasi Anda sebagai{' '}
               <Text className="font-bold text-[#8B22C0]">{roleMeta?.label || approvedUser.role}</Text> telah disetujui
-              oleh Admin. Anda sekarang dapat mengakses dashboard mengajar, jadwal kelas, dan presensi murid.
+              oleh Admin. Anda sekarang dapat mengakses{' '}
+              {approvedUser.role === 'volunteer'
+                ? 'dashboard volunteer, jadwal kegiatan, dan absensi pendampingan.'
+                : 'dashboard mengajar, jadwal kelas, dan presensi murid.'}
             </Text>
 
             <TouchableOpacity

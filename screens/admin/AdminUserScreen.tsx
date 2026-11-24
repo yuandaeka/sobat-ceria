@@ -128,17 +128,25 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
     const cleanPhone = (target.phone || '').replace(/[^0-9]/g, '');
     const formattedPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
     const roleLabel = ROLES[target.role]?.label || target.role;
+    const accessDesc =
+      target.role === 'volunteer'
+        ? 'jadwal kegiatan, absensi, dan dokumentasi volunteer'
+        : 'dashboard mengajar, materi, dan jadwal kelas';
     const text = encodeURIComponent(
-      `Halo Kak ${target.name}! 🎉\n\nSelamat, pendaftaran Anda sebagai *${roleLabel}* di Sobat Ceria telah *DISETUJUI* oleh Admin.\n\nAnda sekarang dapat login ke platform Sobat Ceria di http://localhost:8082 untuk mulai mengakses dashboard mengajar, materi, dan jadwal kelas.\n\nSalam hangat,\n*Tim Sobat Ceria*`
+      `Halo Kak ${target.name}! 🎉\n\nSelamat, pendaftaran Anda sebagai *${roleLabel}* di Sobat Ceria telah *DISETUJUI* oleh Admin.\n\nAnda sekarang dapat login ke platform Sobat Ceria di http://localhost:8082 untuk mulai mengakses ${accessDesc}.\n\nSalam hangat,\n*Tim Sobat Ceria*`
     );
     Linking.openURL(`https://wa.me/${formattedPhone}?text=${text}`).catch(() => {});
   };
 
   const handleSendEmail = (target: AdminUserData) => {
     const roleLabel = ROLES[target.role]?.label || target.role;
+    const accessDesc =
+      target.role === 'volunteer'
+        ? 'dashboard volunteer, jadwal kegiatan, dan absensi'
+        : 'dashboard, modul kelas, dan presensi murid';
     const subject = encodeURIComponent(`Pendaftaran ${roleLabel} Sobat Ceria Telah Disetujui 🎉`);
     const body = encodeURIComponent(
-      `Halo Kak ${target.name},\n\nSelamat! Pendaftaran Anda sebagai ${roleLabel} di platform Sobat Ceria telah ditinjau dan DISETUJUI oleh Admin.\n\nAnda sekarang dapat login ke akun Sobat Ceria menggunakan email ini (${target.email}) untuk mengakses dashboard, modul kelas, dan presensi murid.\n\nJika ada pertanyaan, silakan hubungi tim kami via WhatsApp di 0812-3456-7890.\n\nSelamat bergabung di ekosistem Sobat Ceria!\n\nSalam hangat,\nTim Sobat Ceria`
+      `Halo Kak ${target.name},\n\nSelamat! Pendaftaran Anda sebagai ${roleLabel} di platform Sobat Ceria telah ditinjau dan DISETUJUI oleh Admin.\n\nAnda sekarang dapat login ke akun Sobat Ceria menggunakan email ini (${target.email}) untuk mengakses ${accessDesc}.\n\nJika ada pertanyaan, silakan hubungi tim kami via WhatsApp di 0812-3456-7890.\n\nSelamat bergabung di ekosistem Sobat Ceria!\n\nSalam hangat,\nTim Sobat Ceria`
     );
     Linking.openURL(`mailto:${target.email}?subject=${subject}&body=${body}`).catch(() => {});
   };
@@ -568,6 +576,56 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
                           </Text>
                           <Text className="text-xs text-gray-700 font-medium mt-0.5">
                             {selectedApplicant.details.notes}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                )}
+
+                {/* Kualifikasi Khusus Volunteer */}
+                {selectedApplicant.role === 'volunteer' && (
+                  <View className="mb-5 flex-col gap-3">
+                    <Text className="text-xs font-black uppercase tracking-wider text-gray-400">
+                      Data Profil Volunteer
+                    </Text>
+
+                    <View className="bg-amber-50/60 border border-amber-200/70 rounded-2xl p-4 flex-col gap-2.5">
+                      <View className="grid grid-cols-2 gap-3">
+                        <View>
+                          <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                            Domisili / Kota
+                          </Text>
+                          <Text className="text-xs font-black text-amber-900 mt-0.5">
+                            {selectedApplicant.details?.city || '-'}
+                          </Text>
+                        </View>
+                        <View>
+                          <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                            Status / Pekerjaan
+                          </Text>
+                          <Text className="text-xs font-bold text-gray-800 mt-0.5">
+                            {selectedApplicant.details?.occupation || '-'}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View className="pt-2 border-t border-amber-200/50">
+                        <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          Ketersediaan Waktu
+                        </Text>
+                        <Text className="text-xs font-bold text-gray-800 mt-0.5">
+                          {selectedApplicant.details?.availability || '-'}
+                        </Text>
+                      </View>
+
+                      {selectedApplicant.details?.motivation ? (
+                        <View className="pt-2 border-t border-amber-200/50">
+                          <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                            Motivasi Bergabung
+                          </Text>
+                          <Text className="text-xs text-gray-700 font-medium mt-0.5">
+                            {selectedApplicant.details.motivation}
                           </Text>
                         </View>
                       ) : null}

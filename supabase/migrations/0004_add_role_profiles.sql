@@ -489,4 +489,26 @@ where p.role = 'teacher'
 on conflict (profile_id) do update set
   status_approval = 'active';
 
+-- 6. Masukkan semua volunteer ke volunteer_profiles
+insert into public.volunteer_profiles (
+  profile_id,
+  city,
+  occupation,
+  availability,
+  motivation,
+  status_approval
+)
+select
+  p.id,
+  coalesce(u.raw_user_meta_data->>'city', '-'),
+  coalesce(u.raw_user_meta_data->>'occupation', '-'),
+  coalesce(u.raw_user_meta_data->>'availability', 'Sabtu & Minggu'),
+  coalesce(u.raw_user_meta_data->>'motivation', ''),
+  coalesce(p.status, 'pending')
+from public.profiles p
+join auth.users u on u.id = p.id
+where p.role = 'volunteer'
+on conflict (profile_id) do update set
+  status_approval = excluded.status_approval;
+
 
