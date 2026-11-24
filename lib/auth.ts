@@ -6,14 +6,24 @@ import { Session } from '@supabase/supabase-js';
 
 WebBrowser.maybeCompleteAuthSession();
 
-// Web: gunakan env EXPO_PUBLIC_SITE_URL (opsional) atau origin halaman aktif.
+// Web: gunakan env EXPO_PUBLIC_SITE_URL (opsional) atau origin halaman aktif (tanpa spasi/newline).
 // Native: pakai scheme sobatceria:// untuk callback.
-const redirectTo =
-  Platform.OS === 'web'
-    ? (process.env.EXPO_PUBLIC_SITE_URL as string) || window.location.origin
-    : AuthSession.makeRedirectUri();
+function getRedirectTo(): string {
+  if (Platform.OS === 'web') {
+    const envUrl = (process.env.EXPO_PUBLIC_SITE_URL || '').trim().replace(/\/+$/, '');
+    if (envUrl && envUrl.startsWith('http')) {
+      return envUrl;
+    }
+    if (typeof window !== 'undefined' && window.location?.origin && window.location.origin !== 'null') {
+      return window.location.origin;
+    }
+    return 'http://localhost:8082';
+  }
+  return AuthSession.makeRedirectUri();
+}
 
 export async function signInWithGoogle(): Promise<Session | null> {
+  const redirectTo = getRedirectTo();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
