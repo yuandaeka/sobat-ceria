@@ -54,7 +54,20 @@ export default function RoleSelectionScreen({ user, onSelect }: RoleSelectionScr
 
         {/* Role Cards */}
         <View className="flex-col gap-3.5">
-          {ROLE_ORDER.map((role) => {
+          {ROLE_ORDER.filter((role) => {
+            if (role === 'admin') {
+              const emailLower = user?.email?.toLowerCase() || '';
+              // Tampilkan opsi Admin untuk email master admin atau domain resmi
+              return (
+                emailLower === 'sobatceria25@gmail.com' ||
+                emailLower === 'sobatceria2025@gmail.com' ||
+                emailLower === 'yuandaeka45@gmail.com' ||
+                emailLower.endsWith('@sobatceria.id') ||
+                user?.role === 'admin'
+              );
+            }
+            return true;
+          }).map((role) => {
             const meta = ROLES[role];
             return (
               <TouchableOpacity

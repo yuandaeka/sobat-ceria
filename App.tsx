@@ -12,6 +12,8 @@ const logoImg = require('./assets/sobatceria.png');
 // Import Screens (Auth)
 import LoginScreen from './screens/auth/LoginScreen';
 import RoleSelectionScreen from './screens/auth/RoleSelectionScreen';
+import RoleRegisterModal from './screens/auth/RoleRegisterModal';
+import PendingApprovalScreen from './screens/auth/PendingApprovalScreen';
 
 // Import Screens (Orang Tua)
 import ParentDashboard from './screens/parent/ParentDashboard';
@@ -85,6 +87,7 @@ export default function App() {
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [roleRegisterTarget, setRoleRegisterTarget] = useState<'volunteer' | 'teacher' | 'collaboration' | 'partner' | null>(null);
 
   // Load Supabase session on app start & listen to auth changes
   useEffect(() => {
@@ -295,6 +298,15 @@ export default function App() {
               <LoginScreen onLogin={(profile) => setUser(profile)} />
             ) : !user.role ? (
               <RoleSelectionScreen user={user} onSelect={(role) => setUser({ ...user, role })} />
+            ) : user.status === 'pending' ? (
+              <PendingApprovalScreen
+                user={user}
+                onLogout={async () => {
+                  await supabase.auth.signOut().catch(() => {});
+                  setUser(null);
+                }}
+                onStatusUpdated={(updated) => setUser(updated)}
+              />
             ) : (
               <RoleDashboard user={user} setUser={setUser} />
             )}
@@ -1260,7 +1272,7 @@ export default function App() {
                 </View>
                 <TouchableOpacity
                   className="w-full bg-[#162E5C] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-1.5"
-                  onPress={() => {}}
+                  onPress={() => setRoleRegisterTarget('volunteer')}
                 >
                   <Text className="text-white font-extrabold text-xs">Daftar</Text>
                   <Feather name="arrow-right" size={14} color="#FFFFFF" />
@@ -1283,7 +1295,7 @@ export default function App() {
                 </View>
                 <TouchableOpacity
                   className="w-full bg-[#5A3B8B] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#472c72] transition active:scale-95 flex-row items-center gap-1.5"
-                  onPress={() => {}}
+                  onPress={() => setRoleRegisterTarget('teacher')}
                 >
                   <Text className="text-white font-extrabold text-xs">Daftar</Text>
                   <Feather name="arrow-right" size={14} color="#FFFFFF" />
@@ -1306,7 +1318,7 @@ export default function App() {
                 </View>
                 <TouchableOpacity
                   className="w-full bg-[#2DA9E9] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#1E8EC7] transition active:scale-95 flex-row items-center gap-1.5"
-                  onPress={() => {}}
+                  onPress={() => setRoleRegisterTarget('collaboration')}
                 >
                   <Text className="text-white font-extrabold text-xs">Daftar</Text>
                   <Feather name="arrow-right" size={14} color="#FFFFFF" />
@@ -1329,7 +1341,7 @@ export default function App() {
                 </View>
                 <TouchableOpacity
                   className="w-full bg-[#30B864] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#25944f] transition active:scale-95 flex-row items-center gap-1.5"
-                  onPress={() => {}}
+                  onPress={() => setRoleRegisterTarget('partner')}
                 >
                   <Text className="text-white font-extrabold text-xs">Daftar</Text>
                   <Feather name="arrow-right" size={14} color="#FFFFFF" />
@@ -1715,6 +1727,12 @@ export default function App() {
             </View>
           </View>
         </ScrollView>
+
+        {/* Modal Registrasi Khusus Role Mitra / Guru / Volunteer / Collaboration */}
+        <RoleRegisterModal
+          role={roleRegisterTarget}
+          onClose={() => setRoleRegisterTarget(null)}
+        />
       </View>
     </SafeAreaProvider>
   );

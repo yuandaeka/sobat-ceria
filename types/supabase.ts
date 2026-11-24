@@ -19,6 +19,7 @@ export interface Database {
           email: string | null;
           phone: string | null;
           role: string | null;
+          status: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -28,6 +29,7 @@ export interface Database {
           email?: string | null;
           phone?: string | null;
           role?: string | null;
+          status?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -37,6 +39,7 @@ export interface Database {
           email?: string | null;
           phone?: string | null;
           role?: string | null;
+          status?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -237,6 +240,132 @@ export interface Database {
           file_url?: string | null;
           is_active?: boolean;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      teacher_profiles: {
+        Row: {
+          profile_id: string;
+          specialization: string;
+          education: string | null;
+          experience_years: number;
+          status_approval: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          specialization: string;
+          education?: string | null;
+          experience_years?: number;
+          status_approval?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          specialization?: string;
+          education?: string | null;
+          experience_years?: number;
+          status_approval?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      volunteer_profiles: {
+        Row: {
+          profile_id: string;
+          city: string | null;
+          occupation: string | null;
+          availability: string | null;
+          motivation: string | null;
+          status_approval: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          city?: string | null;
+          occupation?: string | null;
+          availability?: string | null;
+          motivation?: string | null;
+          status_approval?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          city?: string | null;
+          occupation?: string | null;
+          availability?: string | null;
+          motivation?: string | null;
+          status_approval?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      partner_profiles: {
+        Row: {
+          profile_id: string;
+          brand_name: string;
+          business_type: string;
+          website_social: string | null;
+          status_approval: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          brand_name: string;
+          business_type: string;
+          website_social?: string | null;
+          status_approval?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          brand_name?: string;
+          business_type?: string;
+          website_social?: string | null;
+          status_approval?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      collaboration_profiles: {
+        Row: {
+          profile_id: string;
+          institution_name: string;
+          project_type: string;
+          proposal_note: string | null;
+          status_approval: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          institution_name: string;
+          project_type: string;
+          proposal_note?: string | null;
+          status_approval?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          institution_name?: string;
+          project_type?: string;
+          proposal_note?: string | null;
+          status_approval?: string;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };

@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { UserProfile, UserRole } from '../types';
+import { UserProfile, UserRole, AccountStatus, AdminUserData } from '../types';
 
 export interface ProfileWithChildren {
   profile: NonNullable<UserProfile>;
@@ -32,7 +32,17 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
     if (insertError) throw insertError;
     profile = inserted;
   } else if (profileError) {
-    throw profileError;
+    console.warn('Profile fetch warning (using auth fallback):', profileError.message);
+    profile = {
+      id: userId,
+      parent_name: metaName || (authData.user?.email === 'sobatceria25@gmail.com' ? 'Admin Sobat Ceria' : ''),
+      email: authData.user?.email || null,
+      phone: authData.user?.phone || null,
+      role: (authData.user?.user_metadata?.role as string) || (authData.user?.email === 'sobatceria25@gmail.com' ? 'admin' : null),
+      status: (authData.user?.user_metadata?.status as string) || 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
   } else if (profile && (!profile.parent_name || !profile.email) && (metaName || authData.user?.email)) {
     // Profil sudah ada tapi kosong (mis. user lama) → isi dari metadata Google
     const patch: { parent_name?: string; email?: string } = {};
@@ -42,27 +52,55 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
     profile = { ...profile, ...patch };
   }
 
-  const { data: children, error: childrenError } = await supabase
-    .from('children')
-    .select('*')
-    .eq('profile_id', userId);
+  let childrenList: { id: string; name: string; age: number; special_needs: string | null }[] = [];
+  try {
+    const { data: children } = await supabase
+      .from('children')
+      .select('*')
+      .eq('profile_id', userId);
+    childrenList = children || [];
+  } catch {
+    childrenList = [];
+  }
 
-  if (childrenError) throw childrenError;
+  // Auto-set Admin jika user menggunakan email owner/admin
+  const userEmail = (profile?.email || authData.user?.email || '').toLowerCase();
+  const isMasterAdmin =
+    userEmail === 'sobatceria25@gmail.com' ||
+    userEmail === 'sobatceria2025@gmail.com' ||
+    userEmail === 'yuandaeka45@gmail.com';
+
+  if (isMasterAdmin && (profile?.role !== 'admin' || profile?.status !== 'active')) {
+    try {
+      await supabase.from('profiles').update({ role: 'admin', status: 'active' }).eq('id', userId);
+      if (profile) {
+        profile.role = 'admin';
+        profile.status = 'active';
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  const roleResult: UserRole | null = isMasterAdmin ? 'admin' : ((profile?.role as UserRole | null) ?? null);
+  const statusResult: AccountStatus = isMasterAdmin ? 'active' : ((profile?.status as AccountStatus) || 'active');
 
   return {
     profile: {
-      parentName: profile?.parent_name || metaName,
-      email: profile?.email || '',
+      id: profile?.id || userId,
+      parentName: profile?.parent_name || (isMasterAdmin ? 'Admin Sobat Ceria' : metaName),
+      email: profile?.email || authData.user?.email || '',
       phone: profile?.phone || '',
-      role: (profile?.role as UserRole | null) ?? null,
-      children: (children || []).map((c) => ({
+      role: roleResult,
+      status: statusResult,
+      children: childrenList.map((c) => ({
         id: c.id,
         name: c.name,
         age: c.age,
         specialNeeds: c.special_needs || undefined,
       })),
     },
-    children: children || [],
+    children: childrenList,
   };
 }
 
@@ -123,3 +161,274 @@ export async function updateChild(
     .eq('id', childId);
   if (error) throw error;
 }
+
+// -------------------------------------------------------------
+// MULTI-ROLE REGISTRATION & APPROVAL HELPERS
+// -------------------------------------------------------------
+
+export interface RoleRegisterPayload {
+  email: string;
+  password: string;
+  fullName: string;
+  phone: string;
+  role: 'volunteer' | 'teacher' | 'collaboration' | 'partner';
+  roleData: Record<string, any>;
+}
+
+/**
+ * Mendaftarkan akun khusus role non-parent (Volunteer, Teacher, Collaboration, Partner)
+ * Akun langsung berstatus 'pending' dan menunggu review Admin.
+ */
+export async function registerRoleUser(payload: RoleRegisterPayload) {
+  const { email, password, fullName, phone, role, roleData } = payload;
+
+  // 1. SignUp ke Supabase Auth dengan metadata lengkap
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email: email.trim(),
+    password: password.trim(),
+    options: {
+      data: {
+        full_name: fullName.trim(),
+        phone: phone.trim(),
+        role: role,
+        status: 'pending',
+        // Detail kualifikasi spesifik role disimpan di metadata auth
+        specialization: roleData.specialization || '',
+        education: roleData.education || '',
+        experience_years: roleData.experienceYears || '0',
+        notes: roleData.notes || '',
+        city: roleData.city || '',
+        occupation: roleData.occupation || '',
+        availability: roleData.availability || '',
+        motivation: roleData.motivation || '',
+        brand_name: roleData.brandName || '',
+        business_type: roleData.businessType || '',
+        website_social: roleData.websiteSocial || '',
+        institution_name: roleData.institutionName || '',
+        project_type: roleData.projectType || '',
+        proposal_note: roleData.proposalNote || '',
+      },
+    },
+  });
+
+  if (signUpError) {
+    if (signUpError.message.toLowerCase().includes('already') || signUpError.message.includes('registered')) {
+      throw new Error('Email ini sudah terdaftar. Silakan gunakan email lain atau hubungi Admin Sobat Ceria.');
+    }
+    throw signUpError;
+  }
+  const userId = signUpData.user?.id;
+  if (!userId) {
+    throw new Error('Gagal membuat akun pengguna. Silakan periksa kembali email Anda.');
+  }
+
+  // 2. Pastikan record di profiles tersimpan dengan role & status pending (best-effort)
+  try {
+    await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        parent_name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        role: role,
+        status: 'pending',
+      });
+  } catch (err: any) {
+    console.warn('Upsert profile notice:', err.message);
+  }
+
+  // 3. Masukkan ke tabel spesifik masing-masing role (best-effort)
+  try {
+    if (role === 'teacher') {
+      await supabase.from('teacher_profiles').upsert({
+        profile_id: userId,
+        specialization: roleData.specialization || 'Umum',
+        education: roleData.education || '',
+        experience_years: parseInt(roleData.experienceYears || '0') || 0,
+        status_approval: 'pending',
+        notes: roleData.notes || '',
+      });
+    } else if (role === 'volunteer') {
+      await supabase.from('volunteer_profiles').upsert({
+        profile_id: userId,
+        city: roleData.city || '',
+        occupation: roleData.occupation || '',
+        availability: roleData.availability || '',
+        motivation: roleData.motivation || '',
+        status_approval: 'pending',
+      });
+    } else if (role === 'partner') {
+      await supabase.from('partner_profiles').upsert({
+        profile_id: userId,
+        brand_name: roleData.brandName || '',
+        business_type: roleData.businessType || '',
+        website_social: roleData.websiteSocial || '',
+        status_approval: 'pending',
+      });
+    } else if (role === 'collaboration') {
+      await supabase.from('collaboration_profiles').upsert({
+        profile_id: userId,
+        institution_name: roleData.institutionName || '',
+        project_type: roleData.projectType || '',
+        proposal_note: roleData.proposalNote || '',
+        status_approval: 'pending',
+      });
+    }
+  } catch (err: any) {
+    console.warn(`Gagal menyimpan detail profil ${role}:`, err.message);
+  }
+
+  // 4. Simpan ke cache lokal browser (localStorage) agar Admin Dashboard langsung mendeteksi pendaftar
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const pendingKey = 'sc_pending_applicants';
+      const existingStr = window.localStorage.getItem(pendingKey);
+      const existingList = existingStr ? JSON.parse(existingStr) : [];
+      const newApplicant = {
+        id: userId,
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        role: role,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        details: roleData,
+      };
+      // Hapus jika sudah ada ID yang sama lalu taruh paling depan
+      const filtered = existingList.filter((item: any) => item.id !== userId && item.email !== email.trim());
+      filtered.unshift(newApplicant);
+      window.localStorage.setItem(pendingKey, JSON.stringify(filtered));
+    }
+  } catch {
+    // ignore
+  }
+
+  return { userId, role, status: 'pending' as AccountStatus };
+}
+
+/**
+ * Mengambil daftar seluruh user untuk Admin Dashboard
+ * beserta status aktif / pending / rejected dan role pendukung.
+ */
+export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
+  // Ambil cache pendaftar lokal lebih dulu
+  let localApplicants: AdminUserData[] = [];
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const stored = window.localStorage.getItem('sc_pending_applicants');
+      if (stored) {
+        localApplicants = JSON.parse(stored);
+      }
+    }
+  } catch {
+    localApplicants = [];
+  }
+
+  try {
+    const { data: profiles, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Gagal memuat daftar profiles dari Supabase:', error.message);
+      return localApplicants;
+    }
+
+    // Ambil data pendukung teacher_profiles untuk memperkaya detail pelamar
+    let teacherMap = new Map<string, any>();
+    try {
+      const { data: teachers } = await supabase.from('teacher_profiles').select('*');
+      if (teachers) {
+        teachers.forEach((t) => teacherMap.set(t.profile_id, t));
+      }
+    } catch {
+      // ignore
+    }
+
+    const liveList: AdminUserData[] = (profiles || []).map((p) => {
+      let details: Record<string, any> | undefined = undefined;
+      if (p.role === 'teacher' && teacherMap.has(p.id)) {
+        const t = teacherMap.get(p.id);
+        details = {
+          specialization: t.specialization || 'Umum',
+          education: t.education || '-',
+          experienceYears: t.experience_years || 0,
+          notes: t.notes || '-',
+        };
+      }
+
+      return {
+        id: p.id,
+        name: p.parent_name || 'Tanpa Nama',
+        email: p.email || '-',
+        phone: p.phone || '-',
+        role: (p.role as UserRole) || 'parent',
+        status: (p.status as AccountStatus) || 'active',
+        createdAt: p.created_at || new Date().toISOString(),
+        details,
+      };
+    });
+
+    // Gabungkan live list dari Supabase dengan data pendaftar baru dari local storage
+    const liveIds = new Set(liveList.map((u) => u.id));
+    const merged = [...liveList];
+    for (const local of localApplicants) {
+      if (!liveIds.has(local.id)) {
+        merged.unshift(local);
+      }
+    }
+
+    return merged;
+  } catch (err: any) {
+    console.warn('Gagal memuat daftar user admin dari Supabase:', err.message);
+    return localApplicants;
+  }
+}
+
+/**
+ * Admin mengubah status approval user ('active' untuk setujui, 'rejected' untuk tolak)
+ */
+export async function updateUserAccountStatus(userId: string, status: AccountStatus, role?: UserRole) {
+  // Update tabel profiles
+  try {
+    await supabase
+      .from('profiles')
+      .update({ status })
+      .eq('id', userId);
+  } catch (err: any) {
+    console.warn('Update profiles status notice:', err.message);
+  }
+
+  // Update status_approval di tabel spesifik jika ada
+  try {
+    if (role === 'teacher') {
+      await supabase.from('teacher_profiles').update({ status_approval: status }).eq('profile_id', userId);
+    } else if (role === 'volunteer') {
+      await supabase.from('volunteer_profiles').update({ status_approval: status }).eq('profile_id', userId);
+    } else if (role === 'partner') {
+      await supabase.from('partner_profiles').update({ status_approval: status }).eq('profile_id', userId);
+    } else if (role === 'collaboration') {
+      await supabase.from('collaboration_profiles').update({ status_approval: status }).eq('profile_id', userId);
+    }
+  } catch (err: any) {
+    console.warn('Update role table notice:', err.message);
+  }
+
+  // Update juga di localStorage
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const pendingKey = 'sc_pending_applicants';
+      const stored = window.localStorage.getItem(pendingKey);
+      if (stored) {
+        const list: AdminUserData[] = JSON.parse(stored);
+        const updated = list.map((item) => (item.id === userId ? { ...item, status } : item));
+        window.localStorage.setItem(pendingKey, JSON.stringify(updated));
+      }
+    }
+  } catch {
+    // ignore
+  }
+}
+

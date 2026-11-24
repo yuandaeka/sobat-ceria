@@ -16,12 +16,53 @@ export type UserRole =
   | 'partner'
   | 'admin';
 
+export type AccountStatus = 'active' | 'pending' | 'rejected';
+
 export interface UserProfile {
+  id?: string;
   parentName: string;
   email: string;
   phone: string;
   children: Child[];
   role?: UserRole | null;
+  status?: AccountStatus;
+}
+
+export interface TeacherProfileData {
+  specialization: string;
+  education?: string;
+  experienceYears?: number;
+  notes?: string;
+}
+
+export interface VolunteerProfileData {
+  city?: string;
+  occupation?: string;
+  availability?: string;
+  motivation?: string;
+}
+
+export interface PartnerProfileData {
+  brandName: string;
+  businessType: string;
+  websiteSocial?: string;
+}
+
+export interface CollaborationProfileData {
+  institutionName: string;
+  projectType: string;
+  proposalNote?: string;
+}
+
+export interface AdminUserData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  status: AccountStatus;
+  createdAt: string;
+  details?: Record<string, any>;
 }
 
 export interface Course {
