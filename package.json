@@ -16,6 +16,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-web-browser": "~57.0.2",
     "nativewind": "^4.2.6",
+    "nodemailer": "^10.6.1",
     "postcss": "^8.5.25",
     "react": "19.2.3",
     "react-dom": "19.2.3",

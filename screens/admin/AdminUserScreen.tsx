@@ -77,6 +77,56 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [selectedApplicant, setSelectedApplicant] = useState<AdminUserData | null>(null);
   const [approvedApplicant, setApprovedApplicant] = useState<AdminUserData | null>(null);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [emailStatusNote, setEmailStatusNote] = useState<string>('');
+
+  const getRoleAccessDesc = (role: UserRole) => {
+    if (role === 'volunteer') return 'jadwal kegiatan, absensi, dan dokumentasi volunteer';
+    if (role === 'collaboration') return 'dashboard kolaborasi, manajemen proyek, dan dokumen MoU';
+    if (role === 'partner') return 'dashboard mitra, program kemitraan, leads rujukan, dan laporan komisi';
+    return 'dashboard mengajar, materi, dan jadwal kelas';
+  };
+
+  const sendAutomaticApprovalEmail = async (target: AdminUserData) => {
+    if (!target.email || !target.email.includes('@')) {
+      setEmailStatus('failed');
+      setEmailStatusNote('Email pelamar tidak valid.');
+      return;
+    }
+
+    setEmailStatus('sending');
+    setEmailStatusNote('Mengirim email otomatis dari sobatceria25@gmail.com...');
+    try {
+      const origin =
+        typeof window !== 'undefined' && window.location?.origin && window.location.origin !== 'null'
+          ? window.location.origin
+          : 'https://sobat-ceria.vercel.app';
+
+      const res = await fetch('/api/send-approval-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: target.email,
+          name: target.name,
+          roleLabel: ROLES[target.role]?.label || target.role,
+          accessDesc: getRoleAccessDesc(target.role),
+          platformUrl: origin,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data?.ok) {
+        setEmailStatus('sent');
+        setEmailStatusNote(`Email otomatis berhasil dikirim dari sobatceria25@gmail.com ke ${target.email}.`);
+      } else {
+        setEmailStatus('failed');
+        setEmailStatusNote(data?.error || 'Pengiriman otomatis belum aktif. Gunakan tombol manual di bawah.');
+      }
+    } catch {
+      setEmailStatus('failed');
+      setEmailStatusNote('Endpoint /api/send-approval-email belum terjangkau (pastikan berjalan di Vercel).');
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -112,10 +162,11 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
         prev.map((u) => (u.id === targetUser.id ? { ...u, status: nextStatus } : u))
       );
 
-      // Jika pendaftar berstatus pending disetujui, buka modal notifikasi WhatsApp/Email
+      // Jika pendaftar berstatus pending disetujui, buka modal & kirim email otomatis dari sobatceria25@gmail.com
       if (nextStatus === 'active' && targetUser.status === 'pending') {
         setApprovedApplicant(targetUser);
         setSelectedApplicant(null);
+        sendAutomaticApprovalEmail(targetUser);
       }
     } catch (err: any) {
       alert(`Gagal memperbarui status: ${err?.message || 'Terjadi kesalahan'}`);
@@ -128,30 +179,20 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
     const cleanPhone = (target.phone || '').replace(/[^0-9]/g, '');
     const formattedPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
     const roleLabel = ROLES[target.role]?.label || target.role;
-    const accessDesc =
-      target.role === 'volunteer'
-        ? 'jadwal kegiatan, absensi, dan dokumentasi volunteer'
-        : target.role === 'collaboration'
-        ? 'dashboard kolaborasi, manajemen proyek, dan dokumen MoU'
-        : target.role === 'partner'
-        ? 'dashboard mitra, program kemitraan, leads rujukan, dan laporan komisi'
-        : 'dashboard mengajar, materi, dan jadwal kelas';
+    const accessDesc = getRoleAccessDesc(target.role);
+    const origin =
+      typeof window !== 'undefined' && window.location?.origin && window.location.origin !== 'null'
+        ? window.location.origin
+        : 'https://sobat-ceria.vercel.app';
     const text = encodeURIComponent(
-      `Halo Kak ${target.name}! 🎉\n\nSelamat, pendaftaran Anda sebagai *${roleLabel}* di Sobat Ceria telah *DISETUJUI* oleh Admin.\n\nAnda sekarang dapat login ke platform Sobat Ceria di http://localhost:8082 untuk mulai mengakses ${accessDesc}.\n\nSalam hangat,\n*Tim Sobat Ceria*`
+      `Halo Kak ${target.name}! 🎉\n\nSelamat, pendaftaran Anda sebagai *${roleLabel}* di Sobat Ceria telah *DISETUJUI* oleh Admin.\n\nAnda sekarang dapat login ke platform Sobat Ceria di ${origin} untuk mulai mengakses ${accessDesc}.\n\nSalam hangat,\n*Tim Sobat Ceria*`
     );
     Linking.openURL(`https://wa.me/${formattedPhone}?text=${text}`).catch(() => {});
   };
 
   const handleSendEmail = (target: AdminUserData) => {
     const roleLabel = ROLES[target.role]?.label || target.role;
-    const accessDesc =
-      target.role === 'volunteer'
-        ? 'dashboard volunteer, jadwal kegiatan, dan absensi'
-        : target.role === 'collaboration'
-        ? 'dashboard kolaborasi, proyek bersama, dan dokumen MoU'
-        : target.role === 'partner'
-        ? 'dashboard mitra, program kemitraan, leads rujukan, dan komisi'
-        : 'dashboard, modul kelas, dan presensi murid';
+    const accessDesc = getRoleAccessDesc(target.role);
     const subject = encodeURIComponent(`Pendaftaran ${roleLabel} Sobat Ceria Telah Disetujui 🎉`);
     const body = encodeURIComponent(
       `Halo Kak ${target.name},\n\nSelamat! Pendaftaran Anda sebagai ${roleLabel} di platform Sobat Ceria telah ditinjau dan DISETUJUI oleh Admin.\n\nAnda sekarang dapat login ke akun Sobat Ceria menggunakan email ini (${target.email}) untuk mengakses ${accessDesc}.\n\nJika ada pertanyaan, silakan hubungi tim kami via WhatsApp di 0812-3456-7890.\n\nSelamat bergabung di ekosistem Sobat Ceria!\n\nSalam hangat,\nTim Sobat Ceria`
@@ -763,12 +804,45 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
                   Akun Berhasil Disetujui! 🎉
                 </Text>
 
-                <Text className="text-xs text-gray-600 font-medium text-center leading-relaxed mb-5 max-w-sm">
+                <Text className="text-xs text-gray-600 font-medium text-center leading-relaxed mb-4 max-w-sm">
                   Akun <Text className="font-bold text-[#162E5C]">{approvedApplicant.name}</Text> sekarang sudah{' '}
                   <Text className="font-bold text-emerald-600">Aktif</Text> sebagai{' '}
                   <Text className="font-bold">{ROLES[approvedApplicant.role]?.label}</Text>.
-                  Kirim kabar gembira ini ke pelamar:
                 </Text>
+
+                {/* Status Pengiriman Email Otomatis */}
+                {emailStatus !== 'idle' && (
+                  <View
+                    className={`w-full rounded-2xl p-3 mb-4 border flex-row items-center gap-2.5 ${
+                      emailStatus === 'sent'
+                        ? 'bg-emerald-50 border-emerald-200'
+                        : emailStatus === 'sending'
+                        ? 'bg-blue-50 border-blue-200'
+                        : 'bg-amber-50 border-amber-200'
+                    }`}
+                  >
+                    {emailStatus === 'sending' ? (
+                      <ActivityIndicator size="small" color="#2563EB" />
+                    ) : (
+                      <Feather
+                        name={emailStatus === 'sent' ? 'mail' : 'alert-circle'}
+                        size={15}
+                        color={emailStatus === 'sent' ? '#059669' : '#D97706'}
+                      />
+                    )}
+                    <Text
+                      className={`text-[11px] font-semibold flex-1 text-left ${
+                        emailStatus === 'sent'
+                          ? 'text-emerald-800'
+                          : emailStatus === 'sending'
+                          ? 'text-blue-800'
+                          : 'text-amber-800'
+                      }`}
+                    >
+                      {emailStatusNote}
+                    </Text>
+                  </View>
+                )}
 
                 {/* Option 1: WhatsApp */}
                 <TouchableOpacity
@@ -779,13 +853,15 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
                   <Text className="text-white text-xs font-black">📲 Kirim Kabar via WhatsApp</Text>
                 </TouchableOpacity>
 
-                {/* Option 2: Email */}
+                {/* Option 2: Email Manual / Kirim Ulang */}
                 <TouchableOpacity
                   onPress={() => handleSendEmail(approvedApplicant)}
                   className="w-full bg-white border border-gray-200 hover:bg-gray-50 py-3 rounded-2xl items-center justify-center flex-row gap-2 active:scale-98 transition mb-3"
                 >
                   <Feather name="mail" size={15} color="#4B5563" />
-                  <Text className="text-gray-700 text-xs font-bold">✉️ Kirim Email Notifikasi</Text>
+                  <Text className="text-gray-700 text-xs font-bold">
+                    {emailStatus === 'sent' ? '✉️ Kirim Email Tambahan (Manual)' : '✉️ Kirim Email Manual'}
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Tutup */}
