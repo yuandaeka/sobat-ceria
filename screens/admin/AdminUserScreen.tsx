@@ -131,6 +131,8 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
     const accessDesc =
       target.role === 'volunteer'
         ? 'jadwal kegiatan, absensi, dan dokumentasi volunteer'
+        : target.role === 'collaboration'
+        ? 'dashboard kolaborasi, manajemen proyek, dan dokumen MoU'
         : 'dashboard mengajar, materi, dan jadwal kelas';
     const text = encodeURIComponent(
       `Halo Kak ${target.name}! 🎉\n\nSelamat, pendaftaran Anda sebagai *${roleLabel}* di Sobat Ceria telah *DISETUJUI* oleh Admin.\n\nAnda sekarang dapat login ke platform Sobat Ceria di http://localhost:8082 untuk mulai mengakses ${accessDesc}.\n\nSalam hangat,\n*Tim Sobat Ceria*`
@@ -143,6 +145,8 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
     const accessDesc =
       target.role === 'volunteer'
         ? 'dashboard volunteer, jadwal kegiatan, dan absensi'
+        : target.role === 'collaboration'
+        ? 'dashboard kolaborasi, proyek bersama, dan dokumen MoU'
         : 'dashboard, modul kelas, dan presensi murid';
     const subject = encodeURIComponent(`Pendaftaran ${roleLabel} Sobat Ceria Telah Disetujui 🎉`);
     const body = encodeURIComponent(
@@ -626,6 +630,46 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
                           </Text>
                           <Text className="text-xs text-gray-700 font-medium mt-0.5">
                             {selectedApplicant.details.motivation}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                )}
+
+                {/* Kualifikasi Khusus Collaboration */}
+                {selectedApplicant.role === 'collaboration' && (
+                  <View className="mb-5 flex-col gap-3">
+                    <Text className="text-xs font-black uppercase tracking-wider text-gray-400">
+                      Data Profil Kolaborasi
+                    </Text>
+
+                    <View className="bg-sky-50/70 border border-sky-200/70 rounded-2xl p-4 flex-col gap-2.5">
+                      <View>
+                        <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          Nama Instansi / Lembaga / Komunitas
+                        </Text>
+                        <Text className="text-xs font-black text-sky-950 mt-0.5">
+                          {selectedApplicant.details?.institutionName || '-'}
+                        </Text>
+                      </View>
+
+                      <View className="pt-2 border-t border-sky-200/50">
+                        <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          Bentuk Kolaborasi
+                        </Text>
+                        <Text className="text-xs font-bold text-gray-800 mt-0.5">
+                          {selectedApplicant.details?.projectType || '-'}
+                        </Text>
+                      </View>
+
+                      {selectedApplicant.details?.proposalNote ? (
+                        <View className="pt-2 border-t border-sky-200/50">
+                          <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                            Ringkasan Ide / Proposal
+                          </Text>
+                          <Text className="text-xs text-gray-700 font-medium mt-0.5">
+                            {selectedApplicant.details.proposalNote}
                           </Text>
                         </View>
                       ) : null}

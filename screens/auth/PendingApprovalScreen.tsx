@@ -103,6 +103,8 @@ export default function PendingApprovalScreen({
               oleh Admin. Anda sekarang dapat mengakses{' '}
               {approvedUser.role === 'volunteer'
                 ? 'dashboard volunteer, jadwal kegiatan, dan absensi pendampingan.'
+                : approvedUser.role === 'collaboration'
+                ? 'dashboard kolaborasi, manajemen proyek bersama, dan dokumen MoU.'
                 : 'dashboard mengajar, jadwal kelas, dan presensi murid.'}
             </Text>
 

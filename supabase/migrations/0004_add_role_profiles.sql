@@ -511,4 +511,24 @@ where p.role = 'volunteer'
 on conflict (profile_id) do update set
   status_approval = excluded.status_approval;
 
+-- 7. Masukkan semua collaboration ke collaboration_profiles
+insert into public.collaboration_profiles (
+  profile_id,
+  institution_name,
+  project_type,
+  proposal_note,
+  status_approval
+)
+select
+  p.id,
+  coalesce(u.raw_user_meta_data->>'institution_name', '-'),
+  coalesce(u.raw_user_meta_data->>'project_type', '-'),
+  coalesce(u.raw_user_meta_data->>'proposal_note', ''),
+  coalesce(p.status, 'pending')
+from public.profiles p
+join auth.users u on u.id = p.id
+where p.role = 'collaboration'
+on conflict (profile_id) do update set
+  status_approval = excluded.status_approval;
+
 

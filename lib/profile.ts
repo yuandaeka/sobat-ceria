@@ -347,19 +347,24 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
       return localApplicants;
     }
 
-    // Ambil data pendukung teacher_profiles & volunteer_profiles untuk memperkaya detail pelamar
+    // Ambil data pendukung teacher_profiles, volunteer_profiles & collaboration_profiles untuk memperkaya detail pelamar
     let teacherMap = new Map<string, any>();
     let volunteerMap = new Map<string, any>();
+    let collaborationMap = new Map<string, any>();
     try {
-      const [{ data: teachers }, { data: volunteers }] = await Promise.all([
+      const [{ data: teachers }, { data: volunteers }, { data: collaborations }] = await Promise.all([
         supabase.from('teacher_profiles').select('*'),
         supabase.from('volunteer_profiles').select('*'),
+        supabase.from('collaboration_profiles').select('*'),
       ]);
       if (teachers) {
         teachers.forEach((t) => teacherMap.set(t.profile_id, t));
       }
       if (volunteers) {
         volunteers.forEach((v) => volunteerMap.set(v.profile_id, v));
+      }
+      if (collaborations) {
+        collaborations.forEach((c) => collaborationMap.set(c.profile_id, c));
       }
     } catch {
       // ignore
@@ -382,6 +387,13 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
           occupation: v.occupation || '-',
           availability: v.availability || '-',
           motivation: v.motivation || '-',
+        };
+      } else if (p.role === 'collaboration' && collaborationMap.has(p.id)) {
+        const c = collaborationMap.get(p.id);
+        details = {
+          institutionName: c.institution_name || '-',
+          projectType: c.project_type || '-',
+          proposalNote: c.proposal_note || '-',
         };
       }
 
@@ -510,7 +522,27 @@ export async function updateUserAccountStatus(
     } else if (role === 'partner') {
       await supabase.from('partner_profiles').update({ status_approval: status }).eq('profile_id', userId);
     } else if (role === 'collaboration') {
-      await supabase.from('collaboration_profiles').update({ status_approval: status }).eq('profile_id', userId);
+      const details = fullData?.details || {};
+      const { data: existingCollab } = await supabase
+        .from('collaboration_profiles')
+        .select('profile_id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+
+      if (existingCollab) {
+        await supabase
+          .from('collaboration_profiles')
+          .update({ status_approval: status })
+          .eq('profile_id', userId);
+      } else {
+        await supabase.from('collaboration_profiles').upsert({
+          profile_id: userId,
+          institution_name: details.institutionName || '-',
+          project_type: details.projectType || '-',
+          proposal_note: details.proposalNote || '',
+          status_approval: status,
+        });
+      }
     }
   } catch (err: any) {
     console.warn('Update role table notice:', err.message);
