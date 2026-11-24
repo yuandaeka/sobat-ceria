@@ -1,110 +1,60 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, TouchableOpacity, ScrollView, Platform, Dimensions, Image, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from './lib/supabase';
-import { fetchUserProfile } from './lib/profile';
+import { fetchUserProfile, clearProfileRole } from './lib/profile';
 import { syncProfileToSheet } from './lib/sheets';
 
 const logoImg = require('./assets/sobatceria.png');
 
-// Import Screens
-import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
-import CatalogScreen from './screens/CatalogScreen';
-import ScreeningScreen from './screens/ScreeningScreen';
-import RewardScreen from './screens/RewardScreen';
-import ProfileScreen from './screens/ProfileScreen';
+// Import Screens (Auth)
+import LoginScreen from './screens/auth/LoginScreen';
+import RoleSelectionScreen from './screens/auth/RoleSelectionScreen';
+
+// Import Screens (Orang Tua)
+import ParentDashboard from './screens/parent/ParentDashboard';
+
+// Import Screens (Role Lainnya)
+import VolunteerDashboard from './screens/volunteer/VolunteerDashboard';
+import TeacherDashboard from './screens/teacher/TeacherDashboard';
+import CollaborationDashboard from './screens/collaboration/CollaborationDashboard';
+import PartnerDashboard from './screens/partner/PartnerDashboard';
+import AdminDashboard from './screens/admin/AdminDashboard';
 
 // Import Types
 import { UserProfile } from './types';
 
-const Tab = createBottomTabNavigator();
+// --- ROLE-BASED DASHBOARD ROUTER ---
+function RoleDashboard({ user, setUser }: { user: UserProfile; setUser: (u: UserProfile | null) => void }) {
+  const onLogout = () => setUser(null);
 
+  const onSwitchRole = async () => {
+    try {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) await clearProfileRole(data.user.id);
+    } catch {
+      // best-effort: tetap lanjutkan ke pemilihan role
+    }
+    setUser({ ...user, role: null });
+  };
 
-
-// --- CORE APP STACK ---
-function AppCore({ user, setUser }: { user: UserProfile | null; setUser: (u: UserProfile | null) => void }) {
-  return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarIcon: ({ focused }) => {
-            let iconName: any = 'home';
-            if (route.name === 'Beranda') {
-              iconName = 'home';
-            } else if (route.name === 'Kelas') {
-              iconName = 'shopping-bag';
-            } else if (route.name === 'Screening') {
-              iconName = 'activity';
-            } else if (route.name === 'Worksheet') {
-              iconName = 'gift';
-            } else if (route.name === 'Profil') {
-              iconName = 'user';
-            }
-            return (
-              <Feather
-                name={iconName}
-                size={18}
-                color={focused ? '#D82B5A' : '#6B7280'}
-              />
-            );
-          },
-          tabBarActiveTintColor: '#D82B5A',
-          tabBarInactiveTintColor: '#6B7280',
-          tabBarStyle: {
-            backgroundColor: '#FFFFFF',
-            borderTopWidth: 0,
-            height: 58,
-            borderRadius: 22,
-            position: 'absolute',
-            bottom: 12,
-            left: 12,
-            right: 12,
-            shadowColor: '#1B254B',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.08,
-            shadowRadius: 10,
-            elevation: 3,
-            paddingBottom: 0,
-          },
-          tabBarLabelStyle: {
-            fontSize: 9,
-            fontWeight: 'bold',
-            marginTop: -2,
-            marginBottom: 2,
-          },
-        })}
-      >
-        <Tab.Screen name="Beranda">
-          {(props) => <HomeScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Kelas">
-          {(props) => <CatalogScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Screening">
-          {(props) => <ScreeningScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Worksheet">
-          {(props) => <RewardScreen {...props} user={user} />}
-        </Tab.Screen>
-        <Tab.Screen name="Profil">
-          {(props) => (
-            <ProfileScreen
-              {...props}
-              user={user}
-              onLogout={() => setUser(null)}
-              onLogin={(profile) => setUser(profile)}
-            />
-          )}
-        </Tab.Screen>
-      </Tab.Navigator>
-    </NavigationContainer>
-  );
+  switch (user.role) {
+    case 'volunteer':
+      return <VolunteerDashboard user={user} onLogout={onLogout} onSwitchRole={onSwitchRole} />;
+    case 'teacher':
+      return <TeacherDashboard user={user} onLogout={onLogout} onSwitchRole={onSwitchRole} />;
+    case 'collaboration':
+      return <CollaborationDashboard user={user} onLogout={onLogout} onSwitchRole={onSwitchRole} />;
+    case 'partner':
+      return <PartnerDashboard user={user} onLogout={onLogout} onSwitchRole={onSwitchRole} />;
+    case 'admin':
+      return <AdminDashboard user={user} onLogout={onLogout} onSwitchRole={onSwitchRole} />;
+    case 'parent':
+    default:
+      return <ParentDashboard user={user} setUser={setUser} onSwitchRole={onSwitchRole} />;
+  }
 }
 
 // TESTIMONIAL DATA ACCORDING TO PRD PERSONAS
@@ -332,22 +282,22 @@ export default function App() {
     setTestimonialIdx((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
   };
 
-  // --- RENDER FULL WEB APP MODE (No Phone Frame) ---
+  // --- RENDER FULL WEB APP MODE (Full-Width Web Layout) ---
   if (viewMode === 'app') {
     return (
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <View className="flex-1 bg-brand-cream relative">
-          {/* Main App Workspace (Clean Layout without Phone Frame) */}
-          <View className="flex-1 w-full bg-brand-cream justify-center items-center">
-            <View className="flex-1 w-full max-w-3xl bg-white shadow-sm overflow-hidden">
-              {/* Wajib login dulu sebelum masuk aplikasi */}
-              {!user ? (
-                <LoginScreen onLogin={(profile) => setUser(profile)} />
-              ) : (
-                <AppCore user={user} setUser={setUser} />
-              )}
-            </View>
+          {/* Main App Workspace (full-width web layout) */}
+          <View className="flex-1 w-full bg-brand-cream">
+            {/* Wajib login dulu sebelum masuk aplikasi */}
+            {!user ? (
+              <LoginScreen onLogin={(profile) => setUser(profile)} />
+            ) : !user.role ? (
+              <RoleSelectionScreen user={user} onSelect={(role) => setUser({ ...user, role })} />
+            ) : (
+              <RoleDashboard user={user} setUser={setUser} />
+            )}
           </View>
         </View>
       </SafeAreaProvider>

@@ -2,29 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform, Linking, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { UserProfile } from '../types';
-import LoginScreen from './LoginScreen';
-import { signOut } from '../lib/auth';
-import { supabase } from '../lib/supabase';
-import { upsertProfile, updateChild, addChild, fetchUserProfile } from '../lib/profile';
-import { fetchOrders, OrderData } from '../lib/data';
-import { syncProfileToSheet } from '../lib/sheets';
+import { UserProfile } from '../../types';
+import LoginScreen from '../auth/LoginScreen';
+import { signOut } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+import { upsertProfile, updateChild, addChild, fetchUserProfile } from '../../lib/profile';
+import { fetchOrders, OrderData } from '../../lib/data';
+import { syncProfileToSheet } from '../../lib/sheets';
 
 interface ProfileScreenProps {
   user: UserProfile | null;
   onLogout: () => void;
   onLogin?: (user: UserProfile) => void;
+  onSwitchRole?: () => void;
 }
 
-export default function ProfileScreen({ user, onLogout, onLogin }: ProfileScreenProps) {
+export default function ProfileScreen({ user, onLogout, onLogin, onSwitchRole }: ProfileScreenProps) {
   if (!user) {
     return <LoginScreen onLogin={onLogin || (() => {})} />;
   }
 
-  return <ProfileView key={user.email} user={user} onLogout={onLogout} onLogin={onLogin || (() => {})} />;
+  return <ProfileView key={user.email} user={user} onLogout={onLogout} onLogin={onLogin || (() => {})} onSwitchRole={onSwitchRole} />;
 }
 
-function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout: () => void; onLogin: (user: UserProfile) => void }) {
+function ProfileView({ user, onLogout, onLogin, onSwitchRole }: { user: UserProfile; onLogout: () => void; onLogin: (user: UserProfile) => void; onSwitchRole?: () => void }) {
   const child = user?.children?.[0] || { name: 'Arka', age: 4, specialNeeds: '' };
 
   // Edit mode state
@@ -126,6 +127,10 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
   const handleLogout = async () => {
     await signOut();
     onLogout();
+  };
+
+  const handleSwitchRole = async () => {
+    onSwitchRole?.();
   };
 
   const handleOpenDrive = () => {
@@ -439,6 +444,17 @@ function ProfileView({ user, onLogout, onLogin }: { user: UserProfile; onLogout:
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Ganti Peran */}
+        {onSwitchRole && (
+          <TouchableOpacity
+            className="bg-white border border-gray-200 py-3.5 rounded-[1.75rem] items-center flex-row justify-center gap-2 shadow-sm transition-transform active:scale-98 mb-3"
+            onPress={handleSwitchRole}
+          >
+            <Feather name="refresh-cw" size={15} color="#162E5C" />
+            <Text className="text-[#162E5C] text-xs font-extrabold">Ganti Peran / Role</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Log Out Button */}
         <TouchableOpacity

@@ -8,11 +8,20 @@ export interface Child {
   specialNeeds?: string; // e.g., "Speech Delay", "ADHD", or leave empty/undefined for typical children
 }
 
+export type UserRole =
+  | 'parent'
+  | 'volunteer'
+  | 'teacher'
+  | 'collaboration'
+  | 'partner'
+  | 'admin';
+
 export interface UserProfile {
   parentName: string;
   email: string;
   phone: string;
   children: Child[];
+  role?: UserRole | null;
 }
 
 export interface Course {

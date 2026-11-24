@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Platform, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { UserProfile } from '../types';
-import { supabase } from '../lib/supabase';
-import { signInWithGoogle } from '../lib/auth';
-import { fetchUserProfile, upsertProfile, addChild } from '../lib/profile';
+import { UserProfile } from '../../types';
+import { supabase } from '../../lib/supabase';
+import { signInWithGoogle } from '../../lib/auth';
+import { fetchUserProfile, upsertProfile, addChild } from '../../lib/profile';
 
 interface LoginScreenProps {
   onLogin: (user: UserProfile) => void;
@@ -128,7 +128,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         <View className="items-center mb-6">
           <View className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-[#D82B5A]/20 shadow-md items-center justify-center p-1 mb-3">
             <Image
-              source={require('../assets/sobatceria.png')}
+              source={require('../../assets/sobatceria.png')}
               style={{ width: '100%', height: '100%', borderRadius: 999 }}
               resizeMode="contain"
             />
@@ -169,7 +169,6 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
             <Text className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">atau daftar manual</Text>
             <View className="flex-1 h-px bg-gray-200" />
           </View>
-
           {/* Form input fields */}
           <Text className="text-[10px] font-extrabold text-[#162E5C] mb-1 uppercase tracking-wider">Nama Lengkap Orang Tua</Text>
           <TextInput

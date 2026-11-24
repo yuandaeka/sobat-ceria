@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { ScreeningResult } from '../types';
-import { fetchScreeningResults } from '../lib/data';
+import { ScreeningResult } from '../../types';
+import { fetchScreeningResults } from '../../lib/data';
 
 const MOCK_RESULTS: ScreeningResult[] = [
   {

@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { Course } from '../types';
-import CheckoutModal from '../components/CheckoutModal';
-import { fetchCourses } from '../lib/data';
+import { Course } from '../../types';
+import CheckoutModal from '../../components/CheckoutModal';
+import { fetchCourses } from '../../lib/data';
 
 // Fallback jika data dari Supabase belum terisi
 const FALLBACK_COURSES: Course[] = [
@@ -102,14 +102,14 @@ const FALLBACK_COURSES: Course[] = [
 const getProgramImage = (course: Course) => {
   const key = (course.title || '').toLowerCase();
   const images: Record<string, any> = {
-    'mini stimulation': require('../assets/dokumentasi sobat/ministimulation-program.jpeg'),
-    communication: require('../assets/dokumentasi sobat/communication-program.jpeg'),
-    'seminar parenting': require('../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
-    'art and craft': require('../assets/dokumentasi sobat/program-art.jpeg'),
-    science: require('../assets/dokumentasi sobat/program-science.jpeg'),
-    pottery: require('../assets/dokumentasi sobat/poetry-program.jpeg'),
-    cooking: require('../assets/dokumentasi sobat/cooking-program.jpeg'),
-    outbond: require('../assets/dokumentasi sobat/outbondceria-program.jpeg'),
+    'mini stimulation': require('../../assets/dokumentasi sobat/ministimulation-program.jpeg'),
+    communication: require('../../assets/dokumentasi sobat/communication-program.jpeg'),
+    'seminar parenting': require('../../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
+    'art and craft': require('../../assets/dokumentasi sobat/program-art.jpeg'),
+    science: require('../../assets/dokumentasi sobat/program-science.jpeg'),
+    pottery: require('../../assets/dokumentasi sobat/poetry-program.jpeg'),
+    cooking: require('../../assets/dokumentasi sobat/cooking-program.jpeg'),
+    outbond: require('../../assets/dokumentasi sobat/outbondceria-program.jpeg'),
   };
   const matched = Object.keys(images).find((k) => key.includes(k));
   return matched ? images[matched] : images['mini stimulation'];

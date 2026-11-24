@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { UserProfile } from '../types';
+import { UserProfile, UserRole } from '../types';
 
 export interface ProfileWithChildren {
   profile: NonNullable<UserProfile>;
@@ -54,6 +54,7 @@ export async function fetchUserProfile(userId: string): Promise<ProfileWithChild
       parentName: profile?.parent_name || metaName,
       email: profile?.email || '',
       phone: profile?.phone || '',
+      role: (profile?.role as UserRole | null) ?? null,
       children: (children || []).map((c) => ({
         id: c.id,
         name: c.name,
@@ -77,6 +78,22 @@ export async function upsertProfile(userId: string, data: Partial<{ parentName: 
       },
       { onConflict: 'id' }
     );
+  if (error) throw error;
+}
+
+export async function updateProfileRole(userId: string, role: UserRole) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ role })
+    .eq('id', userId);
+  if (error) throw error;
+}
+
+export async function clearProfileRole(userId: string) {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ role: null })
+    .eq('id', userId);
   if (error) throw error;
 }
 

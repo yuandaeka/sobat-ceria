@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { fetchWorksheets, fetchVouchers, WorksheetData, VoucherData } from '../lib/data';
+import { fetchWorksheets, fetchVouchers, WorksheetData, VoucherData } from '../../lib/data';
 
 interface Worksheet {
   id: string;

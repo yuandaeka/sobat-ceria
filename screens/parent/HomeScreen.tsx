@@ -12,11 +12,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { BookItem, Course } from '../types';
-import CheckoutModal from '../components/CheckoutModal';
-import { fetchCourses } from '../lib/data';
+import { BookItem, Course } from '../../types';
+import CheckoutModal from '../../components/CheckoutModal';
+import { fetchCourses } from '../../lib/data';
 
-const bannerImg = require('../assets/online_learning_banner.png');
+const bannerImg = require('../../assets/online_learning_banner.png');
 
 // --- MOCK BOOK CATALOG DATA (Matching Image & Sobat Ceria Educational Focus) ---
 export const MOCK_BOOKS: BookItem[] = [
@@ -286,7 +286,7 @@ export default function HomeScreen({ user, navigation }: { user: any; navigation
                 subtitle: 'Edukasi Orang Tua',
                 age: 'Untuk Ortu',
                 price: 49000,
-                image: require('../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
+                image: require('../../assets/dokumentasi sobat/seminarparenting-program.jpeg'),
               },
               {
                 id: 'p-science',
@@ -294,7 +294,7 @@ export default function HomeScreen({ user, navigation }: { user: any; navigation
                 subtitle: 'Eksperimen STEAM',
                 age: 'Usia 3-7 Thn',
                 price: 69000,
-                image: require('../assets/dokumentasi sobat/program-science.jpeg'),
+                image: require('../../assets/dokumentasi sobat/program-science.jpeg'),
               },
               {
                 id: 'p-cooking',
@@ -302,7 +302,7 @@ export default function HomeScreen({ user, navigation }: { user: any; navigation
                 subtitle: 'Kemandirian & Life Skill',
                 age: 'Usia 3-7 Thn',
                 price: 85000,
-                image: require('../assets/dokumentasi sobat/cooking-program.jpeg'),
+                image: require('../../assets/dokumentasi sobat/cooking-program.jpeg'),
               },
               {
                 id: 'p-outbond',
@@ -310,7 +310,7 @@ export default function HomeScreen({ user, navigation }: { user: any; navigation
                 subtitle: 'Permainan Fisik Aktif',
                 age: 'Usia 2-7 Thn',
                 price: 69000,
-                image: require('../assets/dokumentasi sobat/outbondceria-program.jpeg'),
+                image: require('../../assets/dokumentasi sobat/outbondceria-program.jpeg'),
               },
             ].map((program) => (
               <TouchableOpacity
@@ -369,7 +369,7 @@ export default function HomeScreen({ user, navigation }: { user: any; navigation
             <View className="flex-row items-center gap-3.5 flex-1 pr-2">
               <View className="w-14 h-18 rounded-xl overflow-hidden shadow-xs bg-gray-200 border border-rose-100">
                 <Image 
-                  source={require('../assets/dokumentasi sobat/program-science.jpeg')} 
+                  source={require('../../assets/dokumentasi sobat/program-science.jpeg')} 
                   className="w-full h-full object-cover" 
                   style={{ width: '100%', height: '100%' }} 
                 />
