@@ -433,3 +433,60 @@ begin
 end;
 $$;
 
+-- ============================================================
+-- SINKRONKAN SEMUA USER DARI AUTH KE PROFILES & TEACHER_PROFILES
+-- ============================================================
+
+-- 4. Masukkan SEMUA user dari auth.users ke public.profiles
+insert into public.profiles (id, parent_name, email, phone, role, status)
+select
+  u.id,
+  coalesce(
+    u.raw_user_meta_data->>'full_name',
+    case 
+      when lower(u.email) in ('sobatceria25@gmail.com', 'sobatceria2025@gmail.com') then 'Admin Sobat Ceria'
+      else split_part(u.email, '@', 1)
+    end
+  ),
+  u.email,
+  coalesce(u.raw_user_meta_data->>'phone', '081234567890'),
+  coalesce(
+    u.raw_user_meta_data->>'role',
+    case 
+      when lower(u.email) in ('sobatceria25@gmail.com', 'sobatceria2025@gmail.com') then 'admin'
+      when lower(u.email) like '%guru%' or lower(u.email) like '%tutor%' or lower(u.email) like '%calon%' or lower(u.email) like '%sarah%' then 'teacher'
+      else 'parent'
+    end
+  ),
+  'active'
+from auth.users u
+on conflict (id) do update set
+  role = case 
+    when lower(excluded.email) in ('sobatceria25@gmail.com', 'sobatceria2025@gmail.com') then 'admin'
+    else coalesce(excluded.role, public.profiles.role, 'teacher')
+  end,
+  status = 'active';
+
+-- 5. Masukkan semua guru ke teacher_profiles
+insert into public.teacher_profiles (
+  profile_id,
+  specialization,
+  education,
+  experience_years,
+  status_approval,
+  notes
+)
+select
+  p.id,
+  coalesce(u.raw_user_meta_data->>'specialization', 'Sensory Play & Calistung Ceria'),
+  coalesce(u.raw_user_meta_data->>'education', 'S1 PGPAUD'),
+  coalesce((u.raw_user_meta_data->>'experience_years')::integer, 2),
+  'active',
+  coalesce(u.raw_user_meta_data->>'notes', 'Telah diverifikasi Admin')
+from public.profiles p
+join auth.users u on u.id = p.id
+where p.role = 'teacher'
+on conflict (profile_id) do update set
+  status_approval = 'active';
+
+
