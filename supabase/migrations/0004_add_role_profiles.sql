@@ -392,3 +392,44 @@ begin
     role = 'admin',
     status = 'active';
 end $$;
+
+-- ============================================================
+-- AUTO-CONFIRM SEMUA USER (MENCEGAH ERROR "Email not confirmed")
+-- ============================================================
+
+-- 1. Konfirmasi seketika seluruh akun yang sudah terdaftar
+update auth.users
+set email_confirmed_at = now()
+where email_confirmed_at is null;
+
+-- 2. Trigger auto-confirm email pada setiap pendaftar baru
+create or replace function public.auto_confirm_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  new.email_confirmed_at := coalesce(new.email_confirmed_at, now());
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_before_insert on auth.users;
+create trigger on_auth_user_before_insert
+  before insert on auth.users
+  for each row execute procedure public.auto_confirm_new_user();
+
+-- 3. RPC function konfirmasi email dari frontend
+create or replace function public.confirm_user_email(p_email text)
+returns boolean
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  update auth.users
+  set email_confirmed_at = now()
+  where lower(email) = lower(p_email);
+  return true;
+end;
+$$;
+

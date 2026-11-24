@@ -102,9 +102,9 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
   const handleUpdateStatus = async (targetUser: AdminUserData, nextStatus: AccountStatus) => {
     setProcessingId(targetUser.id);
     try {
-      // Update di Supabase jika bukan mock ID
+      // Update di Supabase & sinkronkan detail lengkap pelamar
       if (!targetUser.id.startsWith('mock-')) {
-        await updateUserAccountStatus(targetUser.id, nextStatus, targetUser.role);
+        await updateUserAccountStatus(targetUser.id, nextStatus, targetUser.role, targetUser);
       }
 
       // Update state lokal

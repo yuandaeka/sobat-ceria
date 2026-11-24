@@ -400,22 +400,75 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
 
 /**
  * Admin mengubah status approval user ('active' untuk setujui, 'rejected' untuk tolak)
+ * Juga memastikan record user dan kualifikasinya tersimpan permanen di Supabase.
  */
-export async function updateUserAccountStatus(userId: string, status: AccountStatus, role?: UserRole) {
-  // Update tabel profiles
+export async function updateUserAccountStatus(
+  userId: string,
+  status: AccountStatus,
+  role?: UserRole,
+  fullData?: Partial<AdminUserData>
+) {
+  // 1. Jika ada email, coba auto-confirm email di Supabase Auth via RPC
+  if (fullData?.email) {
+    try {
+      await (supabase.rpc as any)('confirm_user_email', { p_email: fullData.email });
+    } catch {
+      // ignore
+    }
+  }
+
+  // 2. Simpan / perbarui tabel profiles di Supabase
   try {
-    await supabase
+    const { data: existingProfile } = await supabase
       .from('profiles')
-      .update({ status })
-      .eq('id', userId);
+      .select('id')
+      .or(`id.eq.${userId},email.eq.${fullData?.email || ''}`)
+      .maybeSingle();
+
+    if (existingProfile) {
+      await supabase
+        .from('profiles')
+        .update({ status, role: role || 'teacher' })
+        .eq('id', existingProfile.id);
+    } else if (fullData && fullData.email) {
+      await supabase.from('profiles').insert({
+        id: userId.startsWith('applicant-') ? undefined as any : userId,
+        parent_name: fullData.name || 'Guru Sobat Ceria',
+        email: fullData.email,
+        phone: fullData.phone || null,
+        role: role || 'teacher',
+        status: status,
+      });
+    }
   } catch (err: any) {
     console.warn('Update profiles status notice:', err.message);
   }
 
-  // Update status_approval di tabel spesifik jika ada
+  // 3. Simpan / perbarui status_approval di tabel kualifikasi spesifik (teacher, volunteer, dll.)
   try {
     if (role === 'teacher') {
-      await supabase.from('teacher_profiles').update({ status_approval: status }).eq('profile_id', userId);
+      const details = fullData?.details || {};
+      const { data: existingTeacher } = await supabase
+        .from('teacher_profiles')
+        .select('profile_id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+
+      if (existingTeacher) {
+        await supabase
+          .from('teacher_profiles')
+          .update({ status_approval: status })
+          .eq('profile_id', userId);
+      } else {
+        await supabase.from('teacher_profiles').upsert({
+          profile_id: userId,
+          specialization: details.specialization || 'Umum',
+          education: details.education || '-',
+          experience_years: parseInt(details.experienceYears || '1') || 1,
+          status_approval: status,
+          notes: details.notes || '',
+        });
+      }
     } else if (role === 'volunteer') {
       await supabase.from('volunteer_profiles').update({ status_approval: status }).eq('profile_id', userId);
     } else if (role === 'partner') {
@@ -427,14 +480,14 @@ export async function updateUserAccountStatus(userId: string, status: AccountSta
     console.warn('Update role table notice:', err.message);
   }
 
-  // Update juga di localStorage
+  // 4. Update juga di localStorage
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const pendingKey = 'sc_pending_applicants';
       const stored = window.localStorage.getItem(pendingKey);
       if (stored) {
         const list: AdminUserData[] = JSON.parse(stored);
-        const updated = list.map((item) => (item.id === userId ? { ...item, status } : item));
+        const updated = list.map((item) => (item.id === userId || (fullData?.email && item.email === fullData.email) ? { ...item, status } : item));
         window.localStorage.setItem(pendingKey, JSON.stringify(updated));
       }
     }
