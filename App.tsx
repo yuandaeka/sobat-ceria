@@ -1554,7 +1554,7 @@ export default function App() {
               </Text>
             </View>
 
-            <View className="max-w-3xl mx-auto bg-white rounded-[2.5rem] p-8 md:p-12 border-2 border-[#5A3B8B]/40 shadow-sm relative card-hover-effect">
+            <View className="max-w-3xl mx-auto bg-white rounded-[2.5rem] p-6 md:p-12 border-2 border-[#5A3B8B]/40 shadow-sm relative card-hover-effect">
               <View className="flex-row gap-1 mb-4">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Feather key={s} name="star" size={16} color="#FFD100" />
@@ -1565,21 +1565,21 @@ export default function App() {
                 {currentTestimonial.text}
               </Text>
 
-              <View className="flex-row items-center justify-between pt-6 border-t border-gray-100">
-                <View className="flex-row items-center gap-4">
+              <View className="flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-gray-100">
+                <View className="flex-row items-center gap-3.5 flex-1 min-w-0">
                   <Image
                     source={{ uri: currentTestimonial.avatar }}
-                    className="w-12 h-12 rounded-full border-2 border-[#5A3B8B]"
+                    className="w-12 h-12 rounded-full border-2 border-[#5A3B8B] shrink-0"
                     style={{ width: 48, height: 48, borderRadius: 24 }}
                   />
-                  <View>
+                  <View className="flex-1 min-w-0">
                     <Text className="font-extrabold text-[#162E5C] text-sm">{currentTestimonial.name}</Text>
                     <Text className="text-xs text-[#D82B5A] font-bold mt-0.5">{currentTestimonial.role}</Text>
                   </View>
                 </View>
 
                 {/* Controls */}
-                <View className="flex-row gap-2">
+                <View className="flex-row gap-2 self-end sm:self-auto shrink-0">
                   <TouchableOpacity
                     className="w-10 h-10 rounded-full border border-gray-200 bg-white items-center justify-center hover:bg-gray-50 shadow-sm transition-transform active:scale-95"
                     onPress={prevTestimonial}
