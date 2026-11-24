@@ -76,6 +76,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
         options: {
           data: {
             full_name: finalName,
+            phone: phone.trim() || '081234567890',
             role: finalRole,
             status: 'active',
           },
@@ -105,6 +106,18 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       }
 
       const userId = (signUpData.session?.user || signUpData.user)!.id;
+
+      // Jika session masih null (karena Confirm email masih aktif di Dashboard meski trigger auto-confirm jalan),
+      // coba signInWithPassword agar auth.uid() aktif untuk insert data anak (children)
+      if (!signUpData.session) {
+        await supabase.auth
+          .signInWithPassword({
+            email: trimmedEmail,
+            password: password.trim(),
+          })
+          .catch(() => {});
+      }
+
       await upsertProfile(userId, {
         parentName: finalName,
         email: trimmedEmail,
@@ -116,11 +129,15 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       } else {
         const ageNumber = parseInt(childAge.trim()) || 4;
         if (childName.trim()) {
-          await addChild(userId, {
-            name: childName.trim(),
-            age: ageNumber,
-            specialNeeds: specialNeeds.trim() || undefined,
-          });
+          try {
+            await addChild(userId, {
+              name: childName.trim(),
+              age: ageNumber,
+              specialNeeds: specialNeeds.trim() || undefined,
+            });
+          } catch (childErr: any) {
+            console.warn('Simpan data anak notice:', childErr?.message);
+          }
         }
       }
 
