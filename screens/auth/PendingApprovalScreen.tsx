@@ -105,6 +105,8 @@ export default function PendingApprovalScreen({
                 ? 'dashboard volunteer, jadwal kegiatan, dan absensi pendampingan.'
                 : approvedUser.role === 'collaboration'
                 ? 'dashboard kolaborasi, manajemen proyek bersama, dan dokumen MoU.'
+                : approvedUser.role === 'partner'
+                ? 'dashboard mitra, program kemitraan, leads rujukan, dan laporan komisi.'
                 : 'dashboard mengajar, jadwal kelas, dan presensi murid.'}
             </Text>
 

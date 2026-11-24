@@ -347,15 +347,17 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
       return localApplicants;
     }
 
-    // Ambil data pendukung teacher_profiles, volunteer_profiles & collaboration_profiles untuk memperkaya detail pelamar
+    // Ambil data pendukung teacher_profiles, volunteer_profiles, collaboration_profiles & partner_profiles
     let teacherMap = new Map<string, any>();
     let volunteerMap = new Map<string, any>();
     let collaborationMap = new Map<string, any>();
+    let partnerMap = new Map<string, any>();
     try {
-      const [{ data: teachers }, { data: volunteers }, { data: collaborations }] = await Promise.all([
+      const [{ data: teachers }, { data: volunteers }, { data: collaborations }, { data: partners }] = await Promise.all([
         supabase.from('teacher_profiles').select('*'),
         supabase.from('volunteer_profiles').select('*'),
         supabase.from('collaboration_profiles').select('*'),
+        supabase.from('partner_profiles').select('*'),
       ]);
       if (teachers) {
         teachers.forEach((t) => teacherMap.set(t.profile_id, t));
@@ -365,6 +367,9 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
       }
       if (collaborations) {
         collaborations.forEach((c) => collaborationMap.set(c.profile_id, c));
+      }
+      if (partners) {
+        partners.forEach((pt) => partnerMap.set(pt.profile_id, pt));
       }
     } catch {
       // ignore
@@ -394,6 +399,13 @@ export async function fetchAdminUsersList(): Promise<AdminUserData[]> {
           institutionName: c.institution_name || '-',
           projectType: c.project_type || '-',
           proposalNote: c.proposal_note || '-',
+        };
+      } else if (p.role === 'partner' && partnerMap.has(p.id)) {
+        const pt = partnerMap.get(p.id);
+        details = {
+          brandName: pt.brand_name || '-',
+          businessType: pt.business_type || '-',
+          websiteSocial: pt.website_social || '-',
         };
       }
 
@@ -520,7 +532,27 @@ export async function updateUserAccountStatus(
         });
       }
     } else if (role === 'partner') {
-      await supabase.from('partner_profiles').update({ status_approval: status }).eq('profile_id', userId);
+      const details = fullData?.details || {};
+      const { data: existingPartner } = await supabase
+        .from('partner_profiles')
+        .select('profile_id')
+        .eq('profile_id', userId)
+        .maybeSingle();
+
+      if (existingPartner) {
+        await supabase
+          .from('partner_profiles')
+          .update({ status_approval: status })
+          .eq('profile_id', userId);
+      } else {
+        await supabase.from('partner_profiles').upsert({
+          profile_id: userId,
+          brand_name: details.brandName || '-',
+          business_type: details.businessType || '-',
+          website_social: details.websiteSocial || '',
+          status_approval: status,
+        });
+      }
     } else if (role === 'collaboration') {
       const details = fullData?.details || {};
       const { data: existingCollab } = await supabase

@@ -133,6 +133,8 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
         ? 'jadwal kegiatan, absensi, dan dokumentasi volunteer'
         : target.role === 'collaboration'
         ? 'dashboard kolaborasi, manajemen proyek, dan dokumen MoU'
+        : target.role === 'partner'
+        ? 'dashboard mitra, program kemitraan, leads rujukan, dan laporan komisi'
         : 'dashboard mengajar, materi, dan jadwal kelas';
     const text = encodeURIComponent(
       `Halo Kak ${target.name}! 🎉\n\nSelamat, pendaftaran Anda sebagai *${roleLabel}* di Sobat Ceria telah *DISETUJUI* oleh Admin.\n\nAnda sekarang dapat login ke platform Sobat Ceria di http://localhost:8082 untuk mulai mengakses ${accessDesc}.\n\nSalam hangat,\n*Tim Sobat Ceria*`
@@ -147,6 +149,8 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
         ? 'dashboard volunteer, jadwal kegiatan, dan absensi'
         : target.role === 'collaboration'
         ? 'dashboard kolaborasi, proyek bersama, dan dokumen MoU'
+        : target.role === 'partner'
+        ? 'dashboard mitra, program kemitraan, leads rujukan, dan komisi'
         : 'dashboard, modul kelas, dan presensi murid';
     const subject = encodeURIComponent(`Pendaftaran ${roleLabel} Sobat Ceria Telah Disetujui 🎉`);
     const body = encodeURIComponent(
@@ -670,6 +674,46 @@ export default function AdminUserScreen({ user }: { user: UserProfile }) {
                           </Text>
                           <Text className="text-xs text-gray-700 font-medium mt-0.5">
                             {selectedApplicant.details.proposalNote}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                )}
+
+                {/* Kualifikasi Khusus Mitra (Partner) */}
+                {selectedApplicant.role === 'partner' && (
+                  <View className="mb-5 flex-col gap-3">
+                    <Text className="text-xs font-black uppercase tracking-wider text-gray-400">
+                      Data Profil Mitra
+                    </Text>
+
+                    <View className="bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 flex-col gap-2.5">
+                      <View>
+                        <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          Nama Brand / Klinik / Sekolah
+                        </Text>
+                        <Text className="text-xs font-black text-emerald-950 mt-0.5">
+                          {selectedApplicant.details?.brandName || '-'}
+                        </Text>
+                      </View>
+
+                      <View className="pt-2 border-t border-emerald-200/50">
+                        <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                          Jenis Kemitraan
+                        </Text>
+                        <Text className="text-xs font-bold text-gray-800 mt-0.5">
+                          {selectedApplicant.details?.businessType || '-'}
+                        </Text>
+                      </View>
+
+                      {selectedApplicant.details?.websiteSocial ? (
+                        <View className="pt-2 border-t border-emerald-200/50">
+                          <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                            Website / Instagram Bisnis
+                          </Text>
+                          <Text className="text-xs text-gray-700 font-medium mt-0.5">
+                            {selectedApplicant.details.websiteSocial}
                           </Text>
                         </View>
                       ) : null}

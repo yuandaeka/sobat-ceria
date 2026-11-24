@@ -531,4 +531,24 @@ where p.role = 'collaboration'
 on conflict (profile_id) do update set
   status_approval = excluded.status_approval;
 
+-- 8. Masukkan semua partner (Mitra) ke partner_profiles
+insert into public.partner_profiles (
+  profile_id,
+  brand_name,
+  business_type,
+  website_social,
+  status_approval
+)
+select
+  p.id,
+  coalesce(u.raw_user_meta_data->>'brand_name', '-'),
+  coalesce(u.raw_user_meta_data->>'business_type', '-'),
+  coalesce(u.raw_user_meta_data->>'website_social', ''),
+  coalesce(p.status, 'pending')
+from public.profiles p
+join auth.users u on u.id = p.id
+where p.role = 'partner'
+on conflict (profile_id) do update set
+  status_approval = excluded.status_approval;
+
 
