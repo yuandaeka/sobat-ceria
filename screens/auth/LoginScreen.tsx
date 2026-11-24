@@ -9,9 +9,10 @@ import { fetchUserProfile, upsertProfile, addChild } from '../../lib/profile';
 
 interface LoginScreenProps {
   onLogin: (user: UserProfile) => void;
+  onBack?: () => void;
 }
 
-export default function LoginScreen({ onLogin }: LoginScreenProps) {
+export default function LoginScreen({ onLogin, onBack }: LoginScreenProps) {
   const [parentName, setParentName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
@@ -324,6 +325,16 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <SafeAreaView style={{ flex: 1 }} className="bg-[#FAF6F0] justify-center">
       <ScrollView contentContainerStyle={{ paddingVertical: 30 }} className="p-4 md:p-8 max-w-md mx-auto w-full" showsVerticalScrollIndicator={false}>
+        {onBack && (
+          <TouchableOpacity
+            onPress={onBack}
+            className="self-start flex-row items-center gap-1.5 bg-white border border-gray-200 px-3.5 py-2 rounded-full shadow-xs mb-4 hover:bg-gray-50 transition active:scale-95"
+          >
+            <Feather name="arrow-left" size={14} color="#162E5C" />
+            <Text className="text-xs font-extrabold text-[#162E5C]">Kembali ke Beranda</Text>
+          </TouchableOpacity>
+        )}
+
         <View className="items-center mb-6">
           <View className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-[#D82B5A]/20 shadow-md items-center justify-center p-1 mb-3">
             <Image

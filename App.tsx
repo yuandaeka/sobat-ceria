@@ -295,7 +295,10 @@ export default function App() {
           <View className="flex-1 w-full bg-brand-cream">
             {/* Wajib login dulu sebelum masuk aplikasi */}
             {!user ? (
-              <LoginScreen onLogin={(profile) => setUser(profile)} />
+              <LoginScreen
+                onLogin={(profile) => setUser(profile)}
+                onBack={() => setViewMode('landing')}
+              />
             ) : !user.role ? (
               <RoleSelectionScreen user={user} onSelect={(role) => setUser({ ...user, role })} />
             ) : user.status === 'pending' ? (
