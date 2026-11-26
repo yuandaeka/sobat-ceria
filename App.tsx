@@ -1098,14 +1098,14 @@ export default function App() {
           <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
             <View id="class-toolkit" nativeID="class-toolkit" className="bg-white rounded-[2.5rem] p-8 md:p-14 border border-gray-100 shadow-sm card-hover-effect">
               {/* Header Penjelasan Class Toolkit Franchise */}
-              <View className="text-center max-w-3xl mx-auto mb-12">
+              <View className="items-center text-center max-w-3xl mx-auto mb-12">
                 <View className="bg-[#D82B5A]/10 self-center px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
-                  <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider">Pilar 3 Inovasi: Program Franchise Edukasi</Text>
+                  <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider text-center">Pilar 3 Inovasi: Program Franchise Edukasi</Text>
                 </View>
-                <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4">
+                <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4 text-center">
                   Ready-to-Deploy Class Toolkits
                 </Text>
-                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium">
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium text-center">
                   Class Toolkit Franchise adalah paket kemitraan usaha stimulasi tumbuh kembang anak usia dini (0–6 tahun) siap pakai berkonsep turn-key. Dirancang khusus untuk mempermudah sekolah, daycare, komunitas, maupun wirausaha pemula mereplikasi kelas belajar berkualitas tanpa harus meriset kurikulum dari awal. Setiap mitra dibekali modul tematik STEAM & Mindfulness, perlengkapan sensory kit terstandar, SOP manajemen kelas, serta akses aplikasi screening tumbuh kembang berbantuan AI.
                 </Text>
               </View>
