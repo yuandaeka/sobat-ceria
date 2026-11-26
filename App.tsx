@@ -132,7 +132,7 @@ export default function App() {
   const [lang, setLang] = useState<LandingLang>(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
       const saved = window.localStorage.getItem('sc_lang');
-      if (saved === 'en' || saved === 'id') return saved;
+      if (saved === 'en' || saved === 'id' || saved === 'th') return saved;
     }
     return 'id';
   });
@@ -442,18 +442,24 @@ export default function App() {
           {/* Right Header Controls: Language Switcher + Menu Toggle */}
           <View className="flex-row items-center gap-2.5 shrink-0">
             <View className="flex-row items-center bg-gray-100 rounded-full p-1 border border-gray-200/80">
-              <Feather name="globe" size={12} color="#162E5C" style={{ marginLeft: 6, marginRight: 4 }} />
+              <Feather name="globe" size={12} color="#162E5C" style={{ marginLeft: 6, marginRight: 3 }} />
               <TouchableOpacity
                 onPress={() => handleChangeLang('id')}
-                className={`px-2.5 py-1 rounded-full transition ${lang === 'id' ? 'bg-white shadow-xs' : ''}`}
+                className={`px-2 py-1 rounded-full transition ${lang === 'id' ? 'bg-white shadow-xs' : ''}`}
               >
                 <Text className={`text-[11px] font-black ${lang === 'id' ? 'text-[#162E5C]' : 'text-gray-500'}`}>ID</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => handleChangeLang('en')}
-                className={`px-2.5 py-1 rounded-full transition ${lang === 'en' ? 'bg-white shadow-xs' : ''}`}
+                className={`px-2 py-1 rounded-full transition ${lang === 'en' ? 'bg-white shadow-xs' : ''}`}
               >
                 <Text className={`text-[11px] font-black ${lang === 'en' ? 'text-[#D82B5A]' : 'text-gray-500'}`}>EN</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleChangeLang('th')}
+                className={`px-2 py-1 rounded-full transition ${lang === 'th' ? 'bg-white shadow-xs' : ''}`}
+              >
+                <Text className={`text-[11px] font-black ${lang === 'th' ? 'text-[#5A3B8B]' : 'text-gray-500'}`}>TH</Text>
               </TouchableOpacity>
             </View>
 
@@ -629,6 +635,12 @@ export default function App() {
                     className={`px-2.5 py-1 rounded-full ${lang === 'en' ? 'bg-white shadow-xs' : ''}`}
                   >
                     <Text className={`text-[10px] font-black ${lang === 'en' ? 'text-[#D82B5A]' : 'text-gray-500'}`}>EN</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleChangeLang('th')}
+                    className={`px-2.5 py-1 rounded-full ${lang === 'th' ? 'bg-white shadow-xs' : ''}`}
+                  >
+                    <Text className={`text-[10px] font-black ${lang === 'th' ? 'text-[#5A3B8B]' : 'text-gray-500'}`}>TH</Text>
                   </TouchableOpacity>
                 </View>
               </View>
