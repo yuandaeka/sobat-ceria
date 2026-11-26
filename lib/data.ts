@@ -139,6 +139,28 @@ export async function deleteCourse(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function uploadCourseImage(file: Blob, originalFileName = 'course.jpg'): Promise<string> {
+  const ext = (originalFileName.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const filePath = `classes/${safeName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('course-images')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: (file as any).type || `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+    });
+
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from('course-images').getPublicUrl(filePath);
+  if (!data?.publicUrl) {
+    throw new Error('Gagal mendapatkan URL publik foto kelas.');
+  }
+  return data.publicUrl;
+}
+
 // ============ SCREENING RESULTS ============
 
 export async function fetchScreeningResults(childId?: string): Promise<ScreeningResult[]> {

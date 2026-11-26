@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
+  Image,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { UserProfile } from '../../types';
@@ -18,6 +19,7 @@ import {
   createCourse,
   updateCourse,
   deleteCourse,
+  uploadCourseImage,
 } from '../../lib/data';
 
 export default function AdminKelasScreen({ user }: { user: UserProfile }) {
@@ -26,6 +28,7 @@ export default function AdminKelasScreen({ user }: { user: UserProfile }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<AdminCourseData | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -153,6 +156,41 @@ export default function AdminKelasScreen({ user }: { user: UserProfile }) {
     } finally {
       setTogglingId(null);
     }
+  };
+
+  const handlePickImageFromFolder = () => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') {
+      Alert.alert('Info', 'Pilih foto dari folder saat ini tersedia di versi Web Admin.');
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e: any) => {
+      const file: File | undefined = e?.target?.files?.[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        setFormError('Ukuran foto maksimal 5 MB.');
+        return;
+      }
+
+      setFormError(null);
+      setUploadingImage(true);
+      try {
+        const publicUrl = await uploadCourseImage(file, file.name);
+        setImage(publicUrl);
+      } catch (err: any) {
+        setFormError(
+          err?.message ||
+            'Gagal mengunggah foto. Pastikan bucket Storage "course-images" sudah dibuat (jalankan 0006_storage_course_images.sql).'
+        );
+      } finally {
+        setUploadingImage(false);
+      }
+    };
+    input.click();
   };
 
   const confirmDelete = (course: AdminCourseData) => {
@@ -400,14 +438,52 @@ export default function AdminKelasScreen({ user }: { user: UserProfile }) {
                 </View>
 
                 <View>
-                  <Text className="text-xs font-bold text-gray-700 mb-1">URL Foto Kelas (Opsional)</Text>
+                  <Text className="text-xs font-bold text-gray-700 mb-1.5">Foto Kelas</Text>
+
+                  {image ? (
+                    <View className="w-full h-36 rounded-2xl overflow-hidden border border-gray-200 mb-2.5 relative bg-gray-100">
+                      <Image
+                        source={{ uri: image }}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="cover"
+                      />
+                      <TouchableOpacity
+                        onPress={() => setImage('')}
+                        className="absolute top-2 right-2 bg-black/65 px-2.5 py-1 rounded-full flex-row items-center gap-1"
+                      >
+                        <Feather name="x" size={12} color="#FFFFFF" />
+                        <Text className="text-white text-[10px] font-bold">Hapus</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : null}
+
+                  <TouchableOpacity
+                    onPress={handlePickImageFromFolder}
+                    disabled={uploadingImage}
+                    className="bg-[#132A5E]/5 border border-dashed border-[#132A5E]/30 rounded-xl py-3 px-4 flex-row items-center justify-center gap-2 mb-2 hover:bg-[#132A5E]/10 transition"
+                  >
+                    {uploadingImage ? (
+                      <>
+                        <ActivityIndicator size="small" color="#132A5E" />
+                        <Text className="text-xs font-bold text-[#132A5E]">Mengunggah ke Supabase...</Text>
+                      </>
+                    ) : (
+                      <>
+                        <Feather name="upload" size={14} color="#132A5E" />
+                        <Text className="text-xs font-bold text-[#132A5E]">
+                          {image ? 'Ganti Foto dari Folder' : 'Pilih Foto dari Folder'}
+                        </Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+
                   <TextInput
                     value={image}
                     onChangeText={setImage}
-                    placeholder="https://images.unsplash.com/..."
+                    placeholder="Atau tempel URL foto: https://..."
                     placeholderTextColor="#9CA3AF"
                     autoCapitalize="none"
-                    className="bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-xs text-gray-800 font-medium"
+                    className="bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2 text-[11px] text-gray-700 font-medium"
                   />
                 </View>
 
