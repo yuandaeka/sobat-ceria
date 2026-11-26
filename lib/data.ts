@@ -3,6 +3,32 @@ import { Course, ScreeningResult } from '../types';
 
 // ============ COURSES (Katalog Kelas) ============
 
+export interface AdminCourseData {
+  id: string;
+  title: string;
+  category: string;
+  ageRange: string;
+  price: number;
+  seats: number;
+  image: string;
+  description: string;
+  facilitator: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CoursePayload {
+  title: string;
+  category: string;
+  ageRange: string;
+  price: number;
+  seats: number;
+  image?: string;
+  description?: string;
+  facilitator?: string;
+  isActive?: boolean;
+}
+
 export async function fetchCourses(): Promise<Course[]> {
   const { data, error } = await supabase
     .from('courses')
@@ -23,6 +49,94 @@ export async function fetchCourses(): Promise<Course[]> {
     description: c.description || '',
     facilitator: c.facilitator || undefined,
   }));
+}
+
+export async function fetchAllCoursesAdmin(): Promise<AdminCourseData[]> {
+  const { data, error } = await supabase
+    .from('courses')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) throw error;
+
+  return (data || []).map((c) => ({
+    id: c.id,
+    title: c.title,
+    category: c.category,
+    ageRange: c.age_range,
+    price: c.price,
+    seats: c.seats,
+    image: c.image || '',
+    description: c.description || '',
+    facilitator: c.facilitator || '',
+    isActive: c.is_active,
+    createdAt: c.created_at,
+  }));
+}
+
+export async function createCourse(payload: CoursePayload): Promise<AdminCourseData> {
+  const { data, error } = await supabase
+    .from('courses')
+    .insert({
+      title: payload.title.trim(),
+      category: payload.category.trim(),
+      age_range: payload.ageRange.trim(),
+      price: Number(payload.price) || 0,
+      seats: Number(payload.seats) || 10,
+      image: payload.image?.trim() || null,
+      description: payload.description?.trim() || '',
+      facilitator: payload.facilitator?.trim() || 'Tim Fasilitator Sobat Ceria',
+      is_active: payload.isActive ?? true,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return {
+    id: data.id,
+    title: data.title,
+    category: data.category,
+    ageRange: data.age_range,
+    price: data.price,
+    seats: data.seats,
+    image: data.image || '',
+    description: data.description || '',
+    facilitator: data.facilitator || '',
+    isActive: data.is_active,
+    createdAt: data.created_at,
+  };
+}
+
+export async function updateCourse(id: string, payload: Partial<CoursePayload>): Promise<void> {
+  const patch: {
+    title?: string;
+    category?: string;
+    age_range?: string;
+    price?: number;
+    seats?: number;
+    image?: string | null;
+    description?: string | null;
+    facilitator?: string | null;
+    is_active?: boolean;
+  } = {};
+  if (payload.title !== undefined) patch.title = payload.title.trim();
+  if (payload.category !== undefined) patch.category = payload.category.trim();
+  if (payload.ageRange !== undefined) patch.age_range = payload.ageRange.trim();
+  if (payload.price !== undefined) patch.price = Number(payload.price) || 0;
+  if (payload.seats !== undefined) patch.seats = Number(payload.seats) || 10;
+  if (payload.image !== undefined) patch.image = payload.image.trim() || null;
+  if (payload.description !== undefined) patch.description = payload.description.trim();
+  if (payload.facilitator !== undefined) patch.facilitator = payload.facilitator.trim();
+  if (payload.isActive !== undefined) patch.is_active = payload.isActive;
+
+  const { error } = await supabase.from('courses').update(patch).eq('id', id);
+  if (error) throw error;
+}
+
+export async function deleteCourse(id: string): Promise<void> {
+  const { error } = await supabase.from('courses').delete().eq('id', id);
+  if (error) throw error;
 }
 
 // ============ SCREENING RESULTS ============

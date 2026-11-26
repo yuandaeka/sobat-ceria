@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
 import { supabase } from './lib/supabase';
 import { fetchUserProfile, clearProfileRole } from './lib/profile';
+import { fetchCourses } from './lib/data';
 import { syncProfileToSheet } from './lib/sheets';
 
 const logoImg = require('./assets/sobatceria.png');
@@ -26,7 +27,45 @@ import PartnerDashboard from './screens/partner/PartnerDashboard';
 import AdminDashboard from './screens/admin/AdminDashboard';
 
 // Import Types
-import { UserProfile } from './types';
+import { UserProfile, Course } from './types';
+
+// Mapping foto lokal resmi untuk 8 program default agar tampilan tetap tajam saat dipakai bersama Supabase
+const LOCAL_COURSE_IMAGES: { match: RegExp; src: any }[] = [
+  { match: /mini\s*stimulation/i, src: require('./assets/dokumentasi sobat/ministimulation-program.jpeg') },
+  { match: /communication/i, src: require('./assets/dokumentasi sobat/communication-program.jpeg') },
+  { match: /parenting|seminar/i, src: require('./assets/dokumentasi sobat/seminarparenting-program.jpeg') },
+  { match: /art/i, src: require('./assets/dokumentasi sobat/program-art.jpeg') },
+  { match: /science/i, src: require('./assets/dokumentasi sobat/program-science.jpeg') },
+  { match: /pottery|poetry/i, src: require('./assets/dokumentasi sobat/poetry-program.jpeg') },
+  { match: /cooking/i, src: require('./assets/dokumentasi sobat/cooking-program.jpeg') },
+  { match: /outbond|sensory\s*&\s*movement/i, src: require('./assets/dokumentasi sobat/outbondceria-program.jpeg') },
+];
+
+const DEFAULT_LANDING_COURSES: Course[] = [
+  { id: 'def-1', title: 'Mini Stimulation Class', category: 'Mini Stimulation', ageRange: 'Usia 2-3 Thn', price: 59000, seats: 12, image: '', description: 'Melatih seluruh aspek perkembangan melalui permainan edukatif.' },
+  { id: 'def-2', title: 'Communication Class', category: 'Communication', ageRange: 'Usia 2-4 Thn', price: 65000, seats: 4, image: '', description: 'Mengembangkan kemampuan komunikasi, bahasa, dan public speaking anak.' },
+  { id: 'def-3', title: 'Seminar Parenting', category: 'Parenting', ageRange: 'Untuk Ortu', price: 49000, seats: 25, image: '', description: 'Edukasi interaktif bersama para ahli untuk membantu orang tua memahami dan mendampingi tumbuh kembang anak secara optimal.' },
+  { id: 'def-4', title: 'Art and Craft Class', category: 'Art & Craft', ageRange: 'Usia 2-5 Thn', price: 79000, seats: 8, image: '', description: 'Mengembangkan kreativitas, motorik halus, dan imajinasi.' },
+  { id: 'def-5', title: 'Science Class', category: 'Science Class', ageRange: 'Usia 3-7 Thn', price: 69000, seats: 15, image: '', description: 'Eksperimen sains sederhana berbasis STEAM.' },
+  { id: 'def-6', title: 'Pottery Class', category: 'Pottery Class', ageRange: 'Usia 3-7 Thn', price: 75000, seats: 6, image: '', description: 'Mengembangkan kreativitas, konsentrasi, koordinasi tangan, dan regulasi emosi.' },
+  { id: 'def-7', title: 'Cooking Class', category: 'Cooking Class', ageRange: 'Usia 3-7 Thn', price: 85000, seats: 10, image: '', description: 'Melatih kemandirian, life skill, numerasi, dan sensorik.' },
+  { id: 'def-8', title: 'Outbond Ceria', category: 'Outbond Ceria', ageRange: 'Usia 2-6 Thn', price: 69000, seats: 12, image: '', description: 'Permainan fisik aktif & rintangan motorik kasar anak.' },
+];
+
+const AGE_COLORS = ['#2DA9E9', '#5A3B8B', '#30B864', '#F77712'];
+
+function resolveCourseImage(course: Course): any | null {
+  const img = (course.image || '').trim();
+  // Jika Admin mengisi URL foto custom (bukan URL placeholder unsplash bawaan seed), pakai URL tersebut
+  if (img && !img.includes('images.unsplash.com')) {
+    return { uri: img };
+  }
+  const haystack = `${course.title} ${course.category}`;
+  const matched = LOCAL_COURSE_IMAGES.find((m) => m.match.test(haystack));
+  if (matched) return matched.src;
+  if (img) return { uri: img };
+  return null;
+}
 
 // --- ROLE-BASED DASHBOARD ROUTER ---
 function RoleDashboard({ user, setUser }: { user: UserProfile; setUser: (u: UserProfile | null) => void }) {
@@ -88,6 +127,25 @@ export default function App() {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [roleRegisterTarget, setRoleRegisterTarget] = useState<'volunteer' | 'teacher' | 'collaboration' | 'partner' | null>(null);
+  const [landingCourses, setLandingCourses] = useState<Course[]>(DEFAULT_LANDING_COURSES);
+
+  // Muat daftar kelas aktif dari Supabase untuk katalog web awal setiap kali masuk landing view
+  useEffect(() => {
+    if (viewMode !== 'landing') return;
+    let active = true;
+    fetchCourses()
+      .then((list) => {
+        if (active && list && list.length > 0) {
+          setLandingCourses(list);
+        }
+      })
+      .catch(() => {
+        // pertahankan fallback default jika offline
+      });
+    return () => {
+      active = false;
+    };
+  }, [viewMode]);
 
   // Load Supabase session on app start & listen to auth changes
   useEffect(() => {
@@ -826,178 +884,65 @@ export default function App() {
             </View>
           </ScrollRevealSection>
 
-          {/* SECTION 5: 8 PROGRAM KELAS RESMI (Interactive Hover & Scroll Reveal) */}
+          {/* SECTION 5: PROGRAM KELAS RESMI (Dinamis dari Supabase / Admin Kelola Kelas) */}
           <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="katalog-kelas" nativeID="katalog-kelas" className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Katalog Resmi</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C]">
-                8 Program Kelas Stimulasi Terpadu
+            <View id="katalog-kelas" nativeID="katalog-kelas" className="items-center text-center mb-12">
+              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1 text-center">Katalog Resmi</Text>
+              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
+                {landingCourses.length} Program Kelas Stimulasi Terpadu
               </Text>
             </View>
 
-            {/* 8 Official Program Cards Grid */}
+            {/* Official Program Cards Grid */}
             <View className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-              {/* 1. Mini Stimulation */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/ministimulation-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">1. Mini Stimulation</Text>
+              {landingCourses.map((course, idx) => {
+                const imgSource = resolveCourseImage(course);
+                const ageColor = AGE_COLORS[idx % AGE_COLORS.length];
+                const isSeminar = /seminar|parenting/i.test(course.title);
+                return (
+                  <View
+                    key={course.id}
+                    className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect"
+                  >
+                    <View>
+                      <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container bg-[#FAF6F0] items-center justify-center">
+                        {imgSource ? (
+                          <Image
+                            source={imgSource}
+                            className="w-full h-full object-cover"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              ...(isSeminar ? ({ objectPosition: 'center 1000%' } as any) : {}),
+                            }}
+                          />
+                        ) : (
+                          <View className="items-center justify-center">
+                            <Feather name="book-open" size={32} color="#162E5C" />
+                          </View>
+                        )}
+                        <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
+                          <Text className="text-[9px] font-black text-white">
+                            {idx + 1}. {course.category}
+                          </Text>
+                        </View>
+                      </View>
+                      <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">{course.title}</Text>
+                      <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
+                        {course.description || 'Program stimulasi tumbuh kembang anak usia dini bersama fasilitator Sobat Ceria.'}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
+                      <Text className="text-[10px] font-bold" style={{ color: ageColor }}>
+                        {course.ageRange}
+                      </Text>
+                      <Text className="text-xs font-black text-[#D82B5A]">
+                        Rp {Number(course.price || 0).toLocaleString('id-ID')}
+                      </Text>
                     </View>
                   </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Mini Stimulation Class</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Melatih seluruh aspek perkembangan melalui permainan edukatif.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#2DA9E9]">Usia 2-3 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 59.000</Text>
-                </View>
-              </View>
-
-              {/* 2. Communication */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/communication-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">2. Communication</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Communication Class</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Mengembangkan kemampuan komunikasi, bahasa, dan public speaking anak.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#5A3B8B]">Usia 2-4 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 65.000</Text>
-                </View>
-              </View>
-
-              {/* 3. Seminar Parenting */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/seminarparenting-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%', objectPosition: 'center 1000%' } as any} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">3. Seminar Parenting</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Seminar Parenting</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Edukasi interaktif bersama para ahli untuk membantu orang tua memahami dan mendampingi tumbuh kembang anak secara optimal.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#30B864]">Untuk Ortu</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 49.000</Text>
-                </View>
-              </View>
-
-              {/* 4. Art & Craft */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/program-art.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">4. Art & Craft</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Art and Craft Class</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Mengembangkan kreativitas, motorik halus, dan imajinasi.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#F77712]">Usia 2-5 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 79.000</Text>
-                </View>
-              </View>
-
-              {/* 5. Science Class */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/program-science.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">5. Science Class</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Science Class</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Eksperimen sains sederhana berbasis STEAM.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#F77712]">Usia 3-7 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 69.000</Text>
-                </View>
-              </View>
-
-              {/* 6. Pottery Class */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/poetry-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">6. Pottery Class</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Pottery Class</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Mengembangkan kreativitas, konsentrasi, koordinasi tangan, dan regulasi emosi.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#30B864]">Usia 3-7 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 75.000</Text>
-                </View>
-              </View>
-
-              {/* 7. Cooking Class */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/cooking-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">7. Cooking Class</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Cooking Class</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Melatih kemandirian, life skill, numerasi, dan sensorik.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#5A3B8B]">Usia 3-7 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 85.000</Text>
-                </View>
-              </View>
-
-              {/* 8. Outbond Ceria */}
-              <View className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
-                <View>
-                  <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container">
-                    <Image source={require('./assets/dokumentasi sobat/outbondceria-program.jpeg')} className="w-full h-full object-cover" style={{ width: '100%', height: '100%' }} />
-                    <View className="absolute top-2.5 left-2.5 bg-[#162E5C] px-2.5 py-1 rounded-lg">
-                      <Text className="text-[9px] font-black text-white">8. Outbond Ceria</Text>
-                    </View>
-                  </View>
-                  <Text className="text-base font-extrabold text-[#162E5C] mb-1.5">Outbond Ceria</Text>
-                  <Text className="text-xs text-gray-600 leading-relaxed mb-4 font-medium">
-                    Permainan fisik aktif & rintangan motorik kasar anak.
-                  </Text>
-                </View>
-                <View className="flex-row items-center justify-between pt-3 border-t border-gray-100">
-                  <Text className="text-[10px] font-bold text-[#2DA9E9]">Usia 2-6 Thn</Text>
-                  <Text className="text-xs font-black text-[#D82B5A]">Rp 69.000</Text>
-                </View>
-              </View>
-
+                );
+              })}
             </View>
 
             {/* CTA Button to Full App Catalog */}
