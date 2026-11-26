@@ -521,18 +521,6 @@ export default function LoginScreen({ onLogin, onBack }: LoginScreenProps) {
             )}
           </TouchableOpacity>
 
-          {/* Tombol Bypass Akses Cepat Admin */}
-          <TouchableOpacity
-            className="bg-[#162E5C] py-3 rounded-full items-center shadow-xs hover:bg-[#0f2142] transition-transform active:scale-95 flex-row justify-center gap-2 mt-3"
-            onPress={handleDirectAdminLogin}
-            disabled={loading}
-          >
-            <Feather name="shield" size={14} color="#FFD100" />
-            <Text className="text-white text-xs font-bold">
-              Masuk Cepat Sebagai Admin
-            </Text>
-          </TouchableOpacity>
-
           {/* Toggle Login / Register */}
           <TouchableOpacity
             className="items-center mt-4"

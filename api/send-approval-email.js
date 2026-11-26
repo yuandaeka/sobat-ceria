@@ -58,7 +58,7 @@ module.exports = async function handler(req, res) {
       '',
       `Anda sekarang dapat login menggunakan email ini (${to}) di ${platformUrl} untuk mengakses ${accessDesc}.`,
       '',
-      'Jika ada pertanyaan, silakan hubungi tim kami via WhatsApp di 0812-3456-7890 atau balas email ini.',
+      'Jika ada pertanyaan, silakan hubungi tim kami via WhatsApp di 085879571393 atau balas email ini.',
       '',
       'Selamat bergabung di ekosistem Sobat Ceria!',
       '',
