@@ -20,7 +20,6 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/sobatceria.png",
       "bundler": "metro"
     },
     "plugins": [
