@@ -127,6 +127,8 @@ export default function App() {
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isMenuLangOpen, setIsMenuLangOpen] = useState(false);
   const [roleRegisterTarget, setRoleRegisterTarget] = useState<'volunteer' | 'teacher' | 'collaboration' | 'partner' | null>(null);
   const [landingCourses, setLandingCourses] = useState<Course[]>(DEFAULT_LANDING_COURSES);
   const [lang, setLang] = useState<LandingLang>(() => {
@@ -327,7 +329,8 @@ export default function App() {
     }
   }, [calcAge, calcTime]);
 
-  const isDesktop = screenWidth > 768 && Platform.OS === 'web';
+  const isDesktop = screenWidth >= 1024 && Platform.OS === 'web';
+  const isTabletOrUp = screenWidth >= 768 && Platform.OS === 'web';
 
   const scrollToSection = (sectionId: string) => {
     if (viewMode !== 'landing') {
@@ -403,27 +406,30 @@ export default function App() {
       <View className="flex-1 bg-[#FAF6F0] relative">
 
         {/* HEADER NAVBAR (Full Width Flat Top Header — SMM Style) */}
-        <View className="w-full bg-white border-b border-gray-100 py-3.5 px-6 md:px-16 z-50 sticky top-0 left-0 right-0 shadow-sm flex-row justify-between items-center">
+        <View className="w-full bg-white border-b border-gray-100 py-3 px-4 sm:px-6 md:px-12 lg:px-16 z-50 sticky top-0 left-0 right-0 shadow-sm flex-row justify-between items-center">
           {/* Logo & Brand Name */}
           <TouchableOpacity
-            className="flex-row items-center gap-3"
+            className="flex-row items-center gap-2 sm:gap-3 shrink min-w-0 mr-2"
             onPress={() => setViewMode('landing')}
           >
-            <View className="w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden items-center justify-center p-0.5 border border-purple-100 bg-white shadow-sm">
+            <View className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden items-center justify-center p-0.5 border border-purple-100 bg-white shadow-sm shrink-0">
               <Image
                 source={logoImg}
                 style={{ width: '100%', height: '100%', borderRadius: 999 }}
                 resizeMode="contain"
               />
             </View>
-            <Text className="text-lg md:text-xl font-extrabold tracking-wide text-[#162E5C]">
+            <Text
+              numberOfLines={1}
+              className="text-base sm:text-lg md:text-xl font-extrabold tracking-wide text-[#162E5C]"
+            >
               SOBAT CERIA
             </Text>
           </TouchableOpacity>
 
           {/* Nav Menu Desktop (Utama: Tentang Kami, Aplikasi Screening, Class Toolkit, Join Us) */}
           {isDesktop && (
-            <View className="flex-row items-center gap-8">
+            <View className="flex-row items-center gap-6 lg:gap-8">
               <TouchableOpacity onPress={() => scrollToSection('tentang-kami')}>
                 <Text className="text-sm font-bold text-gray-700 hover:text-[#D82B5A] transition">{t.nav.about}</Text>
               </TouchableOpacity>
@@ -439,39 +445,115 @@ export default function App() {
             </View>
           )}
 
-          {/* Right Header Controls: Language Switcher + Menu Toggle */}
-          <View className="flex-row items-center gap-2.5 shrink-0">
-            <View className="flex-row items-center bg-gray-100 rounded-full p-1 border border-gray-200/80">
-              <Feather name="globe" size={12} color="#162E5C" style={{ marginLeft: 6, marginRight: 3 }} />
-              <TouchableOpacity
-                onPress={() => handleChangeLang('id')}
-                className={`px-2 py-1 rounded-full transition ${lang === 'id' ? 'bg-white shadow-xs' : ''}`}
-              >
-                <Text className={`text-[11px] font-black ${lang === 'id' ? 'text-[#162E5C]' : 'text-gray-500'}`}>ID</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleChangeLang('en')}
-                className={`px-2 py-1 rounded-full transition ${lang === 'en' ? 'bg-white shadow-xs' : ''}`}
-              >
-                <Text className={`text-[11px] font-black ${lang === 'en' ? 'text-[#D82B5A]' : 'text-gray-500'}`}>EN</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => handleChangeLang('th')}
-                className={`px-2 py-1 rounded-full transition ${lang === 'th' ? 'bg-white shadow-xs' : ''}`}
-              >
-                <Text className={`text-[11px] font-black ${lang === 'th' ? 'text-[#5A3B8B]' : 'text-gray-500'}`}>TH</Text>
-              </TouchableOpacity>
-            </View>
+          {/* Right Header Controls: Compact Globe Language Button + Menu Toggle */}
+          <View className="flex-row items-center gap-2 sm:gap-2.5 shrink-0">
+            <TouchableOpacity
+              onPress={() => {
+                setIsLangOpen(!isLangOpen);
+                if (isMenuOpen) setIsMenuOpen(false);
+              }}
+              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full items-center justify-center border transition ${
+                isLangOpen
+                  ? 'bg-[#162E5C] border-[#162E5C]'
+                  : 'bg-gray-100 hover:bg-gray-200 border-gray-200/80'
+              }`}
+              accessibilityLabel={t.menu.langLabel}
+            >
+              <Feather name="globe" size={16} color={isLangOpen ? '#FFFFFF' : '#162E5C'} />
+            </TouchableOpacity>
 
             <TouchableOpacity
-              className="bg-[#D82B5A] px-5 py-2.5 rounded-full shadow-md items-center justify-center hover:bg-[#B01E49] transition shrink-0 flex-row items-center gap-2"
-              onPress={() => setIsMenuOpen(!isMenuOpen)}
+              className="bg-[#D82B5A] px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md items-center justify-center hover:bg-[#B01E49] transition shrink-0 flex-row items-center gap-1.5 sm:gap-2"
+              onPress={() => {
+                setIsMenuOpen(!isMenuOpen);
+                if (isLangOpen) setIsLangOpen(false);
+              }}
             >
-              <Feather name={isMenuOpen ? "x" : "menu"} size={16} color="#FFFFFF" />
+              <Feather name={isMenuOpen ? 'x' : 'menu'} size={15} color="#FFFFFF" />
               <Text className="text-white font-extrabold text-xs md:text-sm tracking-wide">{t.nav.menu}</Text>
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* GLOBE LANGUAGE DROPDOWN POPOVER (Muncul hanya saat ikon Globe diklik) */}
+        {isLangOpen && (
+          <>
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setIsLangOpen(false)}
+              style={{
+                position: 'fixed' as any,
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(15, 23, 42, 0.15)',
+                zIndex: 60,
+              }}
+            />
+            <View
+              style={{
+                position: 'fixed' as any,
+                top: 62,
+                right: isDesktop ? 140 : isTabletOrUp ? 110 : 16,
+                zIndex: 75,
+                width: 196,
+              }}
+              className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 overflow-hidden"
+            >
+              <View className="flex-row items-center gap-1.5 px-2.5 py-1.5 border-b border-gray-100 mb-1">
+                <Feather name="globe" size={12} color="#162E5C" />
+                <Text className="text-[10px] font-black uppercase tracking-wider text-gray-400">
+                  {t.menu.langLabel}
+                </Text>
+              </View>
+              {(
+                [
+                  { code: 'id' as LandingLang, short: 'ID', label: 'Indonesia', accent: '#162E5C' },
+                  { code: 'en' as LandingLang, short: 'EN', label: 'English', accent: '#D82B5A' },
+                  { code: 'th' as LandingLang, short: 'TH', label: 'ภาษาไทย', accent: '#5A3B8B' },
+                ] as const
+              ).map((item) => {
+                const active = lang === item.code;
+                return (
+                  <TouchableOpacity
+                    key={item.code}
+                    onPress={() => {
+                      handleChangeLang(item.code);
+                      setIsLangOpen(false);
+                    }}
+                    className={`flex-row items-center justify-between px-2.5 py-2 rounded-xl transition ${
+                      active ? 'bg-[#FAF6F0]' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <View className="flex-row items-center gap-2.5">
+                      <View
+                        className="w-7 h-6 rounded-md items-center justify-center"
+                        style={{ backgroundColor: active ? item.accent : '#F3F4F6' }}
+                      >
+                        <Text
+                          className={`text-[10px] font-black ${
+                            active ? 'text-white' : 'text-gray-600'
+                          }`}
+                        >
+                          {item.short}
+                        </Text>
+                      </View>
+                      <Text
+                        className={`text-xs ${
+                          active ? 'font-extrabold text-[#162E5C]' : 'font-semibold text-gray-600'
+                        }`}
+                      >
+                        {item.label}
+                      </Text>
+                    </View>
+                    {active && <Feather name="check" size={14} color={item.accent} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
+        )}
 
         {/* DROPDOWN / FULL NAV OPTIONS MENU */}
         {isMenuOpen && (
@@ -495,13 +577,14 @@ export default function App() {
             <View
               style={{
                 position: 'fixed' as any,
-                top: 68,
-                right: isDesktop ? 64 : 16,
+                top: 64,
+                right: isDesktop ? 64 : 12,
+                left: isTabletOrUp ? undefined : 12,
                 zIndex: 70,
-                maxWidth: 360,
-                width: '90%',
+                maxWidth: isTabletOrUp ? 360 : 420,
+                maxHeight: '84vh' as any,
               }}
-              className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-5 overflow-hidden"
+              className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-4 sm:p-5 overflow-hidden"
             >
               {/* Header inside Menu */}
               <View className="flex-row items-center justify-between pb-3 border-b border-gray-100 mb-2">
@@ -519,181 +602,208 @@ export default function App() {
                 </TouchableOpacity>
               </View>
 
-              {/* Menu Options: Katalog Kelas, Screening STPPA, Worksheet Gratis, Testimoni, Why Us */}
-              <View className="flex-col gap-1">
-                <TouchableOpacity
-                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-rose-50 transition"
-                  onPress={() => {
-                    scrollToSection('katalog-kelas');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-9 h-9 rounded-xl bg-[#D82B5A]/10 items-center justify-center">
-                      <Feather name="book-open" size={16} color="#D82B5A" />
-                    </View>
-                    <View>
-                      <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.catalogTitle}</Text>
-                      <Text className="text-[10px] text-gray-500 font-medium">{t.menu.catalogSub}</Text>
-                    </View>
-                  </View>
-                  <Feather name="chevron-right" size={14} color="#D82B5A" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-sky-50 transition"
-                  onPress={() => {
-                    scrollToSection('screening-stppa');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-9 h-9 rounded-xl bg-[#2DA9E9]/15 items-center justify-center">
-                      <Feather name="activity" size={16} color="#2DA9E9" />
-                    </View>
-                    <View>
-                      <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.screeningTitle}</Text>
-                      <Text className="text-[10px] text-gray-500 font-medium">{t.menu.screeningSub}</Text>
-                    </View>
-                  </View>
-                  <Feather name="chevron-right" size={14} color="#2DA9E9" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-purple-50 transition"
-                  onPress={() => {
-                    scrollToSection('worksheet-gratis');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-9 h-9 rounded-xl bg-[#5A3B8B]/15 items-center justify-center">
-                      <Feather name="gift" size={16} color="#5A3B8B" />
-                    </View>
-                    <View>
-                      <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.worksheetTitle}</Text>
-                      <Text className="text-[10px] text-gray-500 font-medium">{t.menu.worksheetSub}</Text>
-                    </View>
-                  </View>
-                  <Feather name="chevron-right" size={14} color="#5A3B8B" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-amber-50 transition"
-                  onPress={() => {
-                    scrollToSection('testimoni');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-9 h-9 rounded-xl bg-[#F59E0B]/15 items-center justify-center">
-                      <Feather name="star" size={16} color="#D97706" />
-                    </View>
-                    <View>
-                      <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.testimoniTitle}</Text>
-                      <Text className="text-[10px] text-gray-500 font-medium">{t.menu.testimoniSub}</Text>
-                    </View>
-                  </View>
-                  <Feather name="chevron-right" size={14} color="#D97706" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="flex-row items-center justify-between p-3 rounded-2xl hover:bg-emerald-50 transition"
-                  onPress={() => {
-                    scrollToSection('why-us');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-9 h-9 rounded-xl bg-[#30B864]/15 items-center justify-center">
-                      <Feather name="award" size={16} color="#30B864" />
-                    </View>
-                    <View>
-                      <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.whyUsTitle}</Text>
-                      <Text className="text-[10px] text-gray-500 font-medium">{t.menu.whyUsSub}</Text>
-                    </View>
-                  </View>
-                  <Feather name="chevron-right" size={14} color="#30B864" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Pengaturan Bahasa / Language Setting inside Menu */}
-              <View className="mt-2 pt-2.5 border-t border-gray-100 flex-row items-center justify-between px-1">
-                <View className="flex-row items-center gap-2">
-                  <Feather name="globe" size={14} color="#162E5C" />
-                  <Text className="text-xs font-bold text-[#162E5C]">{t.menu.langLabel}</Text>
-                </View>
-                <View className="flex-row bg-gray-100 p-0.5 rounded-full border border-gray-200">
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: '72vh' as any }}>
+                {/* Menu Options: Katalog Kelas, Screening STPPA, Worksheet Gratis, Testimoni, Why Us */}
+                <View className="flex-col gap-1">
                   <TouchableOpacity
-                    onPress={() => handleChangeLang('id')}
-                    className={`px-2.5 py-1 rounded-full ${lang === 'id' ? 'bg-white shadow-xs' : ''}`}
-                  >
-                    <Text className={`text-[10px] font-black ${lang === 'id' ? 'text-[#162E5C]' : 'text-gray-500'}`}>ID</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleChangeLang('en')}
-                    className={`px-2.5 py-1 rounded-full ${lang === 'en' ? 'bg-white shadow-xs' : ''}`}
-                  >
-                    <Text className={`text-[10px] font-black ${lang === 'en' ? 'text-[#D82B5A]' : 'text-gray-500'}`}>EN</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleChangeLang('th')}
-                    className={`px-2.5 py-1 rounded-full ${lang === 'th' ? 'bg-white shadow-xs' : ''}`}
-                  >
-                    <Text className={`text-[10px] font-black ${lang === 'th' ? 'text-[#5A3B8B]' : 'text-gray-500'}`}>TH</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Mobile Extended Nav (Tentang Kami, Class Toolkit, Join Us) */}
-              {!isDesktop && (
-                <View className="mt-2 pt-2 border-t border-gray-100 flex-col gap-1">
-                  <TouchableOpacity
-                    className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                    className="flex-row items-center justify-between p-2.5 sm:p-3 rounded-2xl hover:bg-rose-50 transition"
                     onPress={() => {
-                      scrollToSection('tentang-kami');
+                      scrollToSection('katalog-kelas');
                       setIsMenuOpen(false);
                     }}
                   >
-                    <Text className="text-xs font-bold text-gray-700">{t.nav.about}</Text>
-                    <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                    <View className="flex-row items-center gap-3 flex-1 pr-2">
+                      <View className="w-9 h-9 rounded-xl bg-[#D82B5A]/10 items-center justify-center shrink-0">
+                        <Feather name="book-open" size={16} color="#D82B5A" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.catalogTitle}</Text>
+                        <Text className="text-[10px] text-gray-500 font-medium">{t.menu.catalogSub}</Text>
+                      </View>
+                    </View>
+                    <Feather name="chevron-right" size={14} color="#D82B5A" />
                   </TouchableOpacity>
+
                   <TouchableOpacity
-                    className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                    className="flex-row items-center justify-between p-2.5 sm:p-3 rounded-2xl hover:bg-sky-50 transition"
                     onPress={() => {
-                      scrollToSection('class-toolkit');
+                      scrollToSection('screening-stppa');
                       setIsMenuOpen(false);
                     }}
                   >
-                    <Text className="text-xs font-bold text-gray-700">{t.menu.toolkitNav}</Text>
-                    <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                    <View className="flex-row items-center gap-3 flex-1 pr-2">
+                      <View className="w-9 h-9 rounded-xl bg-[#2DA9E9]/15 items-center justify-center shrink-0">
+                        <Feather name="activity" size={16} color="#2DA9E9" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.screeningTitle}</Text>
+                        <Text className="text-[10px] text-gray-500 font-medium">{t.menu.screeningSub}</Text>
+                      </View>
+                    </View>
+                    <Feather name="chevron-right" size={14} color="#2DA9E9" />
                   </TouchableOpacity>
+
                   <TouchableOpacity
-                    className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                    className="flex-row items-center justify-between p-2.5 sm:p-3 rounded-2xl hover:bg-purple-50 transition"
                     onPress={() => {
-                      scrollToSection('join-us');
+                      scrollToSection('worksheet-gratis');
                       setIsMenuOpen(false);
                     }}
                   >
-                    <Text className="text-xs font-bold text-gray-700">{t.menu.joinUsNav}</Text>
-                    <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                    <View className="flex-row items-center gap-3 flex-1 pr-2">
+                      <View className="w-9 h-9 rounded-xl bg-[#5A3B8B]/15 items-center justify-center shrink-0">
+                        <Feather name="gift" size={16} color="#5A3B8B" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.worksheetTitle}</Text>
+                        <Text className="text-[10px] text-gray-500 font-medium">{t.menu.worksheetSub}</Text>
+                      </View>
+                    </View>
+                    <Feather name="chevron-right" size={14} color="#5A3B8B" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="flex-row items-center justify-between p-2.5 sm:p-3 rounded-2xl hover:bg-amber-50 transition"
+                    onPress={() => {
+                      scrollToSection('testimoni');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <View className="flex-row items-center gap-3 flex-1 pr-2">
+                      <View className="w-9 h-9 rounded-xl bg-[#F59E0B]/15 items-center justify-center shrink-0">
+                        <Feather name="star" size={16} color="#D97706" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.testimoniTitle}</Text>
+                        <Text className="text-[10px] text-gray-500 font-medium">{t.menu.testimoniSub}</Text>
+                      </View>
+                    </View>
+                    <Feather name="chevron-right" size={14} color="#D97706" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="flex-row items-center justify-between p-2.5 sm:p-3 rounded-2xl hover:bg-emerald-50 transition"
+                    onPress={() => {
+                      scrollToSection('why-us');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <View className="flex-row items-center gap-3 flex-1 pr-2">
+                      <View className="w-9 h-9 rounded-xl bg-[#30B864]/15 items-center justify-center shrink-0">
+                        <Feather name="award" size={16} color="#30B864" />
+                      </View>
+                      <View className="flex-1">
+                        <Text className="text-xs font-extrabold text-[#162E5C]">{t.menu.whyUsTitle}</Text>
+                        <Text className="text-[10px] text-gray-500 font-medium">{t.menu.whyUsSub}</Text>
+                      </View>
+                    </View>
+                    <Feather name="chevron-right" size={14} color="#30B864" />
                   </TouchableOpacity>
                 </View>
-              )}
 
-              {/* Direct App Launch Button */}
-              <View className="mt-3 pt-3 border-t border-gray-100">
-                <TouchableOpacity
-                  className="w-full bg-[#D82B5A] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#B01E49] transition flex-row items-center gap-2"
-                  onPress={() => {
-                    setViewMode('app');
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <Feather name="smartphone" size={14} color="#FFFFFF" />
-                  <Text className="text-white font-extrabold text-xs">{t.menu.openApp}</Text>
-                </TouchableOpacity>
-              </View>
+                {/* Pengaturan Bahasa / Language Setting inside Menu (Tertutup dulu, klik globe untuk buka 3 bahasa) */}
+                <View className="mt-2 pt-2.5 border-t border-gray-100 px-1">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center gap-2">
+                      <Feather name="globe" size={14} color="#162E5C" />
+                      <Text className="text-xs font-bold text-[#162E5C]">{t.menu.langLabel}</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => setIsMenuLangOpen(!isMenuLangOpen)}
+                      className={`w-8 h-8 rounded-full items-center justify-center border transition ${
+                        isMenuLangOpen
+                          ? 'bg-[#162E5C] border-[#162E5C]'
+                          : 'bg-gray-100 border-gray-200'
+                      }`}
+                    >
+                      <Feather name="globe" size={14} color={isMenuLangOpen ? '#FFFFFF' : '#162E5C'} />
+                    </TouchableOpacity>
+                  </View>
+
+                  {isMenuLangOpen && (
+                    <View className="flex-row gap-2 mt-2.5 bg-gray-50 p-1.5 rounded-2xl border border-gray-200/80">
+                      {(
+                        [
+                          { code: 'id' as LandingLang, short: 'ID', label: 'Indonesia', accent: '#162E5C' },
+                          { code: 'en' as LandingLang, short: 'EN', label: 'English', accent: '#D82B5A' },
+                          { code: 'th' as LandingLang, short: 'TH', label: 'ไทย', accent: '#5A3B8B' },
+                        ] as const
+                      ).map((item) => {
+                        const active = lang === item.code;
+                        return (
+                          <TouchableOpacity
+                            key={item.code}
+                            onPress={() => {
+                              handleChangeLang(item.code);
+                              setIsMenuLangOpen(false);
+                            }}
+                            className={`flex-1 py-1.5 px-2 rounded-xl items-center justify-center ${
+                              active ? 'bg-white shadow-xs border border-gray-200/80' : ''
+                            }`}
+                          >
+                            <Text
+                              className="text-[11px] font-black"
+                              style={{ color: active ? item.accent : '#6B7280' }}
+                            >
+                              {item.short} • {item.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  )}
+                </View>
+
+                {/* Mobile & Tablet Extended Nav (Tentang Kami, Class Toolkit, Join Us) */}
+                {!isDesktop && (
+                  <View className="mt-2 pt-2 border-t border-gray-100 flex-col gap-1">
+                    <TouchableOpacity
+                      className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                      onPress={() => {
+                        scrollToSection('tentang-kami');
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <Text className="text-xs font-bold text-gray-700">{t.nav.about}</Text>
+                      <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                      onPress={() => {
+                        scrollToSection('class-toolkit');
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <Text className="text-xs font-bold text-gray-700">{t.menu.toolkitNav}</Text>
+                      <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className="p-2.5 rounded-xl hover:bg-gray-50 flex-row items-center justify-between"
+                      onPress={() => {
+                        scrollToSection('join-us');
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <Text className="text-xs font-bold text-gray-700">{t.menu.joinUsNav}</Text>
+                      <Feather name="arrow-up-right" size={12} color="#9CA3AF" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Direct App Launch Button */}
+                <View className="mt-3 pt-3 border-t border-gray-100">
+                  <TouchableOpacity
+                    className="w-full bg-[#D82B5A] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#B01E49] transition flex-row items-center gap-2"
+                    onPress={() => {
+                      setViewMode('app');
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    <Feather name="smartphone" size={14} color="#FFFFFF" />
+                    <Text className="text-white font-extrabold text-xs">{t.menu.openApp}</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
             </View>
           </>
         )}
@@ -703,115 +813,230 @@ export default function App() {
           showsVerticalScrollIndicator={false}
         >
 
-          {/* HERO SECTION (SMM Format with 100% Full Background Photo + Left Pink Right-Fading Opacity Gradient + Rounded-BL & Rounded-BR Corners) */}
+          {/* HERO SECTION (Responsive: Stacked Clean Layout on Mobile, Side-by-Side Full-Bleed Gradient on Tablet/Desktop) */}
           <View className="w-full bg-[#FAF6F0] relative overflow-hidden">
-            
-            {/* 100% Full Width Background Photo Slideshow across entire Hero */}
-            <View className="absolute inset-0 z-0 bg-black rounded-bl-none md:rounded-bl-[4.5rem] rounded-br-none md:rounded-br-[4.5rem] overflow-hidden">
-              {HERO_IMAGES.map((img, idx) => (
+            {isTabletOrUp ? (
+              <>
+                {/* Desktop / Tablet: 100% Full Width Background Photo Slideshow across entire Hero */}
+                <View className="absolute inset-0 z-0 bg-black md:rounded-bl-[4.5rem] md:rounded-br-[4.5rem] overflow-hidden">
+                  {HERO_IMAGES.map((img, idx) => (
+                    <View
+                      key={idx}
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        opacity: heroImageIdx === idx ? 1 : 0,
+                        transition: 'opacity 1.2s ease-in-out',
+                        zIndex: heroImageIdx === idx ? 1 : 0,
+                      } as any}
+                    >
+                      <Image
+                        source={img}
+                        className="w-full h-full object-cover"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectPosition: idx === 4 ? 'center 1000%' : 'center center',
+                        } as any}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  ))}
+                </View>
+
+                {/* Desktop / Tablet Foreground Content Row */}
+                <View className="w-full flex-row items-stretch min-h-[500px] lg:min-h-[560px] relative z-10">
+                  {/* Left Column: Pink Banner with Right-Fading Opacity Gradient & Rounded-BL Corner */}
+                  <View
+                    className="w-3/5 lg:w-1/2 p-10 md:p-14 lg:p-20 text-white flex-col justify-center relative md:rounded-bl-[4.5rem] z-20 overflow-hidden"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(to right, rgba(216, 43, 90, 0.98) 0%, rgba(216, 43, 90, 0.88) 62%, rgba(216, 43, 90, 0.35) 88%, transparent 100%)',
+                    } as any}
+                  >
+                    <View className="absolute top-10 left-10 opacity-15 pointer-events-none">
+                      <Feather name="send" size={130} color="#FFFFFF" />
+                    </View>
+                    <View className="absolute bottom-6 right-8 opacity-15 pointer-events-none">
+                      <Feather name="cloud" size={110} color="#FFFFFF" />
+                    </View>
+
+                    <View className="relative z-10 max-w-xl">
+                      <Text
+                        className="text-3xl md:text-4xl lg:text-[40px] font-black text-white leading-tight mb-5"
+                        style={{ lineHeight: '1.25em' } as any}
+                      >
+                        {t.hero.title}
+                      </Text>
+
+                      <Text className="text-sm md:text-base text-white/95 font-medium leading-relaxed mb-8">
+                        {t.hero.subtitle}
+                      </Text>
+
+                      <View className="flex-row flex-wrap items-center gap-3.5">
+                        <TouchableOpacity
+                          className="bg-white px-7 py-3 rounded-full shadow-lg hover:bg-gray-100 transition flex-row items-center gap-2"
+                          onPress={() => {
+                            const url = 'https://sccreening-sobatceria.vercel.app/';
+                            if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                            } else {
+                              Linking.openURL(url).catch(() => {});
+                            }
+                          }}
+                        >
+                          <Feather name="activity" size={16} color="#D82B5A" />
+                          <Text className="text-[#D82B5A] font-extrabold text-xs md:text-sm">
+                            {t.hero.btnScreening}
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          className="border-2 border-white px-7 py-2.5 rounded-full hover:bg-white/10 transition"
+                          onPress={() => scrollToSection('pendaftaran')}
+                        >
+                          <Text className="text-white font-extrabold text-xs md:text-sm">
+                            {t.hero.btnTrial}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Right Column: Clear Photo View with Rounded-BR Corner & Badge Overlay */}
+                  <View className="w-2/5 lg:w-1/2 min-h-[500px] relative justify-end p-6 z-10 md:rounded-br-[4.5rem]">
+                    <View className="absolute bottom-6 right-8 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 z-20 flex-row items-center gap-2">
+                      <Text className="text-white text-[11px] font-extrabold">{t.hero.badge}</Text>
+                      <View className="flex-row gap-1">
+                        {HERO_IMAGES.map((_, idx) => (
+                          <View
+                            key={idx}
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              heroImageIdx === idx ? 'w-4 bg-[#D82B5A]' : 'w-2 bg-white/70'
+                            }`}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </>
+            ) : (
+              /* Mobile (< 768px): Proporsional, foto tidak terpotong vertikal, teks & tombol tidak menutupi wajah anak */
+              <View className="w-full rounded-b-[2.25rem] overflow-hidden shadow-md bg-[#D82B5A]">
+                {/* Top Pink Content Block */}
                 <View
-                  key={idx}
-                  className="absolute inset-0 pointer-events-none"
+                  className="w-full px-5 pt-6 pb-6 relative overflow-hidden"
                   style={{
-                    opacity: heroImageIdx === idx ? 1 : 0,
-                    transition: 'opacity 1.2s ease-in-out',
-                    zIndex: heroImageIdx === idx ? 1 : 0,
+                    backgroundImage:
+                      'linear-gradient(180deg, #D82B5A 0%, #C92350 100%)',
                   } as any}
                 >
-                  <Image
-                    source={img}
-                    className="w-full h-full object-cover"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectPosition: idx === 4 ? 'center 1000%' : 'center center',
-                    } as any}
-                    resizeMode="cover"
-                  />
-                </View>
-              ))}
-            </View>
+                  <View className="absolute top-4 right-4 opacity-10 pointer-events-none">
+                    <Feather name="send" size={90} color="#FFFFFF" />
+                  </View>
 
-            {/* Foreground Content Row */}
-            <View className="w-full flex-col md:flex-row items-stretch min-h-[500px] md:min-h-[560px] relative z-10">
-              
-              {/* Left Column: Pink Banner with Right/Bottom-Fading Opacity Gradient & Rounded-BL Corner */}
-              <View
-                className="w-full md:w-1/2 p-6 md:p-14 lg:p-20 pb-16 md:pb-14 text-white flex-col justify-center relative rounded-bl-none md:rounded-bl-[4.5rem] z-20 overflow-hidden"
-                style={isDesktop ? {
-                  backgroundImage: 'linear-gradient(to right, rgba(216, 43, 90, 0.98) 0%, rgba(216, 43, 90, 0.88) 60%, rgba(216, 43, 90, 0.35) 88%, transparent 100%)',
-                } as any : {
-                  backgroundImage: 'linear-gradient(to bottom, rgba(216, 43, 90, 0.98) 0%, rgba(216, 43, 90, 0.92) 40%, rgba(216, 43, 90, 0.6) 70%, rgba(216, 43, 90, 0.2) 88%, rgba(216, 43, 90, 0) 100%)',
-                } as any}
-              >
-                {/* Decorative Paper Airplane & Cloud Watermarks */}
-                <View className="absolute top-10 left-10 opacity-15 pointer-events-none">
-                  <Feather name="send" size={130} color="#FFFFFF" />
-                </View>
-                <View className="absolute bottom-6 right-8 opacity-15 pointer-events-none">
-                  <Feather name="cloud" size={110} color="#FFFFFF" />
-                </View>
-
-                <View className="relative z-10 max-w-xl pt-10 md:pt-0">
-                  <Text className="text-2xl md:text-4xl lg:text-[40px] font-black text-white leading-tight mb-5" style={{ lineHeight: '1.25em' } as any}>
-                    {t.hero.title}
-                  </Text>
-
-                  <Text className="text-xs md:text-base text-white/95 font-medium leading-relaxed mb-8">
-                    {t.hero.subtitle}
-                  </Text>
-
-                  <View className="flex-row flex-wrap items-center gap-4">
-                    <TouchableOpacity
-                      className="bg-white px-7 py-3 rounded-full shadow-lg hover:bg-gray-100 transition flex-row items-center gap-2"
-                      onPress={() => {
-                        const url = 'https://sccreening-sobatceria.vercel.app/';
-                        if (Platform.OS === 'web' && typeof window !== 'undefined') {
-                          window.open(url, '_blank', 'noopener,noreferrer');
-                        } else {
-                          Linking.openURL(url).catch(() => {});
-                        }
-                      }}
+                  <View className="relative z-10">
+                    <Text
+                      className="text-[22px] sm:text-3xl font-black text-white mb-3"
+                      style={{ lineHeight: '1.28em' } as any}
                     >
-                      <Feather name="activity" size={16} color="#D82B5A" />
-                      <Text className="text-[#D82B5A] font-extrabold text-xs md:text-sm">{t.hero.btnScreening}</Text>
-                    </TouchableOpacity>
+                      {t.hero.title}
+                    </Text>
 
-                    <TouchableOpacity
-                      className="border-2 border-white px-7 py-2.5 rounded-full hover:bg-white/10 transition"
-                      onPress={() => scrollToSection('pendaftaran')}
-                    >
-                      <Text className="text-white font-extrabold text-xs md:text-sm">{t.hero.btnTrial}</Text>
-                    </TouchableOpacity>
+                    <Text className="text-xs sm:text-sm text-white/95 font-medium leading-relaxed mb-5">
+                      {t.hero.subtitle}
+                    </Text>
+
+                    <View className="flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                      <TouchableOpacity
+                        className="bg-white px-5 py-3 rounded-full shadow-md items-center justify-center flex-row gap-2"
+                        onPress={() => {
+                          const url = 'https://sccreening-sobatceria.vercel.app/';
+                          if (Platform.OS === 'web' && typeof window !== 'undefined') {
+                            window.open(url, '_blank', 'noopener,noreferrer');
+                          } else {
+                            Linking.openURL(url).catch(() => {});
+                          }
+                        }}
+                      >
+                        <Feather name="activity" size={15} color="#D82B5A" />
+                        <Text className="text-[#D82B5A] font-extrabold text-xs">
+                          {t.hero.btnScreening}
+                        </Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        className="border-2 border-white/90 bg-white/10 px-5 py-2.5 rounded-full items-center justify-center"
+                        onPress={() => scrollToSection('pendaftaran')}
+                      >
+                        <Text className="text-white font-extrabold text-xs">
+                          {t.hero.btnTrial}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
 
-              {/* Right Column: Clear Photo View with Rounded-BR Corner & Badge Overlay */}
-              <View className="w-full md:w-1/2 h-[380px] md:h-auto min-h-[440px] relative justify-end p-6 z-10 rounded-br-none md:rounded-br-[4.5rem]">
-                <View className="absolute bottom-6 right-8 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 z-20 flex-row items-center gap-2">
-                  <Text className="text-white text-[11px] font-extrabold">{t.hero.badge}</Text>
-                  <View className="flex-row gap-1">
-                    {HERO_IMAGES.map((_, idx) => (
-                      <View
-                        key={idx}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          heroImageIdx === idx ? 'w-4 bg-[#D82B5A]' : 'w-2 bg-white/70'
-                        }`}
+                {/* Bottom Landscape Photo Carousel Frame */}
+                <View className="w-full h-[230px] sm:h-[300px] relative bg-black overflow-hidden">
+                  {HERO_IMAGES.map((img, idx) => (
+                    <View
+                      key={idx}
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        opacity: heroImageIdx === idx ? 1 : 0,
+                        transition: 'opacity 1.2s ease-in-out',
+                        zIndex: heroImageIdx === idx ? 1 : 0,
+                      } as any}
+                    >
+                      <Image
+                        source={img}
+                        className="w-full h-full object-cover"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectPosition: 'center center',
+                        } as any}
+                        resizeMode="cover"
                       />
-                    ))}
+                    </View>
+                  ))}
+
+                  {/* Subtle top gradient seam blending pink banner into photo */}
+                  <View
+                    className="absolute top-0 left-0 right-0 h-10 z-10 pointer-events-none"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(to bottom, rgba(201, 35, 80, 0.85) 0%, rgba(201, 35, 80, 0) 100%)',
+                    } as any}
+                  />
+
+                  {/* Bottom Indicator Badge */}
+                  <View className="absolute bottom-3 left-4 right-4 z-20 flex-row items-center justify-between bg-black/50 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/25">
+                    <Text numberOfLines={1} className="text-white text-[10px] font-extrabold flex-1 mr-2">
+                      {t.hero.badge}
+                    </Text>
+                    <View className="flex-row gap-1 shrink-0">
+                      {HERO_IMAGES.map((_, idx) => (
+                        <View
+                          key={idx}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            heroImageIdx === idx ? 'w-3.5 bg-[#D82B5A]' : 'w-1.5 bg-white/70'
+                          }`}
+                        />
+                      ))}
+                    </View>
                   </View>
                 </View>
               </View>
-
-            </View>
+            )}
           </View>
 
           {/* SECTION 1: MENGENAL SOBAT CERIA (Interactive Scroll Reveal & Hover Lift) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="tentang-kami" nativeID="tentang-kami" className="flex-col md:flex-row items-center gap-8 md:gap-12 bg-white rounded-[2.5rem] p-6 md:p-12 shadow-sm border border-gray-100 card-hover-effect">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="tentang-kami" nativeID="tentang-kami" className="flex-col md:flex-row items-center gap-6 md:gap-12 bg-white rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-12 shadow-sm border border-gray-100 card-hover-effect">
               {/* Left Photo Frame */}
-              <View className="w-full md:w-2/5 h-72 md:h-80 rounded-[2rem] overflow-hidden relative shadow-md img-zoom-container">
+              <View className="w-full md:w-2/5 h-56 sm:h-72 md:h-80 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden relative shadow-md img-zoom-container">
                 <Image
                   source={require('./assets/dokumentasi sobat/tentang-sobat-ceria.jpeg')}
                   className="w-full h-full object-cover"
@@ -824,22 +1049,22 @@ export default function App() {
 
               {/* Right Text Content */}
               <View className="w-full md:w-3/5">
-                <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">{t.about.eyebrow}</Text>
-                <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4">
+                <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1">{t.about.eyebrow}</Text>
+                <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3.5 md:mb-4">
                   {t.about.title}
                 </Text>
-                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-4">
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-3.5">
                   {t.about.p1}
                 </Text>
-                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-4">
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-3.5">
                   {t.about.p2}
                 </Text>
-                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-6">
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-5 md:mb-6">
                   {t.about.p3}
                 </Text>
                 <View className="flex-row items-center gap-4">
                   <TouchableOpacity
-                    className="bg-[#162E5C] px-5 py-2.5 rounded-full shadow-sm hover:bg-[#0B2B64] transition"
+                    className="w-full sm:w-auto bg-[#162E5C] px-6 py-3 rounded-full shadow-sm hover:bg-[#0B2B64] transition items-center justify-center"
                     onPress={() => setViewMode('app')}
                   >
                     <Text className="text-white font-extrabold text-xs">{t.about.cta}</Text>
@@ -850,15 +1075,15 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 3: VISI & MISI (Interactive Card Reveal) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="bg-[#162E5C] rounded-[2.5rem] p-8 md:p-14 text-white shadow-xl flex-col md:flex-row items-center gap-10 card-solid-hover">
-              <View className="flex-1">
-                <Text className="text-[#FFD100] text-lg font-serif italic mb-2">{t.vision.eyebrow}</Text>
-                <Text className="text-2xl md:text-3xl font-extrabold text-white mb-4">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View className="bg-[#162E5C] rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-14 text-white shadow-xl flex-col md:flex-row items-center gap-6 md:gap-10 card-solid-hover">
+              <View className="flex-1 w-full">
+                <Text className="text-[#FFD100] text-base sm:text-lg font-serif italic mb-1.5">{t.vision.eyebrow}</Text>
+                <Text className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white mb-4">
                   {t.vision.title}
                 </Text>
 
-                <View className="mb-6">
+                <View className="mb-5 md:mb-6">
                   <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-1">{t.vision.visionLabel}</Text>
                   <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">
                     {t.vision.visionText}
@@ -874,7 +1099,7 @@ export default function App() {
                   </View>
                 </View>
 
-                <View className="mt-6">
+                <View className="mt-5 md:mt-6">
                   <Text className="text-xs font-black uppercase text-[#FFD100] tracking-wider mb-1">{t.vision.locationLabel}</Text>
                   <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium">
                     Lab Tumbuh Kembang FKIP UMS Lantai 2, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo.
@@ -883,7 +1108,7 @@ export default function App() {
               </View>
 
               {/* Right Image Frame */}
-              <View className="w-full md:w-2/5 h-64 md:h-80 rounded-[2rem] overflow-hidden shadow-lg border-2 border-white/20 img-zoom-container">
+              <View className="w-full md:w-2/5 h-56 sm:h-64 md:h-80 rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-lg border-2 border-white/20 img-zoom-container">
                 <Image
                   source={require('./assets/dokumentasi sobat/visi-misi.jpeg')}
                   className="w-full h-full object-cover"
@@ -894,56 +1119,56 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 4: JENJANG USIA PROGRAM (Interactive Cards with Zoom & Lift) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1">Jenjang Usia</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C]">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View className="items-center text-center mb-8 md:mb-12">
+              <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1 text-center">Jenjang Usia</Text>
+              <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
                 Fokus Program Menurut Usia (2–7 Tahun)
               </Text>
             </View>
 
-            <View className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-8">
               {/* Level 1: Pre-Kinder */}
-              <View className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
-                <View className="w-full h-48 rounded-[1.8rem] overflow-hidden mb-6 img-zoom-container">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2.5rem] p-5 sm:p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
+                <View className="w-full h-44 sm:h-48 rounded-[1.4rem] md:rounded-[1.8rem] overflow-hidden mb-5 img-zoom-container">
                   <Image
                     source={{ uri: 'https://images.unsplash.com/photo-1596464716127-f2a82984de30?w=600' }}
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%' }}
                   />
                 </View>
-                <Text className="text-base font-extrabold text-[#162E5C] mb-2">Fokus Sensori & Bicara</Text>
-                <Text className="text-xs text-gray-600 leading-relaxed font-medium">
+                <Text className="text-base font-extrabold text-[#162E5C] mb-2 text-center">Fokus Sensori & Bicara</Text>
+                <Text className="text-xs text-gray-600 leading-relaxed font-medium text-center">
                   Stimulasi taktil, eksplorasi tekstur, melatih koordinasi fisik dasar, dan menambah kosa kata pertama.
                 </Text>
               </View>
 
               {/* Level 2: Kinder A */}
-              <View className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
-                <View className="w-full h-48 rounded-[1.8rem] overflow-hidden mb-6 img-zoom-container">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2.5rem] p-5 sm:p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
+                <View className="w-full h-44 sm:h-48 rounded-[1.4rem] md:rounded-[1.8rem] overflow-hidden mb-5 img-zoom-container">
                   <Image
                     source={{ uri: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=600' }}
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%' }}
                   />
                 </View>
-                <Text className="text-base font-extrabold text-[#162E5C] mb-2">Eksplorasi & Bersosialisasi</Text>
-                <Text className="text-xs text-gray-600 leading-relaxed font-medium">
+                <Text className="text-base font-extrabold text-[#162E5C] mb-2 text-center">Eksplorasi & Bersosialisasi</Text>
+                <Text className="text-xs text-gray-600 leading-relaxed font-medium text-center">
                   Kriya tangan, motorik halus gunting tempel, permainan kelompok, serta pembentukan kesabaran.
                 </Text>
               </View>
 
               {/* Level 3: Kinder B */}
-              <View className="bg-white rounded-[2.5rem] p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect">
-                <View className="w-full h-48 rounded-[1.8rem] overflow-hidden mb-6 img-zoom-container">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2.5rem] p-5 sm:p-6 shadow-sm border border-gray-100 flex-col items-center text-center card-hover-effect sm:col-span-2 lg:col-span-1">
+                <View className="w-full h-44 sm:h-48 rounded-[1.4rem] md:rounded-[1.8rem] overflow-hidden mb-5 img-zoom-container">
                   <Image
                     source={{ uri: 'https://images.unsplash.com/photo-1530210124550-912dc1381cb8?w=600' }}
                     className="w-full h-full object-cover"
                     style={{ width: '100%', height: '100%' }}
                   />
                 </View>
-                <Text className="text-base font-extrabold text-[#162E5C] mb-2">Berpikir Kritis & STEM</Text>
-                <Text className="text-xs text-gray-600 leading-relaxed font-medium">
+                <Text className="text-base font-extrabold text-[#162E5C] mb-2 text-center">Berpikir Kritis & STEM</Text>
+                <Text className="text-xs text-gray-600 leading-relaxed font-medium text-center">
                   Eksperimen sains sederhana, pemecahan masalah mandiri, dan persiapan matang memasuki jenjang sekolah.
                 </Text>
               </View>
@@ -951,16 +1176,16 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 5: PROGRAM KELAS RESMI (Dinamis dari Supabase / Admin Kelola Kelas) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="katalog-kelas" nativeID="katalog-kelas" className="items-center text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1 text-center">{t.catalog.eyebrow}</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="katalog-kelas" nativeID="katalog-kelas" className="items-center text-center mb-8 md:mb-12">
+              <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1 text-center">{t.catalog.eyebrow}</Text>
+              <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
                 {landingCourses.length} {t.catalog.titleSuffix}
               </Text>
             </View>
 
             {/* Official Program Cards Grid */}
-            <View className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
               {landingCourses.map((course, idx) => {
                 const imgSource = resolveCourseImage(course);
                 const ageColor = AGE_COLORS[idx % AGE_COLORS.length];
@@ -968,10 +1193,10 @@ export default function App() {
                 return (
                   <View
                     key={course.id}
-                    className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect"
+                    className="bg-white rounded-[1.75rem] md:rounded-[2rem] p-5 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect"
                   >
                     <View>
-                      <View className="w-full h-40 rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container bg-[#FAF6F0] items-center justify-center">
+                      <View className="w-full h-40 rounded-[1.25rem] md:rounded-[1.5rem] overflow-hidden mb-4 relative img-zoom-container bg-[#FAF6F0] items-center justify-center">
                         {imgSource ? (
                           <Image
                             source={imgSource}
@@ -1012,32 +1237,32 @@ export default function App() {
             </View>
 
             {/* CTA Button to Full App Catalog */}
-            <View className="items-center mt-10">
+            <View className="items-center mt-8 md:mt-10">
               <TouchableOpacity
-                className="bg-[#D82B5A] px-8 py-3.5 rounded-full shadow-lg hover:bg-[#B01E49] transition-transform active:scale-95 flex-row items-center gap-2"
+                className="w-full sm:w-auto bg-[#D82B5A] px-7 py-3.5 rounded-full shadow-lg hover:bg-[#B01E49] transition-transform active:scale-95 flex-row items-center justify-center gap-2"
                 onPress={() => setViewMode('app')}
               >
-                <Text className="text-white font-extrabold text-xs md:text-sm">{t.catalog.cta}</Text>
+                <Text className="text-white font-extrabold text-xs md:text-sm text-center">{t.catalog.cta}</Text>
                 <Feather name="arrow-right" size={16} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
           </ScrollRevealSection>
 
           {/* SECTION: SCREENING STPPA DIGITAL (Preview Sekilas Teaser) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="screening-stppa" nativeID="screening-stppa" className="bg-white rounded-[2.5rem] p-8 md:p-14 border-2 border-[#2DA9E9]/30 shadow-md flex-col md:flex-row items-center gap-10 card-hover-effect">
-              <View className="flex-1">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="screening-stppa" nativeID="screening-stppa" className="bg-white rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-14 border-2 border-[#2DA9E9]/30 shadow-md flex-col md:flex-row items-center gap-6 md:gap-10 card-hover-effect">
+              <View className="flex-1 w-full">
                 <View className="bg-[#2DA9E9]/15 self-start px-3.5 py-1 rounded-full mb-3 border border-[#2DA9E9]/30">
-                  <Text className="text-[#2DA9E9] text-[11px] font-black uppercase tracking-wider">{t.screening.badge}</Text>
+                  <Text className="text-[#2DA9E9] text-[10px] sm:text-[11px] font-black uppercase tracking-wider">{t.screening.badge}</Text>
                 </View>
-                <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4">
+                <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3.5 md:mb-4">
                   {t.screening.title}
                 </Text>
-                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-6">
+                <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium mb-5 md:mb-6">
                   {t.screening.desc}
                 </Text>
                 <TouchableOpacity
-                  className="bg-[#2DA9E9] px-7 py-3 rounded-full shadow-md hover:bg-[#1E8EC7] transition-transform active:scale-95 self-start flex-row items-center gap-2"
+                  className="w-full sm:w-auto bg-[#2DA9E9] px-7 py-3 rounded-full shadow-md hover:bg-[#1E8EC7] transition-transform active:scale-95 self-stretch sm:self-start flex-row items-center justify-center gap-2"
                   onPress={() => setViewMode('app')}
                 >
                   <Text className="text-white font-extrabold text-xs md:text-sm">{t.screening.cta}</Text>
@@ -1046,17 +1271,17 @@ export default function App() {
               </View>
 
               {/* Visual Card Preview */}
-              <View className="w-full md:w-2/5 bg-[#F0F8FF] rounded-[2rem] p-6 border border-[#2DA9E9]/20 shadow-sm flex-col gap-3">
-                <View className="flex-row justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
-                  <Text className="text-xs font-bold text-[#162E5C]">{t.screening.card1Title}</Text>
+              <View className="w-full md:w-2/5 bg-[#F0F8FF] rounded-[1.5rem] md:rounded-[2rem] p-4 sm:p-6 border border-[#2DA9E9]/20 shadow-sm flex-col gap-2.5 sm:gap-3">
+                <View className="flex-row flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                  <Text className="text-xs font-bold text-[#162E5C] flex-1">{t.screening.card1Title}</Text>
                   <Text className="text-xs font-black text-[#30B864]">{t.screening.card1Val}</Text>
                 </View>
-                <View className="flex-row justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
-                  <Text className="text-xs font-bold text-[#162E5C]">{t.screening.card2Title}</Text>
+                <View className="flex-row flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                  <Text className="text-xs font-bold text-[#162E5C] flex-1">{t.screening.card2Title}</Text>
                   <Text className="text-xs font-black text-[#2DA9E9]">{t.screening.card2Val}</Text>
                 </View>
-                <View className="flex-row justify-between items-center bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
-                  <Text className="text-xs font-bold text-[#162E5C]">{t.screening.card3Title}</Text>
+                <View className="flex-row flex-wrap justify-between items-center gap-2 bg-white p-3 rounded-xl border border-gray-100 shadow-xs">
+                  <Text className="text-xs font-bold text-[#162E5C] flex-1">{t.screening.card3Title}</Text>
                   <Text className="text-xs font-black text-[#F77712]">{t.screening.card3Val}</Text>
                 </View>
               </View>
@@ -1064,20 +1289,20 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION: WORKSHEET GRATIS PRINTABLE (Preview Sekilas Teaser) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="worksheet-gratis" nativeID="worksheet-gratis" className="bg-[#5A3B8B] rounded-[2.5rem] p-8 md:p-14 text-white shadow-xl flex-col md:flex-row items-center gap-10 card-solid-hover">
-              <View className="flex-1">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="worksheet-gratis" nativeID="worksheet-gratis" className="bg-[#5A3B8B] rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-14 text-white shadow-xl flex-col md:flex-row items-center gap-6 md:gap-10 card-solid-hover">
+              <View className="flex-1 w-full">
                 <View className="bg-white/20 self-start px-3.5 py-1 rounded-full mb-3 border border-white/30">
-                  <Text className="text-[#FFD100] text-[11px] font-black uppercase tracking-wider">{t.worksheet.badge}</Text>
+                  <Text className="text-[#FFD100] text-[10px] sm:text-[11px] font-black uppercase tracking-wider">{t.worksheet.badge}</Text>
                 </View>
-                <Text className="text-2xl md:text-4xl font-extrabold text-white mb-4">
+                <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-white mb-3.5 md:mb-4">
                   {t.worksheet.title}
                 </Text>
-                <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium mb-6">
+                <Text className="text-xs md:text-sm text-gray-200 leading-relaxed font-medium mb-5 md:mb-6">
                   {t.worksheet.desc}
                 </Text>
                 <TouchableOpacity
-                  className="bg-[#FFD100] px-7 py-3 rounded-full shadow-md hover:bg-[#E6BC00] transition-transform active:scale-95 self-start flex-row items-center gap-2"
+                  className="w-full sm:w-auto bg-[#FFD100] px-7 py-3 rounded-full shadow-md hover:bg-[#E6BC00] transition-transform active:scale-95 self-stretch sm:self-start flex-row items-center justify-center gap-2"
                   onPress={() => setViewMode('app')}
                 >
                   <Text className="text-[#162E5C] font-extrabold text-xs md:text-sm">{t.worksheet.cta}</Text>
@@ -1086,17 +1311,17 @@ export default function App() {
               </View>
 
               {/* Visual Preview Badge */}
-              <View className="w-full md:w-2/5 bg-white/10 rounded-[2rem] p-6 border border-white/20 flex-col gap-3">
+              <View className="w-full md:w-2/5 bg-white/10 rounded-[1.5rem] md:rounded-[2rem] p-4 sm:p-6 border border-white/20 flex-col gap-3">
                 <View className="flex-row items-center gap-3 bg-white/15 p-3 rounded-xl">
                   <Feather name="file-text" size={20} color="#FFD100" />
-                  <View>
+                  <View className="flex-1">
                     <Text className="text-xs font-extrabold text-white">{t.worksheet.item1Title}</Text>
                     <Text className="text-[10px] text-gray-300">{t.worksheet.item1Sub}</Text>
                   </View>
                 </View>
                 <View className="flex-row items-center gap-3 bg-white/15 p-3 rounded-xl">
                   <Feather name="edit-3" size={20} color="#30B864" />
-                  <View>
+                  <View className="flex-1">
                     <Text className="text-xs font-extrabold text-white">{t.worksheet.item2Title}</Text>
                     <Text className="text-[10px] text-gray-300">{t.worksheet.item2Sub}</Text>
                   </View>
@@ -1106,14 +1331,14 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION: CLASS TOOLKIT FRANCHISE (PILAR 3) - TEPAT DI BAWAH WORKSHEET */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="class-toolkit" nativeID="class-toolkit" className="bg-white rounded-[2.5rem] p-8 md:p-14 border border-gray-100 shadow-sm card-hover-effect">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="class-toolkit" nativeID="class-toolkit" className="bg-white rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-14 border border-gray-100 shadow-sm card-hover-effect">
               {/* Header Penjelasan Class Toolkit Franchise */}
-              <View className="items-center text-center max-w-3xl mx-auto mb-12">
-                <View className="bg-[#D82B5A]/10 self-center px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
-                  <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider text-center">{t.toolkit.badge}</Text>
+              <View className="items-center text-center max-w-3xl mx-auto mb-8 md:mb-12">
+                <View className="bg-[#D82B5A]/10 self-center px-3.5 sm:px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
+                  <Text className="text-[#D82B5A] text-[10px] sm:text-xs font-black uppercase tracking-wider text-center">{t.toolkit.badge}</Text>
                 </View>
-                <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-4 text-center">
+                <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3.5 md:mb-4 text-center">
                   {t.toolkit.title}
                 </Text>
                 <Text className="text-xs md:text-sm text-gray-600 leading-relaxed font-medium text-center">
@@ -1122,138 +1347,138 @@ export default function App() {
               </View>
 
               {/* 3 Paket Franchise Grid */}
-              <View className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <View className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Paket 1: Starter Toolkit */}
-                <View className="bg-[#FAF6F0] rounded-[2rem] p-7 border border-gray-200/80 flex-col justify-between hover:shadow-md transition">
+                <View className="bg-[#FAF6F0] rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-7 border border-gray-200/80 flex-col justify-between hover:shadow-md transition">
                   <View>
                     <View className="w-12 h-12 rounded-2xl bg-[#5A3B8B]/15 items-center justify-center mb-4">
                       <Feather name="box" size={24} color="#5A3B8B" />
                     </View>
-                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#5A3B8B] mb-1">Paket Komunitas / Pop-Up</Text>
-                    <Text className="text-xl font-extrabold text-[#162E5C] mb-2">Starter Toolkit</Text>
+                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#5A3B8B] mb-1">{t.toolkit.p1Tag}</Text>
+                    <Text className="text-xl font-extrabold text-[#162E5C] mb-2">{t.toolkit.p1Title}</Text>
                     <Text className="text-xs text-gray-600 font-medium leading-relaxed mb-5">
-                      Cocok untuk guru privat, komunitas orang tua, atau kelas stimulasi berkala berskala kecil.
+                      {t.toolkit.p1Desc}
                     </Text>
 
                     <View className="border-t border-gray-200/70 pt-4 mb-6 flex-col gap-2.5">
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">2 Modul Tematik Pilihan</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">2 Modul Tematik Pilihan</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Sensory Starter Kit (10 Anak)</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Sensory Starter Kit (10 Anak)</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Buku Panduan Ajar & SOP Dasar</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Buku Panduan Ajar & SOP Dasar</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Screening Perkembangan STPPA Dasar</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Screening Perkembangan STPPA Dasar</Text>
                       </View>
                     </View>
                   </View>
 
                   <TouchableOpacity
-                    className="w-full bg-[#162E5C] py-3 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-2"
-                    onPress={() => {}}
+                    className="w-full bg-[#162E5C] py-3 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row gap-2"
+                    onPress={() => setRoleRegisterTarget('partner')}
                   >
-                    <Text className="text-white font-extrabold text-xs">Lihat Lebih Lanjut</Text>
+                    <Text className="text-white font-extrabold text-xs">{t.toolkit.cta}</Text>
                     <Feather name="arrow-right" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
 
                 {/* Paket 2: Pro Growth Hub (Featured) */}
-                <View className="bg-[#162E5C] rounded-[2rem] p-7 text-white shadow-xl relative overflow-hidden flex-col justify-between border-2 border-[#D82B5A]">
+                <View className="bg-[#162E5C] rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-7 text-white shadow-xl relative overflow-hidden flex-col justify-between border-2 border-[#D82B5A]">
                   <View className="absolute top-4 right-4 bg-[#D82B5A] px-3 py-1 rounded-full">
-                    <Text className="text-[10px] font-black text-white uppercase tracking-wider">Paling Populer</Text>
+                    <Text className="text-[10px] font-black text-white uppercase tracking-wider">{t.toolkit.p2Popular}</Text>
                   </View>
 
                   <View>
                     <View className="w-12 h-12 rounded-2xl bg-[#D82B5A]/30 items-center justify-center mb-4">
                       <Feather name="zap" size={24} color="#FF7B9E" />
                     </View>
-                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#FFD100] mb-1">Paket Playgroup / Daycare</Text>
-                    <Text className="text-xl font-extrabold text-white mb-2">Pro Growth Hub</Text>
+                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#FFD100] mb-1">{t.toolkit.p2Tag}</Text>
+                    <Text className="text-xl font-extrabold text-white mb-2">{t.toolkit.p2Title}</Text>
                     <Text className="text-xs text-gray-200 font-medium leading-relaxed mb-5">
-                      Pilihan terlengkap untuk bimbingan belajar, daycare, atau sentra stimulasi tumbuh kembang mandiri.
+                      {t.toolkit.p2Desc}
                     </Text>
 
                     <View className="border-t border-white/15 pt-4 mb-6 flex-col gap-2.5">
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#FFD100" />
-                        <Text className="text-xs font-semibold text-white">Lengkap 8 Modul Kelas Resmi</Text>
+                        <Text className="text-xs font-semibold text-white flex-1">Lengkap 8 Modul Kelas Resmi</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#FFD100" />
-                        <Text className="text-xs font-semibold text-white">Full Sensory & STEAM Kits (30 Anak)</Text>
+                        <Text className="text-xs font-semibold text-white flex-1">Full Sensory & STEAM Kits (30 Anak)</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#FFD100" />
-                        <Text className="text-xs font-semibold text-white">Akses Aplikasi Screening AI & Dashboard</Text>
+                        <Text className="text-xs font-semibold text-white flex-1">Akses Aplikasi Screening AI & Dashboard</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#FFD100" />
-                        <Text className="text-xs font-semibold text-white">Pelatihan & Sertifikasi 2 Fasilitator</Text>
+                        <Text className="text-xs font-semibold text-white flex-1">Pelatihan & Sertifikasi 2 Fasilitator</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#FFD100" />
-                        <Text className="text-xs font-semibold text-white">Starter Brand Kit & Brosur Promosi</Text>
+                        <Text className="text-xs font-semibold text-white flex-1">Starter Brand Kit & Brosur Promosi</Text>
                       </View>
                     </View>
                   </View>
 
                   <TouchableOpacity
-                    className="w-full bg-[#D82B5A] py-3 rounded-full items-center justify-center shadow-md hover:bg-[#B01E49] transition active:scale-95 flex-row items-center gap-2"
-                    onPress={() => {}}
+                    className="w-full bg-[#D82B5A] py-3 rounded-full items-center justify-center shadow-md hover:bg-[#B01E49] transition active:scale-95 flex-row gap-2"
+                    onPress={() => setRoleRegisterTarget('partner')}
                   >
-                    <Text className="text-white font-extrabold text-xs">Lihat Lebih Lanjut</Text>
+                    <Text className="text-white font-extrabold text-xs">{t.toolkit.cta}</Text>
                     <Feather name="arrow-right" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
 
                 {/* Paket 3: Enterprise Center */}
-                <View className="bg-[#FAF6F0] rounded-[2rem] p-7 border border-gray-200/80 flex-col justify-between hover:shadow-md transition">
+                <View className="bg-[#FAF6F0] rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-7 border border-gray-200/80 flex-col justify-between hover:shadow-md transition md:col-span-2 lg:col-span-1">
                   <View>
                     <View className="w-12 h-12 rounded-2xl bg-[#30B864]/15 items-center justify-center mb-4">
                       <Feather name="award" size={24} color="#30B864" />
                     </View>
-                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#30B864] mb-1">Paket Sekolah / Center Mitra</Text>
-                    <Text className="text-xl font-extrabold text-[#162E5C] mb-2">Enterprise Partner</Text>
+                    <Text className="text-[11px] font-black uppercase tracking-wider text-[#30B864] mb-1">{t.toolkit.p3Tag}</Text>
+                    <Text className="text-xl font-extrabold text-[#162E5C] mb-2">{t.toolkit.p3Title}</Text>
                     <Text className="text-xs text-gray-600 font-medium leading-relaxed mb-5">
-                      Kemitraan strategis institusional untuk sekolah TK/PAUD, klinik tumbuh kembang, dan pusat edukasi anak.
+                      {t.toolkit.p3Desc}
                     </Text>
 
                     <View className="border-t border-gray-200/70 pt-4 mb-6 flex-col gap-2.5">
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Lisensi Area / Wilayah Eksklusif</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Lisensi Area / Wilayah Eksklusif</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Inventaris Kit Lengkap (50+ Anak)</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Inventaris Kit Lengkap (50+ Anak)</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Supervisi Psikolog & Dokter Anak</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Supervisi Psikolog & Dokter Anak</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Pelatihan & Monitoring Terpadu</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Pelatihan & Monitoring Terpadu</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
                         <Feather name="check" size={14} color="#30B864" />
-                        <Text className="text-xs font-semibold text-gray-700">Pembaruan Modul Berkala Otomatis</Text>
+                        <Text className="text-xs font-semibold text-gray-700 flex-1">Pembaruan Modul Berkala Otomatis</Text>
                       </View>
                     </View>
                   </View>
 
                   <TouchableOpacity
-                    className="w-full bg-[#162E5C] py-3 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-2"
-                    onPress={() => {}}
+                    className="w-full bg-[#162E5C] py-3 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row gap-2"
+                    onPress={() => setRoleRegisterTarget('partner')}
                   >
-                    <Text className="text-white font-extrabold text-xs">Lihat Lebih Lanjut</Text>
+                    <Text className="text-white font-extrabold text-xs">{t.toolkit.cta}</Text>
                     <Feather name="arrow-right" size={14} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
@@ -1262,12 +1487,12 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION: JOIN US (PILAR 4) - TEPAT DI BAWAH CLASS TOOLKIT */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="join-us" nativeID="join-us" className="items-center text-center mb-12">
-              <View className="bg-[#D82B5A]/10 self-center px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
-                <Text className="text-[#D82B5A] text-xs font-black uppercase tracking-wider text-center">{t.joinUs.badge}</Text>
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="join-us" nativeID="join-us" className="items-center text-center mb-8 md:mb-12">
+              <View className="bg-[#D82B5A]/10 self-center px-3.5 sm:px-4 py-1.5 rounded-full mb-3 border border-[#D82B5A]/20">
+                <Text className="text-[#D82B5A] text-[10px] sm:text-xs font-black uppercase tracking-wider text-center">{t.joinUs.badge}</Text>
               </View>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3 text-center">
+              <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] mb-3 text-center">
                 {t.joinUs.title}
               </Text>
               <Text className="text-xs md:text-sm text-gray-600 font-medium max-w-2xl mx-auto leading-relaxed text-center">
@@ -1276,9 +1501,9 @@ export default function App() {
             </View>
 
             {/* 4 Pilihan Pendaftaran Grid (Volunteer, Tutor/Guru, Collaboration, Mitra) */}
-            <View className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
               {/* 1. Volunteer */}
-              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-12 h-12 rounded-2xl bg-[#FFD100]/25 items-center justify-center mb-4">
                     <Feather name="heart" size={24} color="#B45309" />
@@ -1292,7 +1517,7 @@ export default function App() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  className="w-full bg-[#162E5C] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row items-center gap-1.5"
+                  className="w-full bg-[#162E5C] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#0B2B64] transition active:scale-95 flex-row gap-1.5"
                   onPress={() => setRoleRegisterTarget('volunteer')}
                 >
                   <Text className="text-white font-extrabold text-xs">{t.joinUs.btn}</Text>
@@ -1301,7 +1526,7 @@ export default function App() {
               </View>
 
               {/* 2. Tutor / Guru */}
-              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-12 h-12 rounded-2xl bg-[#5A3B8B]/15 items-center justify-center mb-4">
                     <Feather name="users" size={24} color="#5A3B8B" />
@@ -1315,7 +1540,7 @@ export default function App() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  className="w-full bg-[#5A3B8B] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#472c72] transition active:scale-95 flex-row items-center gap-1.5"
+                  className="w-full bg-[#5A3B8B] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#472c72] transition active:scale-95 flex-row gap-1.5"
                   onPress={() => setRoleRegisterTarget('teacher')}
                 >
                   <Text className="text-white font-extrabold text-xs">{t.joinUs.btn}</Text>
@@ -1324,7 +1549,7 @@ export default function App() {
               </View>
 
               {/* 3. Collaboration */}
-              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-12 h-12 rounded-2xl bg-[#2DA9E9]/15 items-center justify-center mb-4">
                     <Feather name="share-2" size={24} color="#2DA9E9" />
@@ -1338,7 +1563,7 @@ export default function App() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  className="w-full bg-[#2DA9E9] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#1E8EC7] transition active:scale-95 flex-row items-center gap-1.5"
+                  className="w-full bg-[#2DA9E9] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#1E8EC7] transition active:scale-95 flex-row gap-1.5"
                   onPress={() => setRoleRegisterTarget('collaboration')}
                 >
                   <Text className="text-white font-extrabold text-xs">{t.joinUs.btn}</Text>
@@ -1347,7 +1572,7 @@ export default function App() {
               </View>
 
               {/* 4. Mitra */}
-              <View className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
+              <View className="bg-white rounded-[1.75rem] md:rounded-[2rem] p-5 sm:p-6 border border-gray-100 shadow-sm flex-col justify-between card-hover-effect">
                 <View>
                   <View className="w-12 h-12 rounded-2xl bg-[#30B864]/15 items-center justify-center mb-4">
                     <Feather name="shield" size={24} color="#30B864" />
@@ -1361,7 +1586,7 @@ export default function App() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  className="w-full bg-[#30B864] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#25944f] transition active:scale-95 flex-row items-center gap-1.5"
+                  className="w-full bg-[#30B864] py-2.5 rounded-full items-center justify-center shadow-xs hover:bg-[#25944f] transition active:scale-95 flex-row gap-1.5"
                   onPress={() => setRoleRegisterTarget('partner')}
                 >
                   <Text className="text-white font-extrabold text-xs">{t.joinUs.btn}</Text>
@@ -1371,9 +1596,9 @@ export default function App() {
             </View>
 
             {/* Mitra Logo Badges Grid */}
-            <View className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-6 md:p-10 mt-10">
-              <Text className="text-xs font-black uppercase tracking-wider text-gray-400 text-center mb-6">{t.joinUs.mitraTitle}</Text>
-              <View className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <View className="bg-white rounded-[1.75rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm p-5 sm:p-7 md:p-10 mt-8 md:mt-10">
+              <Text className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-gray-400 text-center mb-5 md:mb-6">{t.joinUs.mitraTitle}</Text>
+              <View className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 {[
                   'TK Intan Permata',
                   'TK Aisyiyah Kampung Sewu',
@@ -1384,9 +1609,9 @@ export default function App() {
                 ].map((mitra) => (
                   <View
                     key={mitra}
-                    className="bg-[#FAF6F0] border border-gray-100 rounded-2xl px-4 py-5 items-center justify-center min-h-[90px] text-center card-hover-effect"
+                    className="bg-[#FAF6F0] border border-gray-100 rounded-2xl px-3 sm:px-4 py-4 sm:py-5 items-center justify-center min-h-[84px] sm:min-h-[90px] text-center card-hover-effect"
                   >
-                    <Feather name="award" size={22} color="#D82B5A" className="mb-2" />
+                    <Feather name="award" size={20} color="#D82B5A" className="mb-2" />
                     <Text className="text-[11px] font-extrabold text-[#162E5C] text-center leading-snug">
                       {mitra}
                     </Text>
@@ -1397,26 +1622,26 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 6: FASILITAS & FITUR EKOSISTEM (Interactive Hover Cards) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1 text-center">{t.facilities.eyebrow}</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View className="items-center text-center mb-8 md:mb-12">
+              <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1 text-center">{t.facilities.eyebrow}</Text>
+              <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
                 {t.facilities.title}
               </Text>
             </View>
 
-            <View className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <View className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {t.facilities.items.map((item, idx) => {
                 const iconNames = ['users', 'gift', 'activity', 'message-circle', 'home'] as const;
                 const colors = ['#5A3B8B', '#D82B5A', '#2DA9E9', '#30B864', '#F77712'];
                 const color = colors[idx % colors.length];
                 return (
-                  <View key={idx} className="bg-white p-7 rounded-[2rem] border border-gray-100 shadow-sm flex-row items-start gap-5 card-hover-effect">
-                    <View className="w-12 h-12 rounded-2xl items-center justify-center shrink-0" style={{ backgroundColor: `${color}26` }}>
-                      <Feather name={iconNames[idx % iconNames.length]} size={24} color={color} />
+                  <View key={idx} className="bg-white p-5 sm:p-7 rounded-[1.75rem] md:rounded-[2rem] border border-gray-100 shadow-sm flex-row items-start gap-4 sm:gap-5 card-hover-effect">
+                    <View className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl items-center justify-center shrink-0" style={{ backgroundColor: `${color}26` }}>
+                      <Feather name={iconNames[idx % iconNames.length]} size={22} color={color} />
                     </View>
                     <View className="flex-1">
-                      <Text className="text-base font-extrabold text-[#162E5C] mb-1">{item.title}</Text>
+                      <Text className="text-sm sm:text-base font-extrabold text-[#162E5C] mb-1">{item.title}</Text>
                       <Text className="text-xs text-gray-600 leading-relaxed font-medium">
                         {item.desc}
                       </Text>
@@ -1428,26 +1653,26 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 7: KEUNGGULAN KAMI (Interactive Solid Lift Cards) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View id="why-us" nativeID="why-us" className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1 text-center">{t.whyUs.eyebrow}</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="why-us" nativeID="why-us" className="items-center text-center mb-8 md:mb-12">
+              <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1 text-center">{t.whyUs.eyebrow}</Text>
+              <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
                 {t.whyUs.title}
               </Text>
             </View>
 
-            <View className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <View className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
               {t.whyUs.cards.map((card, idx) => {
                 const bgColors = ['#F77712', '#5A3B8B', '#D82B5A', '#30B864', '#2DA9E9', '#162E5C'];
                 const icons = ['book-open', 'activity', 'message-circle', 'heart', 'wind', 'users'] as const;
                 return (
                   <View
                     key={idx}
-                    className="rounded-[2.5rem] p-8 text-white shadow-md flex-col justify-between min-h-[240px] card-solid-hover"
+                    className="rounded-[1.75rem] md:rounded-[2.5rem] p-6 sm:p-8 text-white shadow-md flex-col justify-between min-h-[200px] md:min-h-[240px] card-solid-hover"
                     style={{ backgroundColor: bgColors[idx % bgColors.length] }}
                   >
                     <View>
-                      <Text className="text-xl font-black text-white mb-3">{card.title}</Text>
+                      <Text className="text-lg sm:text-xl font-black text-white mb-2.5 sm:mb-3">{card.title}</Text>
                       <Text className="text-xs text-white/95 leading-relaxed font-medium">
                         {card.desc}
                       </Text>
@@ -1462,26 +1687,26 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 8: KATA ORANG TUA (Interactive Testimonial Card) */}
-          <ScrollRevealSection className="max-w-7xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="text-center mb-12">
-              <Text className="text-[#D82B5A] text-lg font-serif italic mb-1 text-center">{t.testimonials.eyebrow}</Text>
-              <Text className="text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
+          <ScrollRevealSection className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="testimoni" nativeID="testimoni" className="items-center text-center mb-8 md:mb-12">
+              <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1 text-center">{t.testimonials.eyebrow}</Text>
+              <Text className="text-xl sm:text-2xl md:text-4xl font-extrabold text-[#162E5C] text-center">
                 {t.testimonials.title}
               </Text>
             </View>
 
-            <View className="max-w-3xl mx-auto bg-white rounded-[2.5rem] p-6 md:p-12 border-2 border-[#5A3B8B]/40 shadow-sm relative card-hover-effect">
+            <View className="w-full max-w-3xl mx-auto bg-white rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-12 border-2 border-[#5A3B8B]/40 shadow-sm relative card-hover-effect">
               <View className="flex-row gap-1 mb-4">
                 {[1, 2, 3, 4, 5].map((s) => (
                   <Feather key={s} name="star" size={16} color="#FFD100" />
                 ))}
               </View>
 
-              <Text className="text-base md:text-lg font-medium text-[#162E5C] leading-relaxed mb-6">
+              <Text className="text-sm sm:text-base md:text-lg font-medium text-[#162E5C] leading-relaxed mb-6">
                 {currentTestimonial.text}
               </Text>
 
-              <View className="flex-col sm:flex-row sm:items-center justify-between gap-4 pt-6 border-t border-gray-100">
+              <View className="flex-col sm:flex-row sm:items-center justify-between gap-4 pt-5 sm:pt-6 border-t border-gray-100">
                 <View className="flex-row items-center gap-3.5 flex-1 min-w-0">
                   <Image
                     source={{ uri: currentTestimonial.avatar }}
@@ -1514,11 +1739,11 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 9: FORMULIR PENDAFTARAN (Interactive Form Card) */}
-          <ScrollRevealSection className="max-w-4xl mx-auto px-4 md:px-12 py-12 md:py-16">
-            <View className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-md border border-gray-100 card-hover-effect">
-              <View className="text-center mb-8">
-                <Text className="text-[#D82B5A] text-lg font-serif italic mb-1 text-center">{t.form.eyebrow}</Text>
-                <Text className="text-2xl md:text-3xl font-extrabold text-[#162E5C] mb-2 text-center">
+          <ScrollRevealSection className="w-full max-w-4xl mx-auto px-4 sm:px-6 md:px-12 py-7 sm:py-10 md:py-14">
+            <View id="pendaftaran" nativeID="pendaftaran" className="bg-white rounded-[1.75rem] sm:rounded-[2.25rem] md:rounded-[2.5rem] p-5 sm:p-8 md:p-12 shadow-md border border-gray-100 card-hover-effect">
+              <View className="items-center text-center mb-6 sm:mb-8">
+                <Text className="text-[#D82B5A] text-base sm:text-lg font-serif italic mb-1 text-center">{t.form.eyebrow}</Text>
+                <Text className="text-xl sm:text-2xl md:text-3xl font-extrabold text-[#162E5C] mb-2 text-center">
                   {t.form.title}
                 </Text>
                 <Text className="text-xs text-gray-500 font-medium text-center">
@@ -1534,7 +1759,7 @@ export default function App() {
                   </View>
                 </View>
 
-                <View className="flex-col md:flex-row gap-4">
+                <View className="flex-col sm:flex-row gap-4">
                   <View className="flex-1">
                     <Text className="text-xs font-bold text-gray-700 mb-1.5">{t.form.waLabel}</Text>
                     <View className="bg-gray-50 border border-gray-200 rounded-full px-4 py-3">
@@ -1558,7 +1783,7 @@ export default function App() {
                 </View>
 
                 <TouchableOpacity
-                  className="bg-[#D82B5A] py-3.5 rounded-full items-center justify-center shadow-md hover:bg-[#B01E49] transition-transform active:scale-98 hover:shadow-lg mt-4"
+                  className="bg-[#D82B5A] py-3.5 rounded-full items-center justify-center shadow-md hover:bg-[#B01E49] transition-transform active:scale-98 hover:shadow-lg mt-3"
                   onPress={() => setViewMode('app')}
                 >
                   <Text className="text-white font-extrabold text-sm tracking-wide">{t.form.cta}</Text>
@@ -1568,8 +1793,8 @@ export default function App() {
           </ScrollRevealSection>
 
           {/* SECTION 10: FOOTER (Clean White/Navy Layout + Sosmed Official) */}
-          <View className="bg-[#162E5C] py-12 px-6 md:px-16 border-t border-[#162E5C] mt-8">
-            <View className="max-w-7xl mx-auto flex-col md:flex-row justify-between items-start gap-8 mb-8">
+          <View className="bg-[#162E5C] py-10 md:py-12 px-5 sm:px-8 md:px-16 border-t border-[#162E5C] mt-6 md:mt-8">
+            <View className="w-full max-w-7xl mx-auto flex-col md:flex-row justify-between items-start gap-8 mb-8">
               <View className="max-w-xs">
                 <View className="flex-row items-center gap-2.5 mb-3">
                   <View className="w-8 h-8 rounded-full overflow-hidden bg-white p-0.5 border border-white/20 items-center justify-center">
@@ -1586,7 +1811,7 @@ export default function App() {
                 </Text>
               </View>
 
-              <View className="flex-row flex-wrap gap-12">
+              <View className="w-full md:w-auto grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-10 md:gap-12">
                 <View>
                   <Text className="text-xs font-black text-white uppercase tracking-widest mb-3">{t.footer.programCol}</Text>
                   <Text className="text-xs text-gray-300 mb-2">{t.nav.about}</Text>
@@ -1599,9 +1824,9 @@ export default function App() {
                   <Text className="text-xs text-gray-300 mb-2">{t.menu.worksheetTitle}</Text>
                   <Text className="text-xs text-gray-300">Voucher Repeat Order</Text>
                 </View>
-                <View>
+                <View className="col-span-2 sm:col-span-1">
                   <Text className="text-xs font-black text-white uppercase tracking-widest mb-3">{t.footer.contactCol}</Text>
-                  <Text className="text-xs text-gray-300 mb-2 font-medium max-w-[220px]">
+                  <Text className="text-xs text-gray-300 mb-2 font-medium max-w-[260px]">
                     Lab Tumbuh Kembang FKIP UMS Lantai 2, Jl. A. Yani Tromol Pos 1 Pabelan, Sukoharjo
                   </Text>
                   <Text className="text-xs text-gray-300 mb-2">WhatsApp: +62 858-7633-2598</Text>
@@ -1636,11 +1861,11 @@ export default function App() {
               </View>
             </View>
 
-            <View className="max-w-7xl mx-auto pt-6 border-t border-white/15 flex-col md:flex-row justify-between items-center gap-4">
-              <Text className="text-[10px] text-gray-400 font-medium">
+            <View className="w-full max-w-7xl mx-auto pt-6 border-t border-white/15 flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left">
+              <Text className="text-[10px] text-gray-400 font-medium text-center md:text-left">
                 {t.footer.copyright}
               </Text>
-              <Text className="text-[10px] text-gray-400 font-medium">
+              <Text className="text-[10px] text-gray-400 font-medium text-center md:text-right">
                 Solo Raya, Jawa Tengah, Indonesia
               </Text>
             </View>

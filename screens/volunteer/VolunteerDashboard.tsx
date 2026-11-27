@@ -124,13 +124,28 @@ export default function VolunteerDashboard({ user, onLogout, onSwitchRole }: Vol
         {/* Mobile Top Bar */}
         <View className="lg:hidden bg-white border-b border-[#F1F5F9] px-4 py-3 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <View className="w-9 h-9 rounded-full overflow-hidden bg-white border border-purple-100 items-center justify-center p-0.5">
+            <View className="w-8 h-8 rounded-full overflow-hidden bg-white border border-purple-100 items-center justify-center p-0.5">
               <Image source={logoImg} style={{ width: '100%', height: '100%', borderRadius: 999 }} resizeMode="contain" />
             </View>
             <Text className="text-sm font-black text-[#132A5E] tracking-wide">Sobat Ceria</Text>
           </View>
-          <View className="w-9 h-9 rounded-full bg-[#2DA9E9] items-center justify-center">
-            <Text className="text-white text-xs font-black">{initials}</Text>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={onSwitchRole}
+              className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 items-center justify-center"
+            >
+              <Feather name="refresh-cw" size={13} color="#64748B" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleLogout}
+              className="px-3 py-1.5 rounded-full bg-[#FFF1F2] border border-rose-200 flex-row items-center gap-1"
+            >
+              <Feather name="log-out" size={12} color="#C81E45" />
+              <Text className="text-[11px] font-extrabold text-[#C81E45]">Keluar</Text>
+            </TouchableOpacity>
+            <View className="w-8 h-8 rounded-full bg-[#2DA9E9] items-center justify-center">
+              <Text className="text-white text-[11px] font-black">{initials}</Text>
+            </View>
           </View>
         </View>
 
